@@ -9,7 +9,7 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private String clientId;
 
-    public ClientHandler(Socket socket) {
+    public ClientHandler (Socket socket) {
         this.socket = socket;
         try {
             this.out = new PrintWriter(socket.getOutputStream(), true);

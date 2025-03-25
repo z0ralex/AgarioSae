@@ -1,9 +1,10 @@
 import java.io.*;
 import java.net.*;
+import java.util.Random;
 
 public class ClientServerTest {
 
-    private static final String SERVER_ADDRESS = "127.0.0.1";  // Adresse du serveur (localhost pour tester en local)
+    private static final String SERVER_ADDRESS = "10.42.17.86";  // Adresse du serveur (localhost pour tester en local)
     private static final int SERVER_PORT = 12345;              // Port utilisé pour la connexion
 
     public static void main(String[] args) {
@@ -21,7 +22,11 @@ public class ClientServerTest {
             System.out.println("Message du serveur : " + serverMessage);
 
             // Envoi de l'ID du joueur au serveur
-            String playerId = "Player2";  // ID du joueur (tu peux en choisir un autre)
+            Random random = new Random();
+            int randomNumber = 10000 + random.nextInt(90000); // 10000 à 99999
+            // Transformer le nombre aléatoire en chaîne de caractères
+            String randomNumberStr = Integer.toString(randomNumber);
+            String playerId = "Player"+randomNumberStr;  // ID du joueur (tu peux en choisir un autre)
             out.println(playerId);
             System.out.println("Message envoyé au serveur : " + playerId);
 
