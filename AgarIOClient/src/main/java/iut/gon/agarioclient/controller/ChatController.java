@@ -35,6 +35,7 @@ public class ChatController {
                 try {
                     String message;
                     while ((message = in.readLine()) != null) {
+                        System.out.println("m "+message);
                         // On ne veut afficher que les messages de chat (et non ceux comme "Bienvenue...")
                         if (message.startsWith("CHAT: ")) {
                             final String msg = message.substring(6); // On enlève le préfixe "CHAT: "
@@ -50,7 +51,7 @@ public class ChatController {
             // Recevoir l'ID du client
             String welcomeMessage = in.readLine(); // "Votre ID est : Client-XXXX"
             System.out.println(welcomeMessage);
-            if (welcomeMessage != null && welcomeMessage.startsWith("Votre ID est : ")) {
+            if (welcomeMessage != null && welcomeMessage.startsWith("Bienvenue! Votre ID est : ")) {
                 clientId = welcomeMessage.split(": ")[1].split(" ")[0]; // Extraire l'ID du message
             } else {
                 // Si le message ne correspond pas, afficher un message d'erreur ou gérer autrement

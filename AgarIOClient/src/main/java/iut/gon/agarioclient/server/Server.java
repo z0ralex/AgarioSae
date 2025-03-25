@@ -15,7 +15,7 @@ public class Server {
 
     // Méthode pour générer un ID aléatoire unique
     public static String generateClientId() {
-        return "Client-" + UUID.randomUUID().toString().substring(0, 8); // Génère un ID aléatoire basé sur UUID
+        return "<Client>-" + UUID.randomUUID().toString().substring(0, 8); // Génère un ID aléatoire basé sur UUID
     }
 
     public static void main(String[] args) {

@@ -36,7 +36,7 @@ public class ClientHandler implements Runnable {
                 System.out.println("Message reçu de " + clientId + ": " + message);
 
                 if (message.startsWith("CHAT: ")) {
-                    Server.broadcast(clientId + ": " + message.substring(6));
+                    Server.broadcast("CHAT: "+clientId + ": " + message.substring(6));
                 }
             }
         } catch (IOException e) {
