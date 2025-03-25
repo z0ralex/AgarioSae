@@ -22,4 +22,8 @@ public class Player extends PlayerComposite {
         // TODO: Implement merge logic
         // Implement merging logic based on the formula t = C + m/100
     }
+
+    public void setInvisible(boolean b) {
+        // TODO: Implement setInvisible logic
+    }
 }
