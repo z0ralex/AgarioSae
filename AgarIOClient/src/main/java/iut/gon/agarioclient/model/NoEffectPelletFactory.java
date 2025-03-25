@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.model;
 
+import iut.gon.agarioclient.controller.GameController;
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public class NoEffectPelletFactory implements PelletFactory {
         List<Pellet> list = new ArrayList<>();
         Random r = new Random();
         for (int i = 0; i < quantity; i++) {
-            Point2D p = new Point2D(r.nextDouble() * 1600, r.nextDouble() * 1200); // Use pane dimensions
+            Point2D p = new Point2D(r.nextDouble() * GameController.X_MAX, r.nextDouble() * GameController.Y_MAX);
             list.add(new Pellet(UUID.randomUUID().toString(), p, 1));
         }
         return list;

@@ -1,6 +1,10 @@
 // Entity.java
 package iut.gon.agarioclient.model;
 
+import iut.gon.agarioclient.model.map.MapNode;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 
 /**
@@ -9,8 +13,11 @@ import javafx.geometry.Point2D;
  */
 public class Entity {
     private final String id;
-    private Point2D position;
-    private double mass;
+
+    private SimpleObjectProperty<Point2D> position;
+    private SimpleDoubleProperty mass;
+
+    private MapNode currentMapNode;
 
     /**
      * Constructs a new Entity with the specified id, position, and mass.
@@ -21,8 +28,8 @@ public class Entity {
      */
     public Entity(String id, Point2D position, double mass) {
         this.id = id;
-        this.position = position;
-        this.mass = mass;
+        this.position = new SimpleObjectProperty<>(position);
+        this.mass = new SimpleDoubleProperty(mass);
     }
 
     /**
@@ -40,7 +47,7 @@ public class Entity {
      * @return the position of the entity
      */
     public Point2D getPosition() {
-        return position;
+        return position.getValue();
     }
 
     /**
@@ -49,7 +56,11 @@ public class Entity {
      * @param position the new position of the entity
      */
     public void setPosition(Point2D position) {
-        this.position = position;
+        this.position.set(position);
+    }
+
+    public SimpleObjectProperty<Point2D> positionProperty(){
+        return position;
     }
 
     /**
@@ -58,8 +69,13 @@ public class Entity {
      * @return the mass of the entity
      */
     public double getMass() {
+        return mass.getValue();
+    }
+
+    public SimpleDoubleProperty massProperty(){
         return mass;
     }
+
 
     /**
      * Sets the mass of the entity.
@@ -67,6 +83,20 @@ public class Entity {
      * @param mass the new mass of the entity
      */
     public void setMass(double mass) {
-        this.mass = mass;
+        this.mass.setValue(mass);
+    }
+
+    public MapNode getCurrentMapNode() {
+        return currentMapNode;
+    }
+
+    public void setCurrentMapNode(MapNode currentMapNode) {
+        this.currentMapNode = currentMapNode;
+    }
+
+    public void removeFromCurrentNode(){
+        currentMapNode.getEntitySet().remove(this);
+
+        currentMapNode = null;
     }
 }
