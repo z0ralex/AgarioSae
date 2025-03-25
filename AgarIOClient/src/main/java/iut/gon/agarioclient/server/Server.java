@@ -50,4 +50,8 @@ public class Server {
             writer.println(message);  // Envoi du message à tous les clients connectés
         }
     }
+
+    public static Map<String, Boolean> getClientReadyStatus() {
+        return clientReadyStatus;
+    }
 }

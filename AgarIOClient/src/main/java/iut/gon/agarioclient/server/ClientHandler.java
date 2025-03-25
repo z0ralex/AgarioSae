@@ -1,9 +1,11 @@
 package iut.gon.agarioclient.server;
 
+import iut.gon.agarioclient.server.Server;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.*;
+
 public class ClientHandler implements Runnable {
 
     private Socket socket;
@@ -42,9 +44,11 @@ public class ClientHandler implements Runnable {
             // Lire les messages envoyés par le client
             String message;
             while ((message = in.readLine()) != null) {
-                // On filtre les messages qui ne sont pas des messages de chat
+                System.out.println("Message reçu de " + clientId + ": " + message);
+
+                // Filtrer et ne diffuser que les messages de chat
                 if (message.startsWith("CHAT: ")) {
-                    // Diffuser le message de chat à tous les clients
+                    // Diffuser uniquement les messages de chat
                     Server.broadcast(clientId + ": " + message.substring(6)); // Enlever le préfixe "CHAT: "
                 }
             }
