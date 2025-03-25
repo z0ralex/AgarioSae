@@ -3,6 +3,8 @@ module com.example.agarioclient {
     requires javafx.fxml;
 
 
-    opens com.example.agarioclient to javafx.fxml;
-    exports com.example.agarioclient;
+    opens iut.gon.agarioclient to javafx.fxml;
+    exports iut.gon.agarioclient;
+    exports iut.gon.agarioclient.controller;
+    opens iut.gon.agarioclient.controller to javafx.fxml;
 }
