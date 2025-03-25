@@ -2,7 +2,7 @@ package iut.gon.agarioclient.model;
 
 import javafx.geometry.Point2D;
 
-public class Ennemy extends Entity{
+public class Ennemy extends Player{
     /**
      * Constructs a new Ennemy with the specified id, position, and mass.
      *
@@ -11,7 +11,18 @@ public class Ennemy extends Entity{
      * @param mass     the mass of the entity
      */
 
-    public Ennemy(String id, Point2D position, double mass) {
-        super(id, position, mass);
+    private IA strat;
+
+    public Ennemy(String id, Point2D position, double mass, IA strat, double speed) {
+        super(id, position, mass, speed);
+        this.strat = strat;
+    }
+
+    public void setStrat(IA strat) {
+        this.strat = strat;
+    }
+
+    public void executeStrat(){
+        strat.execute();
     }
 }
