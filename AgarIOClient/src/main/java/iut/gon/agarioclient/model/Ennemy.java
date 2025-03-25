@@ -10,7 +10,7 @@ public class Ennemy extends Entity{
      * @param position the position of the entity in the game space
      * @param mass     the mass of the entity
      */
-    
+
     public Ennemy(String id, Point2D position, double mass) {
         super(id, position, mass);
     }
