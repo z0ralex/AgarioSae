@@ -9,6 +9,7 @@ import javafx.geometry.Point2D;
  */
 public class Player extends Entity {
     private double speed;
+    private boolean alive;
 
     /**
      * Constructs a new Player with the specified id, position, mass, and speed.
@@ -21,6 +22,7 @@ public class Player extends Entity {
     public Player(String id, Point2D position, double mass, double speed) {
         super(id, position, mass);
         this.speed = speed;
+        this.alive = true; // Player is alive by default
     }
 
     /**
@@ -60,7 +62,7 @@ public class Player extends Entity {
      * @return the calculated speed of the player
      */
     public double calculateSpeed(double cursorX, double cursorY, double panelWidth, double panelHeight) {
-        double maxSpeed = 100 / getMass(); // Not sure more about this formula
+        double maxSpeed = 100 / getMass(); // Example max speed calculation
         double centerX = panelWidth / 2;
         double centerY = panelHeight / 2;
         double distanceX = cursorX - centerX;
@@ -68,5 +70,23 @@ public class Player extends Entity {
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
         double maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
         return maxSpeed * (distance / maxDistance);
+    }
+
+    /**
+     * Returns whether the player is alive.
+     *
+     * @return true if the player is alive, false otherwise
+     */
+    public boolean isAlive() {
+        return alive;
+    }
+
+    /**
+     * Sets the alive status of the player.
+     *
+     * @param alive the new alive status of the player
+     */
+    public void setAlive(boolean alive) {
+        this.alive = alive;
     }
 }
