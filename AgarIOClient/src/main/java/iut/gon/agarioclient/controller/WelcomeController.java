@@ -2,14 +2,17 @@ package iut.gon.agarioclient.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 public class WelcomeController {
 
-    // Référence au champ de texte pour le surnom
     @FXML
     private TextField nicknameField;
 
@@ -18,6 +21,13 @@ public class WelcomeController {
 
     @FXML
     private Button localButton;
+
+    private Stage stage; // Ajouter un champ pour stocker le stage
+
+    // Méthode pour définir le stage
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
     @FXML
     private void onOnlineButtonClick(ActionEvent event) {
@@ -35,7 +45,21 @@ public class WelcomeController {
         if (nickname.isEmpty()) {
             showAlert("Erreur", "Veuillez entrer un surnom !");
         } else {
-            System.out.println("Lancer le jeu en local avec le surnom : " + nickname);
+            try {
+                // Charger la vue du jeu local
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/game-view.fxml"));
+                Parent newView = loader.load();
+
+                // Créer une nouvelle scène avec la vue de jeu
+                Scene gameScene = new Scene(newView);
+
+                // Changer la scène du stage actuel
+                stage.setScene(gameScene);
+                stage.setTitle("Jeu en local");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -47,3 +71,4 @@ public class WelcomeController {
         alert.showAndWait();
     }
 }
+

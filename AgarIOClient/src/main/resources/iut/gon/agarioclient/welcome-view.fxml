@@ -19,8 +19,8 @@
         <TextField fx:id="nicknameField" promptText="Entrez votre surnom" style="-fx-font-size: 14px; -fx-padding: 10px; -fx-min-width: 250px;"/>
 
         <HBox alignment="CENTER" spacing="15">
-            <Button text="Jeu en ligne" style="-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #4CAF50; -fx-text-fill: white;" />
-            <Button text="Jeu en local" style="-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #008CBA; -fx-text-fill: white;" />
+            <Button text="Jeu en ligne" onAction="#onOnlineButtonClick" style="-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #4CAF50; -fx-text-fill: white;" />
+            <Button text="Jeu en local" onAction="#onLocalButtonClick" style="-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #008CBA; -fx-text-fill: white;" />
         </HBox>
 
     </VBox>
