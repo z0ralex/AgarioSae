@@ -2,6 +2,7 @@ package iut.gon.agarioclient.model;
 
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 
@@ -13,7 +14,7 @@ public class Entity {
     private final String id;
 
     private SimpleObjectProperty<Point2D> position;
-    private double mass;
+    private SimpleDoubleProperty mass;
 
     private MapNode currentMapNode;
 
@@ -27,7 +28,7 @@ public class Entity {
     public Entity(String id, Point2D position, double mass) {
         this.id = id;
         this.position = new SimpleObjectProperty<>(position);
-        this.mass = mass;
+        this.mass = new SimpleDoubleProperty(mass);
     }
 
     /**
@@ -67,8 +68,13 @@ public class Entity {
      * @return the mass of the entity
      */
     public double getMass() {
+        return mass.getValue();
+    }
+
+    public SimpleDoubleProperty massProperty(){
         return mass;
     }
+
 
     /**
      * Sets the mass of the entity.
@@ -76,7 +82,7 @@ public class Entity {
      * @param mass the new mass of the entity
      */
     public void setMass(double mass) {
-        this.mass = mass;
+        this.mass.setValue(mass);
     }
 
     public MapNode getCurrentMapNode() {

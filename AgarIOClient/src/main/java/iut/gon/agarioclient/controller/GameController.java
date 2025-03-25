@@ -30,6 +30,9 @@ public class GameController {
     private static final int INITIAL_PELLET_NB = 20;
     private static final int MAX_PELLET = 500;
 
+
+    private double xScale;
+    private double yScale;
     private MapNode root;
     private Map<Player, Circle> playerCircles = new HashMap<>();
     private Map<Pellet, Circle> pelletCircles = new HashMap<>();
@@ -86,12 +89,27 @@ public class GameController {
 
         //TODO ATTENTION LIGNE DANGEREUSE SI MULTI
         player.positionProperty().addListener((obs, oldPoint, newPoint)->{
-            double x = newPoint.getX() - (pane.getWidth()/2);
-            double y = newPoint.getY() - (pane.getHeight()/2);
+            double x = newPoint.getX() - ((pane.getWidth()/2) * camera.getScaleX());
+            double y = newPoint.getY() - ((pane.getHeight()/2) * camera.getScaleY());
             camera.setLayoutX(x);
             camera.setLayoutY(y);
 
         });
+
+        player.massProperty().addListener((obs, oldMass, newMass)->{
+            playerCircle.setRadius(player.calculateRadius()); //update du radius du joueur
+
+            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue()); //update du zoom de la camera
+
+        });
+
+        //FIN DE LA SECTION DANGEREUSE
+    }
+
+    private void setZoomFromMass(double deltaMass){
+        System.out.println(camera.scaleXProperty().doubleValue());
+        camera.setScaleX(camera.getScaleX() + 1./(deltaMass * 100.));
+        camera.setScaleY(camera.getScaleY() + 1./(deltaMass * 100.));
     }
 
     public void updatePlayerPosition(Player player) {
@@ -130,7 +148,7 @@ public class GameController {
 
                 if (distance <= eventHorizon) {
                     player.setMass(player.getMass() + pellet.getMass());
-                    playerCircle.setRadius(player.calculateRadius());
+
                     pane.getChildren().remove(pelletCircle);
 
                     pellet.removeFromCurrentNode();
