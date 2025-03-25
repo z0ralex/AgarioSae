@@ -35,7 +35,6 @@ public class ChatController {
                 try {
                     String message;
                     while ((message = in.readLine()) != null) {
-                        System.out.println("m "+message);
                         // On ne veut afficher que les messages de chat (et non ceux comme "Bienvenue...")
                         if (message.startsWith("CHAT: ")) {
                             final String msg = message.substring(6); // On enlève le préfixe "CHAT: "
