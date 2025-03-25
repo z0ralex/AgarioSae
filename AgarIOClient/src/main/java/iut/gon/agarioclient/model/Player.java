@@ -2,8 +2,9 @@
 package iut.gon.agarioclient.model;
 
 import javafx.geometry.Point2D;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Player extends PlayerComposite {
@@ -25,5 +26,13 @@ public class Player extends PlayerComposite {
 
     public void setInvisible(boolean b) {
         // TODO: Implement setInvisible logic
+    }
+
+    public ObjectProperty<Point2D> positionProperty() {
+        return ((PlayerLeaf) components.get(0)).positionProperty();
+    }
+
+    public DoubleProperty massProperty() {
+        return ((PlayerLeaf) components.get(0)).massProperty();
     }
 }

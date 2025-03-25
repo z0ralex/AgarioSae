@@ -1,40 +1,53 @@
+// PlayerLeaf.java
 package iut.gon.agarioclient.model;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Point2D;
 
 public class PlayerLeaf implements PlayerComponent {
     private String id;
-    private Point2D position;
-    private double mass;
+    private ObjectProperty<Point2D> position;
+    private DoubleProperty mass;
     private double speed;
     private boolean alive;
 
     public PlayerLeaf(String id, Point2D position, double mass, double speed) {
         this.id = id;
-        this.position = position;
-        this.mass = mass;
+        this.position = new SimpleObjectProperty<>(position);
+        this.mass = new SimpleDoubleProperty(mass);
         this.speed = speed;
         this.alive = true;
     }
 
     @Override
     public double getMass() {
-        return mass;
+        return mass.get();
     }
 
     @Override
     public void setMass(double mass) {
-        this.mass = mass;
+        this.mass.set(mass);
+    }
+
+    public DoubleProperty massProperty() {
+        return mass;
     }
 
     @Override
     public Point2D getPosition() {
-        return position;
+        return position.get();
     }
 
     @Override
     public void setPosition(Point2D position) {
-        this.position = position;
+        this.position.set(position);
+    }
+
+    public ObjectProperty<Point2D> positionProperty() {
+        return position;
     }
 
     @Override
@@ -49,12 +62,12 @@ public class PlayerLeaf implements PlayerComponent {
 
     @Override
     public double calculateRadius() {
-        return 10 * Math.sqrt(mass);
+        return 10 * Math.sqrt(mass.get());
     }
 
     @Override
     public double calculateSpeed(double cursorX, double cursorY, double panelWidth, double panelHeight) {
-        double maxSpeed = 100 / mass;
+        double maxSpeed = 100 / mass.get();
         double centerX = panelWidth / 2;
         double centerY = panelHeight / 2;
         double distanceX = cursorX - centerX;

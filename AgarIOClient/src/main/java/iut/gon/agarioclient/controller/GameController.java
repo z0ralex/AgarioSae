@@ -1,11 +1,10 @@
+// GameController.java
 package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.NoEffectPelletFactory;
 import iut.gon.agarioclient.model.Pellet;
 import iut.gon.agarioclient.model.Player;
 import iut.gon.agarioclient.model.map.MapNode;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Camera;
@@ -30,7 +29,6 @@ public class GameController {
     private static final int INITIAL_PELLET_NB = 20;
     private static final int MAX_PELLET = 500;
 
-
     private double xScale;
     private double yScale;
     private MapNode root;
@@ -45,11 +43,9 @@ public class GameController {
 
         this.camera = camera;
 
-
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
 
         Player player = new Player(nickname, new Point2D(400, 300), 10, 5);
-
 
         addPlayer(player);
         createPellets(INITIAL_PELLET_NB); // Create 20 pellets initially
@@ -79,8 +75,6 @@ public class GameController {
                 }.start();
             }
         });
-
-
     }
 
     public void addPlayer(Player player) {
@@ -89,29 +83,23 @@ public class GameController {
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
 
-        //TODO ATTENTION LIGNE DANGEREUSE SI MULTI
-        player.positionProperty().addListener((obs, oldPoint, newPoint)->{
-            double x = newPoint.getX() - ((pane.getWidth()/2) * camera.getScaleX());
-            double y = newPoint.getY() - ((pane.getHeight()/2) * camera.getScaleY());
+        player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
+            double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
+            double y = newPoint.getY() - ((pane.getHeight() / 2) * camera.getScaleY());
             camera.setLayoutX(x);
             camera.setLayoutY(y);
-
         });
 
-        player.massProperty().addListener((obs, oldMass, newMass)->{
-            playerCircle.setRadius(player.calculateRadius()); //update du radius du joueur
-
-            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue()); //update du zoom de la camera
-
+        player.massProperty().addListener((obs, oldMass, newMass) -> {
+            playerCircle.setRadius(player.calculateRadius()); // update du radius du joueur
+            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue()); // update du zoom de la camera
         });
-
-        //FIN DE LA SECTION DANGEREUSE
     }
 
-    private void setZoomFromMass(double deltaMass){
+    private void setZoomFromMass(double deltaMass) {
         System.out.println(camera.scaleXProperty().doubleValue());
-        camera.setScaleX(camera.getScaleX() + 1./(deltaMass * 100.));
-        camera.setScaleY(camera.getScaleY() + 1./(deltaMass * 100.));
+        camera.setScaleX(camera.getScaleX() + 1. / (deltaMass * 100.));
+        camera.setScaleY(camera.getScaleY() + 1. / (deltaMass * 100.));
     }
 
     public void updatePlayerPosition(Player player) {
@@ -150,11 +138,8 @@ public class GameController {
 
                 if (distance <= eventHorizon) {
                     player.setMass(player.getMass() + pellet.getMass());
-
                     pane.getChildren().remove(pelletCircle);
-
                     pellet.removeFromCurrentNode();
-
                     return true;
                 }
                 return false;
