@@ -6,5 +6,4 @@ import java.util.UUID;
 
 public interface LocalEnnemyFactory {
 
-
 }

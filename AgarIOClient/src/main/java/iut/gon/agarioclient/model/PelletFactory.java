@@ -12,8 +12,5 @@ import java.util.UUID;
  * It uses the Factory design pattern to encapsulate the creation logic.
  */
 public interface PelletFactory {
-
     List<Pellet> generatePellets(int quantity);
-
-
 }

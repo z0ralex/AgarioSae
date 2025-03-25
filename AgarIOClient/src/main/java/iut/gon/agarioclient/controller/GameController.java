@@ -1,6 +1,6 @@
 package iut.gon.agarioclient.controller;
 
-import iut.gon.agarioclient.model.EntityFactory;
+import iut.gon.agarioclient.model.NoEffectPelletFactory;
 import iut.gon.agarioclient.model.Pellet;
 import iut.gon.agarioclient.model.Player;
 import javafx.fxml.FXML;
@@ -10,8 +10,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class GameController {
 
@@ -20,7 +20,7 @@ public class GameController {
 
     private Map<Player, Circle> playerCircles = new HashMap<>();
     private Map<Pellet, Circle> pelletCircles = new HashMap<>();
-    private Random random = new Random();
+    private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
     public void initializeGame(String nickname) {
         if (pane == null) {
@@ -29,6 +29,7 @@ public class GameController {
 
         Player player = new Player(nickname, new Point2D(400, 300), 10, 5);
         addPlayer(player);
+        createPellets(20); // Create 20 pellets initially
 
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -72,6 +73,13 @@ public class GameController {
         }
     }
 
+    public void createPellets(int count) {
+        List<Pellet> pellets = pelletFactory.generatePellets(count);
+        for (Pellet pellet : pellets) {
+            addPellet(pellet);
+        }
+    }
+
     public void addPellet(Pellet pellet) {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
         pelletCircle.setFill(Color.GREEN);
@@ -102,11 +110,8 @@ public class GameController {
     }
 
     public void spawnPellets() {
-        if (pelletCircles.size() < 60) { // Maintain at least ?? pellets on the map
-            double x = random.nextDouble() * pane.getWidth();
-            double y = random.nextDouble() * pane.getHeight();
-            Pellet pellet = EntityFactory.createPellet(new Point2D(x, y), 1);
-            addPellet(pellet);
+        if (pelletCircles.size() < 100) { // Maintain at least 100 pellets on the map
+            createPellets(1);
         }
     }
 }
