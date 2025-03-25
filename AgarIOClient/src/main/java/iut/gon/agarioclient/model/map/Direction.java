@@ -1,3 +1,4 @@
+// Direction.java
 package iut.gon.agarioclient.model.map;
 
 public enum Direction {

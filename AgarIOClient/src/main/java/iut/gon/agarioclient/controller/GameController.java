@@ -62,6 +62,8 @@ public class GameController {
                 }.start();
             }
         });
+
+
     }
 
     public void addPlayer(Player player) {

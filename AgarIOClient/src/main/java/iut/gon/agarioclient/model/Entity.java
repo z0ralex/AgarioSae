@@ -1,3 +1,4 @@
+// Entity.java
 package iut.gon.agarioclient.model;
 
 import javafx.geometry.Point2D;
