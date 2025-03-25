@@ -6,7 +6,7 @@ import javafx.geometry.Point2D;
  * The Entity class represents a basic game entity with a unique identifier, position, and mass.
  * This class serves as a base class for other specific entities like players and pellets.
  */
-public abstract class Entity {
+public class Entity {
     private final String id;
     private Point2D position;
     private double mass;

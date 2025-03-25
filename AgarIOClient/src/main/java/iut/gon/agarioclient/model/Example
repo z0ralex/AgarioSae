@@ -1,0 +1,20 @@
+interface PelletFactory {
+    List<Pellet> generate();
+}
+
+class Pellet {
+
+}
+
+class Monde {
+    public Monde(PelletFactory f) {
+        f.generate();
+    }
+}
+
+class NoEffectFactory implements PelletFactory {
+    public List<Pellet> generate() {
+        new Pellet();
+
+    }
+}
