@@ -2,7 +2,7 @@
 package iut.gon.agarioclient.model;
 
 import iut.gon.agarioclient.model.map.MapNode;
-import javafx.beans.property.Property;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
@@ -72,7 +72,7 @@ public class Entity {
         return mass.getValue();
     }
 
-    public SimpleDoubleProperty massProperty(){
+    public DoubleProperty massProperty(){
         return mass;
     }
 

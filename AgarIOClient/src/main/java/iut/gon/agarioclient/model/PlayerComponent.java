@@ -13,5 +13,4 @@ public interface PlayerComponent {
     double calculateSpeed(double cursorX, double cursorY, double panelWidth, double panelHeight);
     boolean isAlive();
     void setAlive(boolean alive);
-    String getId();
 }

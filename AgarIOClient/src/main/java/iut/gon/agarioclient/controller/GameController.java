@@ -1,13 +1,12 @@
-// GameController.java
 package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.NoEffectPelletFactory;
 import iut.gon.agarioclient.model.Pellet;
 import iut.gon.agarioclient.model.Player;
+import iut.gon.agarioclient.model.PlayerLeaf;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.scene.Camera;
 import javafx.scene.ParallelCamera;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -45,7 +44,8 @@ public class GameController {
 
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
 
-        Player player = new Player(nickname, new Point2D(400, 300), 10, 5);
+        Player player = new Player(nickname, new Point2D(400, 300), 10);
+        player.add(new PlayerLeaf(nickname, new Point2D(400, 300), 10, 5));
 
         addPlayer(player);
         createPellets(INITIAL_PELLET_NB); // Create 20 pellets initially

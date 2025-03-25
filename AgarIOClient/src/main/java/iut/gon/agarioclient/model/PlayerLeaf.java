@@ -87,7 +87,6 @@ public class PlayerLeaf implements PlayerComponent {
         this.alive = alive;
     }
 
-    @Override
     public String getId() {
         return id;
     }
