@@ -3,6 +3,7 @@ package iut.gon.agarioclient.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.ParallelCamera;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -45,15 +46,17 @@ public class WelcomeController {
             showAlert("Erreur", "Veuillez entrer un surnom !");
         } else {
             try {
+                ParallelCamera camera = new ParallelCamera();
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/game-view.fxml"));
                 Parent newView = loader.load();
 
                 GameController gameController = loader.getController();
-                gameController.initializeGame(nickname);
+                gameController.initializeGame(nickname, camera);
 
                 Scene gameScene = new Scene(newView);
                 stage.setScene(gameScene);
                 stage.setTitle("Jeu en local");
+                gameScene.setCamera(camera);
 
             } catch (Exception e) {
                 e.printStackTrace();

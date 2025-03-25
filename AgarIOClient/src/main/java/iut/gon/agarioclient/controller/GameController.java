@@ -4,8 +4,12 @@ import iut.gon.agarioclient.model.NoEffectPelletFactory;
 import iut.gon.agarioclient.model.Pellet;
 import iut.gon.agarioclient.model.Player;
 import iut.gon.agarioclient.model.map.MapNode;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.scene.Camera;
+import javafx.scene.ParallelCamera;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -19,23 +23,33 @@ public class GameController {
     @FXML
     private Pane pane;
 
-    public static final int X_MAX = 800;
-    public static final int Y_MAX = 600;
+    private ParallelCamera camera;
+
+    public static final int X_MAX = 8000;
+    public static final int Y_MAX = 6000;
+    private static final int INITIAL_PELLET_NB = 20;
+    private static final int MAX_PELLET = 500;
+
     private MapNode root;
     private Map<Player, Circle> playerCircles = new HashMap<>();
     private Map<Pellet, Circle> pelletCircles = new HashMap<>();
     private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
-    public void initializeGame(String nickname) {
+    public void initializeGame(String nickname, ParallelCamera camera) {
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
 
+        this.camera = camera;
+
+
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
 
         Player player = new Player(nickname, new Point2D(400, 300), 10, 5);
+
+
         addPlayer(player);
-        createPellets(20); // Create 20 pellets initially
+        createPellets(INITIAL_PELLET_NB); // Create 20 pellets initially
 
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -69,6 +83,15 @@ public class GameController {
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
+
+        //TODO ATTENTION LIGNE DANGEREUSE SI MULTI
+        player.positionProperty().addListener((obs, oldPoint, newPoint)->{
+            double x = newPoint.getX() - (pane.getWidth()/2);
+            double y = newPoint.getY() - (pane.getHeight()/2);
+            camera.setLayoutX(x);
+            camera.setLayoutY(y);
+
+        });
     }
 
     public void updatePlayerPosition(Player player) {
@@ -120,7 +143,7 @@ public class GameController {
     }
 
     public void spawnPellets() {
-        if (pelletCircles.size() < 100) { // Maintain at least 100 pellets on the map
+        if (pelletCircles.size() < MAX_PELLET) { // Maintain at least 100 pellets on the map
             createPellets(1);
         }
     }
