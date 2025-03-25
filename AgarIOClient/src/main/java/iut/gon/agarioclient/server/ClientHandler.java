@@ -4,7 +4,6 @@ import iut.gon.agarioclient.server.Server;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 public class ClientHandler implements Runnable {
 
@@ -26,22 +25,17 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            // Envoyer un message d'accueil au client
-            out.println("Bienvenue sur le serveur! En attente d'un ID de joueur...");
+            // Générer un ID unique pour le client
+            clientId = Server.generateClientId();
+            System.out.println("ID du client généré : " + clientId);
 
-            // Réception de l'ID du client
-            clientId = in.readLine();
-            if (clientId == null || clientId.trim().isEmpty()) {
-                out.println("Erreur : ID de joueur invalide.");
-                return;
-            }
-
-            System.out.println("ID du client: " + clientId);
+            // Envoyer l'ID du client au client
+            out.println("Votre ID est : " + clientId + ". Vous pouvez commencer à discuter.");
 
             // Ajouter le PrintWriter à la liste des clients
             Server.addClientWriter(out, clientId);
 
-            // Lire les messages envoyés par le client
+            // Lire les messages envoyés par le client (seulement des messages de chat)
             String message;
             while ((message = in.readLine()) != null) {
                 System.out.println("Message reçu de " + clientId + ": " + message);
@@ -65,3 +59,5 @@ public class ClientHandler implements Runnable {
         }
     }
 }
+
+

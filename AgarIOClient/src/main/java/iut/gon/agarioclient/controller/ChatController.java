@@ -22,6 +22,8 @@ public class ChatController {
     private BufferedReader in;
     private Socket socket;
 
+    private String clientId;
+
     // Méthode d'initialisation de la connexion avec le serveur
     public void initialize() {
         try {
@@ -46,6 +48,10 @@ public class ChatController {
             });
             receiveMessagesThread.start();
 
+            // Recevoir l'ID du client
+            String welcomeMessage = in.readLine(); // "Votre ID est : Client-XXXX"
+            clientId = welcomeMessage.split(": ")[1].split(" ")[0]; // Extraire l'ID du message
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -54,8 +60,8 @@ public class ChatController {
     @FXML
     public void handleSendMessage() {
         String message = messageField.getText();
-        if (!message.isEmpty()) {
-            // Envoyer le message au serveur avec un préfixe "CHAT: "
+        if (!message.isEmpty() && clientId != null) {
+            // Envoi du message au serveur avec un préfixe "CHAT: "
             out.println("CHAT: " + message);
             messageField.clear(); // Effacer le champ de texte après envoi
         }

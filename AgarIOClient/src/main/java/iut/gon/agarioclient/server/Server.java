@@ -13,6 +13,11 @@ public class Server {
     private static Map<String, Boolean> clientReadyStatus = new HashMap<>(); // Suivi de l'état de préparation des clients
     private static ExecutorService threadPool = Executors.newCachedThreadPool(); // Thread pool pour gérer les connexions
 
+    // Méthode pour générer un ID aléatoire unique
+    public static String generateClientId() {
+        return "Client-" + UUID.randomUUID().toString().substring(0, 8); // Génère un ID aléatoire basé sur UUID
+    }
+
     public static void main(String[] args) {
         try {
             serverSocket = new ServerSocket(PORT);
