@@ -3,6 +3,7 @@ package iut.gon.agarioclient.controller;
 import iut.gon.agarioclient.model.NoEffectPelletFactory;
 import iut.gon.agarioclient.model.Pellet;
 import iut.gon.agarioclient.model.Player;
+import iut.gon.agarioclient.model.map.MapNode;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
@@ -18,6 +19,9 @@ public class GameController {
     @FXML
     private Pane pane;
 
+    public static final int X_MAX = 800;
+    public static final int Y_MAX = 600;
+    private MapNode root;
     private Map<Player, Circle> playerCircles = new HashMap<>();
     private Map<Pellet, Circle> pelletCircles = new HashMap<>();
     private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
@@ -26,6 +30,8 @@ public class GameController {
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
+
+        root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
 
         Player player = new Player(nickname, new Point2D(400, 300), 10, 5);
         addPlayer(player);
