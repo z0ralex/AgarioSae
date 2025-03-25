@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.model;
 
+import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
 /**
@@ -10,6 +11,8 @@ public class Entity {
     private final String id;
     private Point2D position;
     private double mass;
+
+    private MapNode currentMapNode;
 
     /**
      * Constructs a new Entity with the specified id, position, and mass.
@@ -67,5 +70,19 @@ public class Entity {
      */
     public void setMass(double mass) {
         this.mass = mass;
+    }
+
+    public MapNode getCurrentMapNode() {
+        return currentMapNode;
+    }
+
+    public void setCurrentMapNode(MapNode currentMapNode) {
+        this.currentMapNode = currentMapNode;
+    }
+
+    public void removeFromCurrentNode(){
+        currentMapNode.getEntitySet().remove(this);
+
+        currentMapNode = null;
     }
 }

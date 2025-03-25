@@ -19,17 +19,7 @@ public class MapNode {
 
     //CONSTRUCTEURS
 
-    public MapNode(MapNode NEnode, MapNode NWnode, MapNode SEnode, MapNode SWnode, MapNode parent, Direction direction) {
-        this.NEnode = NEnode;
-        this.NWnode = NWnode;
-        this.SEnode = SEnode;
-        this.SWnode = SWnode;
-        this.parent = parent;
-        this.direction = direction;
-        this.entitySet = null;
-        this.beginningPoint = null;
-        this.endPoint = null;
-    }
+
 
 
     public MapNode(MapNode parent, Direction direction, Set<Entity> entitySet, Point2D beginningPoint, Point2D endPoint){
@@ -49,6 +39,8 @@ public class MapNode {
      * @param level niveau de l'arbre (0 = feuille)
      */
     public MapNode(int level, Point2D beginningPoint, Point2D endPoint){
+        this.beginningPoint = beginningPoint;
+        this.endPoint = endPoint;
 
         if(beginningPoint.getX() > endPoint.getX() || beginningPoint.getY() > endPoint.getY()){
             throw new IllegalArgumentException("beginningPoint doit avoir des coordonnées inférieures à endpoint (x ET y)");
@@ -73,12 +65,20 @@ public class MapNode {
      * @param e
      */
     public void addEntity(Entity e){
+
+//        System.out.println("rec");
+
         double x = e.getPosition().getX();
         double y = e.getPosition().getY();
 
-        if(!positionInNode(x, y)) throw new IllegalArgumentException("L'entité n'est pas dans cette node");
+        if(!positionInNode(x, y)) throw new IllegalArgumentException("L'entité n'est pas dans cette node : \nCoordonnées de l'entité "
+        + x + " ; " + y + "\nCoordonnées du beginPoint : " + beginningPoint.getX() + " ; " + beginningPoint.getY() +
+                "\nCoordonnées du endPoint : " + endPoint.getX() + " ; " + endPoint.getY()+"\nparent ? " + (parent != null));
 
-        if(isLeaf()) addEntityToSet(e);
+        if(isLeaf()){
+//            System.out.println("AJOUTE\n======================\n");
+            addEntityToSet(e);
+        }
 
         else {
             boolean isSouth = y/2 > (endPoint.getY() - beginningPoint.getY());
@@ -89,8 +89,10 @@ public class MapNode {
 
                 if(isSouth){
                     getSEnode().addEntity(e);
+//                    System.out.println("SE");
                 } else {
                     getNEnode().addEntity(e);
+//                    System.out.println("NE");
                 }
 
 
@@ -98,8 +100,10 @@ public class MapNode {
                 //West
 
                 if(isSouth){
+//                    System.out.println("SW");
                     getSWnode().addEntity(e);
                 } else {
+//                    System.out.println("NW");
                     getNWnode().addEntity(e);
                 }
             }
@@ -109,8 +113,8 @@ public class MapNode {
 
 
     private boolean positionInNode(double x, double y){
-        return (x > endPoint.getX() || x < beginningPoint.getX()) ||
-                (y > endPoint.getY() || y < beginningPoint.getY());
+        return (x < endPoint.getX() || x > beginningPoint.getX()) ||
+                (y < endPoint.getY() || y > beginningPoint.getY());
     }
 
 
@@ -120,6 +124,7 @@ public class MapNode {
         }
 
         entitySet.add(e);
+        e.setCurrentMapNode(this);
     }
 
 

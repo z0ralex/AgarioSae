@@ -88,6 +88,7 @@ public class GameController {
 
     public void addPellet(Pellet pellet) {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
+        root.addEntity(pellet);
         pelletCircle.setFill(Color.GREEN);
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
@@ -108,6 +109,9 @@ public class GameController {
                     player.setMass(player.getMass() + pellet.getMass());
                     playerCircle.setRadius(player.calculateRadius());
                     pane.getChildren().remove(pelletCircle);
+
+                    pellet.removeFromCurrentNode();
+
                     return true;
                 }
                 return false;
