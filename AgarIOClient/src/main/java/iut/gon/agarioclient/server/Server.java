@@ -12,15 +12,11 @@ public class Server {
     private static Set<PrintWriter> clientWriters = new HashSet<>();
     private static Map<String, Boolean> clientReadyStatus = new HashMap<>(); // Suivi de l'état de préparation des clients
     private static ExecutorService threadPool = Executors.newCachedThreadPool(); // Thread pool pour gérer les connexions
-    private static boolean allClientsReady = false; // Indicateur pour savoir si tous les clients sont prêts
 
     public static void main(String[] args) {
         try {
             serverSocket = new ServerSocket(PORT);
             System.out.println("Serveur lancé, en attente de connexions...");
-
-            // Thread pour la mise à jour du jeu
-            new Thread(new GameUpdater()).start();
 
             // Attente infinie de nouvelles connexions
             while (true) {
@@ -48,22 +44,10 @@ public class Server {
         clientReadyStatus.remove(clientId);
     }
 
-    // Méthode pour vérifier si tous les clients sont prêts
-    public static synchronized boolean checkAllClientsReady() {
-        return clientReadyStatus.values().stream().allMatch(Boolean::booleanValue);
-    }
-
     // Méthode pour envoyer un message à tous les clients
-// Serveur
-
     public static synchronized void broadcast(String message) {
         for (PrintWriter writer : clientWriters) {
             writer.println(message);  // Envoi du message à tous les clients connectés
         }
-    }
-
-
-    public static Map<String, Boolean> getClientReadyStatus() {
-        return clientReadyStatus;
     }
 }

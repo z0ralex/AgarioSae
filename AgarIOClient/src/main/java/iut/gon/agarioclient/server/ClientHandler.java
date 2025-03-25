@@ -42,10 +42,11 @@ public class ClientHandler implements Runnable {
             // Lire les messages envoyés par le client
             String message;
             while ((message = in.readLine()) != null) {
-                System.out.println("Message reçu de " + clientId + ": " + message);
-
-                // Diffuser le message à tous les clients connectés
-                Server.broadcast(clientId + ": " + message);
+                // On filtre les messages qui ne sont pas des messages de chat
+                if (message.startsWith("CHAT: ")) {
+                    // Diffuser le message de chat à tous les clients
+                    Server.broadcast(clientId + ": " + message.substring(6)); // Enlever le préfixe "CHAT: "
+                }
             }
         } catch (IOException e) {
             System.err.println("Erreur du client " + clientId + ": " + e.getMessage());
@@ -60,5 +61,3 @@ public class ClientHandler implements Runnable {
         }
     }
 }
-
-

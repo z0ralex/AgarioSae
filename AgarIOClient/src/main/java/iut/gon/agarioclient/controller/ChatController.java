@@ -25,7 +25,7 @@ public class ChatController {
     // Méthode d'initialisation de la connexion avec le serveur
     public void initialize() {
         try {
-            socket = new Socket("10.42.17.106", 12345); // Connexion au serveur
+            socket = new Socket("localhost", 12345); // Connexion au serveur
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -34,9 +34,11 @@ public class ChatController {
                 try {
                     String message;
                     while ((message = in.readLine()) != null) {
-                        // Afficher le message dans l'interface graphique
-                        final String msg = message;
-                        javafx.application.Platform.runLater(() -> chatArea.appendText(msg + "\n"));
+                        // On ne veut afficher que les messages de chat (et non ceux comme "Bienvenue...")
+                        if (message.startsWith("CHAT: ")) {
+                            final String msg = message.substring(6); // On enlève le préfixe "CHAT: "
+                            javafx.application.Platform.runLater(() -> chatArea.appendText(msg + "\n"));
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -53,8 +55,8 @@ public class ChatController {
     public void handleSendMessage() {
         String message = messageField.getText();
         if (!message.isEmpty()) {
-            // Envoyer le message au serveur
-            out.println(message);
+            // Envoyer le message au serveur avec un préfixe "CHAT: "
+            out.println("CHAT: " + message);
             messageField.clear(); // Effacer le champ de texte après envoi
         }
     }
