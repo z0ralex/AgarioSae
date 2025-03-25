@@ -24,10 +24,9 @@ public class ChatController {
 
     private String clientId;
 
-    // Méthode d'initialisation de la connexion avec le serveur
     public void initialize() {
         try {
-            socket = new Socket("localhost", 12345); // Connexion au serveur
+            socket = new Socket("10.42.17.106", 12345); // Connexion au serveur
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -50,12 +49,19 @@ public class ChatController {
 
             // Recevoir l'ID du client
             String welcomeMessage = in.readLine(); // "Votre ID est : Client-XXXX"
-            clientId = welcomeMessage.split(": ")[1].split(" ")[0]; // Extraire l'ID du message
+            System.out.println(welcomeMessage);
+            if (welcomeMessage != null && welcomeMessage.startsWith("Votre ID est : ")) {
+                clientId = welcomeMessage.split(": ")[1].split(" ")[0]; // Extraire l'ID du message
+            } else {
+                // Si le message ne correspond pas, afficher un message d'erreur ou gérer autrement
+                System.err.println("Erreur : message d'accueil invalide");
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     @FXML
     public void handleSendMessage() {

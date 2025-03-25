@@ -25,39 +25,35 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            // Générer un ID unique pour le client
             clientId = Server.generateClientId();
             System.out.println("ID du client généré : " + clientId);
+            out.println("Bienvenue! Votre ID est : " + clientId); // Message explicite
 
-            // Envoyer l'ID du client au client
-            out.println("Votre ID est : " + clientId + ". Vous pouvez commencer à discuter.");
-
-            // Ajouter le PrintWriter à la liste des clients
             Server.addClientWriter(out, clientId);
 
-            // Lire les messages envoyés par le client (seulement des messages de chat)
             String message;
             while ((message = in.readLine()) != null) {
                 System.out.println("Message reçu de " + clientId + ": " + message);
 
-                // Filtrer et ne diffuser que les messages de chat
                 if (message.startsWith("CHAT: ")) {
-                    // Diffuser uniquement les messages de chat
-                    Server.broadcast(clientId + ": " + message.substring(6)); // Enlever le préfixe "CHAT: "
+                    Server.broadcast(clientId + ": " + message.substring(6));
                 }
             }
         } catch (IOException e) {
             System.err.println("Erreur du client " + clientId + ": " + e.getMessage());
         } finally {
-            // Nettoyer à la déconnexion du client
+            // Nettoyage après déconnexion
             try {
-                socket.close();
+                if (socket != null) {
+                    socket.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Server.removeClientWriter(out, clientId);
+            Server.removeClientWriter(out, clientId); // Retirer proprement le client
         }
     }
+
 }
 
 
