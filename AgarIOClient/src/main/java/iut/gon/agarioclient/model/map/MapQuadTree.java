@@ -3,7 +3,7 @@ package iut.gon.agarioclient.model.map;
 /**
  * Représente un noeud de l'arbre de la map
  * Ne pas confondre avec map.MapChunck
- * @see MapChunck
+ * @see MapChunk
  */
 public class MapQuadTree extends MapElt {
     private MapElt NEnode;
@@ -18,6 +18,11 @@ public class MapQuadTree extends MapElt {
         this.NWnode = NWnode;
         this.SEnode = SEnode;
         this.SWnode = SWnode;
+
+        NEnode.setDirection(Direction.NORTH_EAST);
+        NWnode.setDirection(Direction.NORTH_WEST);
+        SEnode.setDirection(Direction.SOUTH_EAST);
+        SWnode.setDirection(Direction.SOUTH_WEST);
     }
 
     public MapQuadTree(MapQuadTree parent) {
@@ -46,17 +51,21 @@ public class MapQuadTree extends MapElt {
 
     public void setNEnode(MapElt NEnode) {
         this.NEnode = NEnode;
+        NEnode.setDirection(Direction.NORTH_EAST);
     }
 
     public void setNWnode(MapElt NWnode) {
         this.NWnode = NWnode;
+        NWnode.setDirection(Direction.NORTH_WEST);
     }
 
     public void setSEnode(MapElt SEnode) {
         this.SEnode = SEnode;
+        SEnode.setDirection(Direction.SOUTH_EAST);
     }
 
     public void setSWnode(MapElt SWnode) {
         this.SWnode = SWnode;
+        SWnode.setDirection(Direction.SOUTH_WEST);
     }
 }
