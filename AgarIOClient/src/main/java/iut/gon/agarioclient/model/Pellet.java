@@ -18,4 +18,13 @@ public class Pellet extends Entity {
     public Pellet(String id, Point2D position, double mass) {
         super(id, position, mass);
     }
+
+    /**
+     * Calculates the radius of the pellet based on its mass.
+     *
+     * @return the radius of the pellet
+     */
+    public double calculateRadius() {
+        return 5;
+    }
 }

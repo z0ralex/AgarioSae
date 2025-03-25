@@ -22,9 +22,8 @@ public class WelcomeController {
     @FXML
     private Button localButton;
 
-    private Stage stage; // Ajouter un champ pour stocker le stage
+    private Stage stage;
 
-    // Méthode pour définir le stage
     public void setStage(Stage stage) {
         this.stage = stage;
     }
@@ -46,14 +45,13 @@ public class WelcomeController {
             showAlert("Erreur", "Veuillez entrer un surnom !");
         } else {
             try {
-                // Charger la vue du jeu local
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/game-view.fxml"));
                 Parent newView = loader.load();
 
-                // Créer une nouvelle scène avec la vue de jeu
-                Scene gameScene = new Scene(newView);
+                GameController gameController = loader.getController();
+                gameController.initializeGame(nickname);
 
-                // Changer la scène du stage actuel
+                Scene gameScene = new Scene(newView);
                 stage.setScene(gameScene);
                 stage.setTitle("Jeu en local");
 
@@ -71,4 +69,3 @@ public class WelcomeController {
         alert.showAndWait();
     }
 }
-
