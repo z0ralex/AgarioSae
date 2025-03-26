@@ -34,6 +34,9 @@ public class Player extends Entity implements PlayerComponent {
         return components;
     }
 
+    private Point2D lastPosition = getPosition();
+
+
     @Override
     public double getMass() {
         return components.stream().mapToDouble(PlayerComponent::getMass).sum();
@@ -49,6 +52,17 @@ public class Player extends Entity implements PlayerComponent {
         this.mass.set(mass);
     }
 
+    public Point2D getDirection() {
+        Point2D currentPosition = getPosition();
+        Point2D direction = currentPosition.subtract(lastPosition);
+
+        if (direction.magnitude() == 0) {
+            return Point2D.ZERO;
+        }
+        return direction.normalize();
+    }
+
+
     @Override
     public Point2D getPosition() {
         double x = components.stream().mapToDouble(c -> c.getPosition().getX()).average().orElse(0);
@@ -58,11 +72,13 @@ public class Player extends Entity implements PlayerComponent {
 
     @Override
     public void setPosition(Point2D position) {
+        this.lastPosition = getPosition();
         for (PlayerComponent component : components) {
             component.setPosition(position);
         }
         this.position.set(position);
     }
+
 
     @Override
     public double getSpeed() {
