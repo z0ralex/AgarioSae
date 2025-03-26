@@ -24,7 +24,11 @@ public class ChatController {
 
     private String clientId;
 
-    public void initialize() {
+    private String nickname;
+
+
+    public void initialize(String nickname) {
+        this.nickname=nickname;
         try {
             socket = new Socket("10.42.17.106", 12345); // Connexion au serveur
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -68,7 +72,7 @@ public class ChatController {
         String message = messageField.getText();
         if (!message.isEmpty() && clientId != null) {
             // Envoi du message au serveur avec un préfixe "CHAT: "
-            out.println("CHAT: " + message);
+            out.println("CHAT: "+nickname + " : " + message);
             messageField.clear(); // Effacer le champ de texte après envoi
         }
     }
