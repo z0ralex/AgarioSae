@@ -68,27 +68,17 @@ public class GameController {
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
-                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
-                        player.setSpeed(speed);
-
-                        Point2D direction = mousePosition[0].subtract(player.getPosition()).normalize();
-                        Point2D newPosition = player.getPosition().add(direction.multiply(player.getSpeed()));
-
-                        // Check for collisions with the map boundaries
-                        double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
-                        double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
-                        newPosition = new Point2D(newX, newY);
-
+                        Point2D newPosition = player.calculateNewPosition(mousePosition[0], X_MAX, Y_MAX);
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
-                        checkCollisions(player);
+                        player.checkCollisions(pelletCircles, pane);
                         spawnPellets();
 
                         // Execute AI strategy
                         ennemy.executeStrat();
 
-                        checkCollisions(ennemy);
+                        ennemy.checkCollisions(pelletCircles, pane);
                     }
                 }.start();
             }
@@ -146,14 +136,6 @@ public class GameController {
         }
     }
 
-    public void updateEnnemyPosition(Ennemy ennemy) {
-        Circle ennemyCircle = ennemyCircles.get(ennemy);
-        if (ennemyCircle != null) {
-            ennemyCircle.setCenterX(ennemy.getPosition().getX());
-            ennemyCircle.setCenterY(ennemy.getPosition().getY());
-        }
-    }
-
     public void createPellets(int count) {
         List<Pellet> pellets = pelletFactory.generatePellets(count);
         for (Pellet pellet : pellets) {
@@ -167,50 +149,6 @@ public class GameController {
         pelletCircle.setFill(Color.GREEN);
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
-    }
-
-    public void checkCollisions(Player player) {
-        Circle playerCircle = playerCircles.get(player);
-        if (playerCircle != null) {
-            double playerRadius = playerCircle.getRadius();
-            double eventHorizon = playerRadius + 100;
-
-            pelletCircles.entrySet().removeIf(entry -> {
-                Pellet pellet = entry.getKey();
-                Circle pelletCircle = entry.getValue();
-                double distance = player.getPosition().distance(pellet.getPosition());
-
-                if (distance <= eventHorizon) {
-                    player.setMass(player.getMass() + pellet.getMass());
-                    pane.getChildren().remove(pelletCircle);
-                    pellet.removeFromCurrentNode();
-                    return true;
-                }
-                return false;
-            });
-        }
-    }
-
-    public void checkCollisions(Ennemy ennemy) {
-        Circle ennemyCircle = ennemyCircles.get(ennemy);
-        if (ennemyCircle != null) {
-            double ennemyRadius = ennemyCircle.getRadius();
-            double eventHorizon = ennemyRadius + 100;
-
-            pelletCircles.entrySet().removeIf(entry -> {
-                Pellet pellet = entry.getKey();
-                Circle pelletCircle = entry.getValue();
-                double distance = ennemy.getPosition().distance(pellet.getPosition());
-
-                if (distance <= eventHorizon) {
-                    ennemy.setMass(ennemy.getMass() + pellet.getMass());
-                    pane.getChildren().remove(pelletCircle);
-                    pellet.removeFromCurrentNode();
-                    return true;
-                }
-                return false;
-            });
-        }
     }
 
     public void spawnPellets() {
