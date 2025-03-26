@@ -164,7 +164,6 @@ public class GameController {
         }
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
-        System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
@@ -203,6 +202,7 @@ public class GameController {
         if (ennemyCircle != null) {
             ennemyCircle.setCenterX(e.getPosition().getX());
             ennemyCircle.setCenterY(e.getPosition().getY());
+            ennemyCircle.setRadius(e.calculateRadius());
         }
     }
 

@@ -11,12 +11,14 @@ public class Ennemy extends Player {
     private IA strat;
     private Point2D posE;
     private double massE;
+    private double speedE;
 
     public Ennemy(String id, Point2D position, double mass, IA strat, double speed) {
         super(id, position, mass);
         this.posE = position;
         this.strat = strat;
         this.massE = mass;
+        this.speedE = speed;
     }
 
     public IA getStrat() {
@@ -49,6 +51,28 @@ public class Ennemy extends Player {
     @Override
     public double getMass() {
         return this.massE;
+    }
+
+    @Override
+    public double getSpeed() {
+        return this.speedE;
+    }
+
+    @Override
+    public void setSpeed(double speed) {
+        this.speedE = speed;
+    }
+
+    @Override
+    public double calculateRadius() {
+        return getMass();
+    }
+
+    @Override
+    public double calculateSpeed(double targetX, double targetY, double mapWidth, double mapHeight) {
+        double mass = getMass();
+        double speed = (mass / Math.pow(mass, 1.44)) * 10;
+        return speed;
     }
 
     public void checkCollisions(Map<Pellet, Circle> pelletCircles, Pane pane) {

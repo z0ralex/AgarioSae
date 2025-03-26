@@ -4,7 +4,7 @@ public class IAStratEatPlayers implements IA{
 
     @Override
     public void execute(Ennemy e) {
-        System.out.println("Je mange des joueurs");
+//        System.out.println("Je mange des joueurs");
     }
 
 }
