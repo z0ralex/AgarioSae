@@ -37,20 +37,25 @@ public class ChatController {
             Thread receiveMessagesThread = new Thread(() -> {
                 try {
                     while (true) {
-                        // Lire un objet qui peut être soit une String soit un TestVecteur
                         Object message = in.readObject();
-                        //System.out.println("Message reçu : " + message);
 
                         if (message instanceof String) {
-                            // Si c'est une String (message de chat)
                             final String msg = (String) message;
+
+                            // Si le message de bienvenue est reçu, on peut l'interpréter pour extraire l'ID si besoin
+                            if (msg.startsWith("Bienvenue! Votre ID est : ")) {
+                                clientId = msg.substring("Bienvenue! Votre ID est : ".length());
+                                // On envoie le message "pret" au serveur pour indiquer que le client est prêt
+                                out.writeObject("pret");
+                                out.flush();
+                            }
+
+                            // Affichage dans la zone de chat (en enlevant le préfixe "CHAT: " s'il y en a un)
                             String messageToDisplay = msg.replaceFirst("^CHAT: ", "");
                             Platform.runLater(() -> chatArea.appendText(messageToDisplay + "\n"));
                         } else if (message instanceof TestVecteur) {
-                            // Si c'est un TestVecteur
                             final TestVecteur vecteur = (TestVecteur) message;
                             Platform.runLater(() -> {
-                                // Afficher le vecteur reçu
                                 System.out.println("Vecteur reçu : " + vecteur);
                             });
                         } else {

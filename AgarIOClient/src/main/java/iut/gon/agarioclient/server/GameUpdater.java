@@ -16,19 +16,22 @@ public  class GameUpdater implements Runnable {
                 Random random = new Random();
                 TestVecteur vecteur = new TestVecteur(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
-                // Envoyer l'objet à tous les clients
+                // Envoyer l'objet uniquement aux clients prêts
                 for (ClientHandler client : Server.getClientHandlersSet()) {
-                    try {
-                        client.sendObject(vecteur);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    Boolean isReady = Server.getClientReadyStatus().get(client.getClientId());
+                    if (isReady != null && isReady) {  // Seulement si le client a répondu "pret"
+                        try {
+                            client.sendObject(vecteur);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-
-                Thread.sleep(1000); // Envoi toutes les 33 ms (~30 FPS)
+                Thread.sleep(1000); // Pause d'une seconde entre chaque envoi (adapter si nécessaire)
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
+
 }

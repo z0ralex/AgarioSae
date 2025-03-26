@@ -38,22 +38,32 @@ public class ClientHandler implements Runnable {
             System.out.println("ID du client généré : " + clientId);
             String s = "Bienvenue! Votre ID est : " + clientId;
             System.out.println(s);
-            out.writeObject("Bienvenue! Votre ID est : " + clientId); // Message d'accueil avec un objet
+            out.writeObject(s); // Envoi du message d'accueil
             out.flush();
 
             Server.addClientOutputStream(out, clientId);
 
             Object message;
-            while ((message = in.readObject()) != null) {  // Lecture d'objets
-                if (message instanceof String && ((String) message).startsWith("CHAT: ")) {
-                    System.out.println(message);
-                    Server.broadcast(message); // Diffusion du message texte en tant qu'objet
+            while ((message = in.readObject()) != null) {
+                if (message instanceof String) {
+                    String msg = (String) message;
+                    // Vérifier si le client signale qu'il est prêt
+                    if (msg.equalsIgnoreCase("pret")) {
+                        System.out.println("Le client " + clientId + " est prêt.");
+                        Server.getClientReadyStatus().put(clientId, true);
+                    }
+                    // Si c'est un message de chat
+                    else if (msg.startsWith("CHAT: ")) {
+                        System.out.println("Message du client " + clientId + ": " + msg);
+                        Server.broadcast(msg);
+                    }
+                } else {
+                    System.err.println("Type inconnu reçu : " + message.getClass());
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Erreur du client " + clientId + ": " + e.getMessage());
         } finally {
-            // Nettoyage après déconnexion
             try {
                 if (socket != null) {
                     socket.close();
@@ -62,9 +72,10 @@ public class ClientHandler implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Server.removeClientOutputStream(out, clientId); // Retirer proprement le client
+            Server.removeClientOutputStream(out, clientId);
         }
     }
+
 
     public String getClientId() {
         return clientId;
