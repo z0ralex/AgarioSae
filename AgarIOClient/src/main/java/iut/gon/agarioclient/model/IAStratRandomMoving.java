@@ -2,8 +2,8 @@ package iut.gon.agarioclient.model;
 
 public class IAStratRandomMoving implements IA{
 
-    public void execute(){
+    @Override
+    public void execute(Ennemy e) {
         System.out.println("Je me déplace aléatoirement");
     }
-
 }

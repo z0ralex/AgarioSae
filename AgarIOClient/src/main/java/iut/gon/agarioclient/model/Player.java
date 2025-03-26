@@ -58,10 +58,10 @@ public class Player extends Entity implements PlayerComponent {
 
     @Override
     public void setPosition(Point2D position) {
+        this.position.set(position);
         for (PlayerComponent component : components) {
             component.setPosition(position);
         }
-        this.position.set(position);
     }
 
     @Override

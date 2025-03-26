@@ -67,7 +67,7 @@ public class PlayerLeaf implements PlayerComponent {
 
     @Override
     public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
-        double maxSpeed = 100 / mass.get();
+        double maxSpeed = 100 / mass.get(); // That's an example value
         double centerX = mapWidth / 2;
         double centerY = mapHeight / 2;
         double distanceX = cursorX - centerX;
