@@ -96,7 +96,6 @@ public class Entity {
 
     public void removeFromCurrentNode(){
         currentMapNode.getEntitySet().remove(this);
-
         currentMapNode = null;
     }
 }

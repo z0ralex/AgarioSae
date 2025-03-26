@@ -1,12 +1,11 @@
+// GameController.java
 package iut.gon.agarioclient.controller;
 
-import iut.gon.agarioclient.model.NoEffectPelletFactory;
-import iut.gon.agarioclient.model.Pellet;
-import iut.gon.agarioclient.model.Player;
-import iut.gon.agarioclient.model.PlayerLeaf;
+import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.ParallelCamera;
@@ -45,8 +44,10 @@ public class GameController {
     private double yScale;
     private MapNode root;
     private Map<Player, Circle> playerCircles = new HashMap<>();
+    private Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
     private Map<Pellet, Circle> pelletCircles = new HashMap<>();
     private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
+    private IAStratEatPelletsOnly iaStratEatPelletsOnly;
 
     public void initializeGame(String nickname, ParallelCamera camera) {
         if (pane == null) {
@@ -80,7 +81,14 @@ public class GameController {
         Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
         player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
 
+        iaStratEatPelletsOnly = new IAStratEatPelletsOnly(root);
+
+
         addPlayer(player);
+
+        //Ennemy ennemy = new Ennemy("IA", new Point2D(500, 400), 10, iaStratEatPelletsOnly, 5.0);
+        //addEnnemy(ennemy);
+
         createPellets(INITIAL_PELLET_NB); // Create 20 pellets initially
 
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -111,7 +119,7 @@ public class GameController {
                     }
                 });
 
-                new javafx.animation.AnimationTimer() {
+                new AnimationTimer() {
                     @Override
                     public void handle(long now) {
 
@@ -127,18 +135,20 @@ public class GameController {
                         double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
                         newPosition = new Point2D(newX, newY);
 
-
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
                         checkCollisions(player);
                         spawnPellets();
+
+                        // Execute AI strategy
+                        //ennemy.executeStrat();
+
+                        //checkCollisions(ennemy);
                     }
                 }.start();
             }
         });
-
-        
     }
 
     public void addPlayer(Player player) {
@@ -179,11 +189,38 @@ public class GameController {
         );
     }
 
+    public void addEnnemy(Ennemy e) {
+        Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 70);
+        ennemyCircle.setFill(Color.RED);
+        ennemyCircles.put(e, ennemyCircle);
+        pane.getChildren().add(ennemyCircle);
+        System.out.println(ennemyCircle);
+
+        e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
+            double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
+            double y = newPoint.getY() - ((pane.getHeight() / 2) * camera.getScaleY());
+            ennemyCircle.setCenterX( newPoint.getX());
+            ennemyCircle.setCenterY( newPoint.getY());
+        });
+
+        e.massProperty().addListener((obs, oldMass, newMass) -> {
+            ennemyCircle.setRadius(e.calculateRadius()); // update du radius du joueur
+        });
+    }
+
     public void updatePlayerPosition(Player player) {
         Circle playerCircle = playerCircles.get(player);
         if (playerCircle != null) {
             playerCircle.setCenterX(player.getPosition().getX());
             playerCircle.setCenterY(player.getPosition().getY());
+        }
+    }
+
+    public void updateEnnemyPosition(Ennemy ennemy) {
+        Circle ennemyCircle = ennemyCircles.get(ennemy);
+        if (ennemyCircle != null) {
+            ennemyCircle.setCenterX(ennemy.getPosition().getX());
+            ennemyCircle.setCenterY(ennemy.getPosition().getY());
         }
     }
 
@@ -206,7 +243,6 @@ public class GameController {
         Circle playerCircle = playerCircles.get(player);
 
         if (playerCircle != null) {
-
             double playerRadius = playerCircle.getRadius();
             double eventHorizon = playerRadius + 100;
 
@@ -226,6 +262,28 @@ public class GameController {
                     return true;
                 }
 
+                return false;
+            });
+        }
+    }
+
+    public void checkCollisions(Ennemy ennemy) {
+        Circle ennemyCircle = ennemyCircles.get(ennemy);
+        if (ennemyCircle != null) {
+            double ennemyRadius = ennemyCircle.getRadius();
+            double eventHorizon = ennemyRadius + 100;
+
+            pelletCircles.entrySet().removeIf(entry -> {
+                Pellet pellet = entry.getKey();
+                Circle pelletCircle = entry.getValue();
+                double distance = ennemy.getPosition().distance(pellet.getPosition());
+
+                if (distance <= eventHorizon) {
+                    ennemy.setMass(ennemy.getMass() + pellet.getMass());
+                    pane.getChildren().remove(pelletCircle);
+                    pellet.removeFromCurrentNode();
+                    return true;
+                }
                 return false;
             });
         }

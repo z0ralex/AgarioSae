@@ -20,13 +20,9 @@ public class MapNode {
     private Point2D beginningPoint;
     private Point2D endPoint;
 
+    // CONSTRUCTEURS
 
-    //CONSTRUCTEURS
-
-
-
-
-    public MapNode(MapNode parent, Direction direction, Set<Entity> entitySet, Point2D beginningPoint, Point2D endPoint){
+    public MapNode(MapNode parent, Direction direction, Set<Entity> entitySet, Point2D beginningPoint, Point2D endPoint) {
         this.NEnode = null;
         this.NWnode = null;
         this.SEnode = null;
@@ -39,10 +35,9 @@ public class MapNode {
     }
 
     /**
-     *
      * @param level niveau de l'arbre (0 = feuille)
      */
-    public MapNode(int level, Point2D beginningPoint, Point2D endPoint){
+    public MapNode(int level, Point2D beginningPoint, Point2D endPoint) {
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
 
@@ -61,26 +56,22 @@ public class MapNode {
     }
 
 
-
     //Gestion d'entité
 
     /**
      * Ajoute l'entité à la map
      * @param e
      */
-    public void addEntity(Entity e){
-
-//        System.out.println("rec");
-
+    public void addEntity(Entity e) {
         double x = e.getPosition().getX();
         double y = e.getPosition().getY();
 
-        if(!positionInNode(x, y)) throw new IllegalArgumentException("L'entité n'est pas dans cette node : \nCoordonnées de l'entité "
-        + x + " ; " + y + "\nCoordonnées du beginPoint : " + beginningPoint.getX() + " ; " + beginningPoint.getY() +
-                "\nCoordonnées du endPoint : " + endPoint.getX() + " ; " + endPoint.getY()+"\nparent ? " + (parent != null));
-
-        if(isLeaf()){
-//            System.out.println("AJOUTE\n======================\n");
+        if (!positionInNode(x, y)) {
+            throw new IllegalArgumentException("L'entité n'est pas dans cette node : \nCoordonnées de l'entité "
+                    + x + " ; " + y + "\nCoordonnées du beginPoint : " + beginningPoint.getX() + " ; " + beginningPoint.getY() +
+                    "\nCoordonnées du endPoint : " + endPoint.getX() + " ; " + endPoint.getY() + "\nparent ? " + (parent != null));
+        }
+        if (isLeaf()) {
             addEntityToSet(e);
         }
 
@@ -93,25 +84,18 @@ public class MapNode {
 
                 if(isSouth){
                     getSEnode().addEntity(e);
-//                    System.out.println("SE");
                 } else {
                     getNEnode().addEntity(e);
-//                    System.out.println("NE");
                 }
 
-
             } else {
-                //West
-
-                if(isSouth){
-//                    System.out.println("SW");
+                // West
+                if (isSouth) {
                     getSWnode().addEntity(e);
                 } else {
-//                    System.out.println("NW");
                     getNWnode().addEntity(e);
                 }
             }
-
         }
     }
 
@@ -121,9 +105,8 @@ public class MapNode {
                 (y < endPoint.getY() || y > beginningPoint.getY());
     }
 
-
-    private void addEntityToSet(Entity e){
-        if(entitySet == null){
+    private void addEntityToSet(Entity e) {
+        if (entitySet == null) {
             entitySet = new HashSet<>();
         }
 
@@ -132,7 +115,7 @@ public class MapNode {
     }
 
 
-    //SETTERS
+    // SETTERS
     public void setNEnode(MapNode NEnode) {
         this.NEnode = NEnode;
         NEnode.setDirection(Direction.NORTH_EAST);
@@ -156,15 +139,15 @@ public class MapNode {
     public void setParent(MapNode parent) {
         this.parent = parent;
     }
+
     public void setDirection(Direction direction) {
         this.direction = direction;
     }
 
 
-    //GETTERS
-
-    public boolean isLeaf(){
-        return  NEnode == null &&
+    // GETTERS
+    public boolean isLeaf() {
+        return NEnode == null &&
                 NWnode == null &&
                 SEnode == null &&
                 SWnode == null;
@@ -178,8 +161,19 @@ public class MapNode {
         return endPoint;
     }
 
-    public Set<Entity> getEntitySet(){
-        return entitySet;
+    public Set<Entity> getEntitySet() {
+        if(isLeaf()){
+            return entitySet;
+        }
+
+        Set<Entity> entities = new HashSet<>();
+
+        entities.addAll(NEnode.getEntitySet());
+        entities.addAll(NWnode.getEntitySet());
+        entities.addAll(SEnode.getEntitySet());
+        entities.addAll(SWnode.getEntitySet());
+
+        return entities;
     }
 
     public MapNode getNEnode() {
@@ -207,29 +201,27 @@ public class MapNode {
     }
 
 
-    //GETTERS des node dans une direction
+    // GETTERS des node dans une direction
 
-    public MapNode getNorthElt(){
-        if(parent == null) return null;
+    public MapNode getNorthElt() {
+        if (parent == null) return null;
 
         MapNode parentNorth = parent.getNorthElt();
 
         switch(direction){
             case NORTH_EAST:
-                if(parentNorth == null){
+                if (parentNorth == null) {
                     return null;
                 }
 
                 return parentNorth.getSEnode();
 
-
             case NORTH_WEST:
-                if(parentNorth == null){
+                if (parentNorth == null) {
                     return null;
                 }
 
                 return parentNorth.getSWnode();
-
 
             case SOUTH_EAST:
                 return parent.getNEnode();
@@ -244,67 +236,59 @@ public class MapNode {
         }
     }
 
-    public MapNode getSouthElt(){
-        if(parent == null) return null; //racine
+    public MapNode getSouthElt() {
+        if (parent == null) return null; // racine
 
         MapNode parentSouth = parent.getSouthElt();
 
-        switch(direction){
+        switch (direction) {
             case NORTH_EAST:
                 return parent.getSEnode();
-
 
             case NORTH_WEST:
                 return parent.getSWnode();
 
-
             case SOUTH_EAST:
-                if(parentSouth == null){ //fin de la map
+                if (parentSouth == null) { // fin de la map
                     return null;
                 }
 
                 return parentSouth.getNEnode();
 
             case SOUTH_WEST:
-                if(parentSouth == null){ //fin de la map
+                if (parentSouth == null) { // fin de la map
                     return null;
                 }
 
                 return parentSouth.getNWnode();
 
             default:
-
                 throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
         }
     }
 
-    public MapNode getEastElt(){
-        if(parent == null) return null; //racine
+    public MapNode getEastElt() {
+        if (parent == null) return null; // racine
 
         MapNode parentEast = parent.getEastElt();
 
-        switch(direction){
+        switch (direction) {
             case NORTH_EAST:
-
-                if(parentEast == null){ //fin de la map
+                if (parentEast == null) { // fin de la map
                     return null;
                 }
 
                 return parentEast.getNWnode();
 
-
             case NORTH_WEST:
                 return parent.getNEnode();
 
-
             case SOUTH_EAST:
-
-                if(parentEast == null){ //fin de la map
+                if (parentEast == null) { // fin de la map
                     return null;
                 }
 
                 return parentEast.getSWnode();
-
 
             case SOUTH_WEST:
                 return parent.getSEnode();
@@ -314,30 +298,27 @@ public class MapNode {
         }
     }
 
-    public MapNode getWestElt(){
-        if(parent == null) return null; //racine
+    public MapNode getWestElt() {
+        if (parent == null) return null; // racine
 
         MapNode parentWest = parent.getWestElt();
 
-        switch(direction){
+        switch (direction) {
             case NORTH_EAST:
                 return parent.getNWnode();
 
-
             case NORTH_WEST:
-                if(parentWest == null){ //fin de la map
+                if (parentWest == null) { // fin de la map
                     return null;
                 }
 
-                return  parentWest.getNEnode();
-
+                return parentWest.getNEnode();
 
             case SOUTH_EAST:
                 return parent.getSWnode();
 
-
             case SOUTH_WEST:
-                if(parentWest == null){ //fin de la map
+                if (parentWest == null) { // fin de la map
                     return null;
                 }
 
