@@ -116,7 +116,7 @@ public class MapNode {
     }
 
 
-    private boolean positionInNode(double x, double y){
+    public boolean positionInNode(double x, double y){
         return (x < endPoint.getX() || x > beginningPoint.getX()) ||
                 (y < endPoint.getY() || y > beginningPoint.getY());
     }
