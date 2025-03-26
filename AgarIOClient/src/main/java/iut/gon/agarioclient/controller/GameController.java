@@ -5,6 +5,7 @@ import iut.gon.agarioclient.model.Pellet;
 import iut.gon.agarioclient.model.Player;
 import iut.gon.agarioclient.model.PlayerLeaf;
 import iut.gon.agarioclient.model.map.MapNode;
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -13,6 +14,7 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -212,10 +214,17 @@ public class GameController {
 
                 if (distance <= eventHorizon) {
                     // pellet mangé
+                    TranslateTransition transition = new TranslateTransition(Duration.millis(500), pelletCircle);
+                    transition.setToX(player.getPosition().getX() - pellet.getPosition().getX());
+                    transition.setToY(player.getPosition().getY() - pellet.getPosition().getY());
 
-                    player.setMass(player.getMass() + pellet.getMass());
-                    pane.getChildren().remove(pelletCircle);
-                    pellet.removeFromCurrentNode();
+                    transition.setOnFinished(event -> {
+                        player.setMass(player.getMass() + pellet.getMass());
+                        pane.getChildren().remove(pelletCircle);
+                        pellet.removeFromCurrentNode();
+                    });
+
+                    transition.play();
 
                     return true;
                 }
