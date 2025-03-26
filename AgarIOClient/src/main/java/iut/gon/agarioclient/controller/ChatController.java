@@ -33,14 +33,28 @@ public class ChatController {
             in = new ObjectInputStream(socket.getInputStream()); // Pour recevoir des objets
             out = new ObjectOutputStream(socket.getOutputStream()); // Pour envoyer des objets
 
-            // Thread pour recevoir les messages du serveur (texte)
+            // Thread pour recevoir les messages du serveur (texte ou objets)
             Thread receiveMessagesThread = new Thread(() -> {
                 try {
-                    Object message;
-                    while ((message = in.readObject()) != null) {
+                    while (true) {
+                        // Lire un objet qui peut être soit une String soit un TestVecteur
+                        Object message = in.readObject();
+                        //System.out.println("Message reçu : " + message);
+
                         if (message instanceof String) {
+                            // Si c'est une String (message de chat)
                             final String msg = (String) message;
-                            Platform.runLater(() -> chatArea.appendText(msg + "\n"));
+                            String messageToDisplay = msg.replaceFirst("^CHAT: ", "");
+                            Platform.runLater(() -> chatArea.appendText(messageToDisplay + "\n"));
+                        } else if (message instanceof TestVecteur) {
+                            // Si c'est un TestVecteur
+                            final TestVecteur vecteur = (TestVecteur) message;
+                            Platform.runLater(() -> {
+                                // Afficher le vecteur reçu
+                                System.out.println("Vecteur reçu : " + vecteur);
+                            });
+                        } else {
+                            System.err.println("Type inconnu reçu : " + message.getClass());
                         }
                     }
                 } catch (IOException | ClassNotFoundException e) {
@@ -49,19 +63,12 @@ public class ChatController {
             });
             receiveMessagesThread.start();
 
-            // Recevoir l'ID du client
-            String welcomeMessage = (String) in.readObject(); // Lecture de l'ID
-            System.out.println(welcomeMessage);
-            if (welcomeMessage != null && welcomeMessage.startsWith("Bienvenue! Votre ID est : ")) {
-                clientId = welcomeMessage.split(": ")[1].split(" ")[0]; // Extraire l'ID du message
-            } else {
-                System.err.println("Erreur : message d'accueil invalide");
-            }
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException  e) {
             e.printStackTrace();
         }
     }
+
 
     @FXML
     public void handleSendMessage() {
@@ -69,7 +76,7 @@ public class ChatController {
         if (!message.isEmpty() && clientId != null) {
             // Envoi du message au serveur avec un préfixe "CHAT: "
             try {
-                out.writeObject("CHAT: "+nickname + " : " + message);
+                out.writeObject("CHAT: " + nickname + " : " + message);  // Envoi du message sous forme de String
                 out.flush();
                 messageField.clear(); // Effacer le champ de texte après envoi
             } catch (IOException e) {
