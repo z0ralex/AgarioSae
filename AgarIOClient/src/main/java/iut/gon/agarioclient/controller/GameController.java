@@ -127,6 +127,7 @@ public class GameController {
 
                         for(int i = 0; i < list.size(); i++){
                             updateEnnemyPosition(list.get(i));
+                            list.get(i).checkCollisions(pelletCircles, pane);
 
                         }
                     }
@@ -156,7 +157,11 @@ public class GameController {
 
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 25);//Attention Valeur en DUR
-        ennemyCircle.setFill(Color.RED);
+        if (e.getStrat() instanceof IAStratEatPelletsOnly) {
+            ennemyCircle.setFill(Color.YELLOW);
+        } else {
+            ennemyCircle.setFill(Color.RED);
+        }
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
         System.out.println(ennemyCircle);

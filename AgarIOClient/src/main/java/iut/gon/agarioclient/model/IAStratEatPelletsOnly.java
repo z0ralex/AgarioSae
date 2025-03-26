@@ -19,7 +19,6 @@ public class IAStratEatPelletsOnly implements IA {
     public void execute(Ennemy ennemy) {
 
         Pellet nearestPellet = findNearestPellet(ennemy);
-        System.out.println("execute: nearestPellet = " + nearestPellet);
         if (nearestPellet != null) {
             moveToPellet(ennemy, nearestPellet);
             checkCollisionAndConsume(ennemy, nearestPellet);
@@ -48,11 +47,7 @@ public class IAStratEatPelletsOnly implements IA {
         Point2D direction = pellet.getPosition().subtract(ennemy.getPosition()).normalize();
         System.out.println(ennemy.getSpeed());
         Point2D newPosition = ennemy.getPosition().add(direction.multiply(10));
-        System.out.println("Current Position: " + ennemy.getPosition());
-        System.out.println("Direction: " + direction);
-        System.out.println("New Position: " + newPosition);
         ennemy.setPosition(newPosition);
-        System.out.println("Updated Position: " + ennemy.getPosition());
     }
 
     private void checkCollisionAndConsume(Ennemy ennemy, Pellet pellet) {
