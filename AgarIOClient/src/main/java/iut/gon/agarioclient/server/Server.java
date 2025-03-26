@@ -8,7 +8,15 @@ import java.util.concurrent.*;
 public class Server {
 
     private static final int PORT = 12345; // Port d'écoute
+
+    public static Set<ClientHandler> getClientHandlersSet() {
+        return clientHandlersSet;
+    }
+
     private static ServerSocket serverSocket;
+
+    private static Set<ClientHandler> clientHandlersSet = new HashSet<>();;
+
     private static Set<PrintWriter> clientWriters = new HashSet<>();
     private static Map<String, Boolean> clientReadyStatus = new HashMap<>(); // Suivi de l'état de préparation des clients
     private static ExecutorService threadPool = Executors.newCachedThreadPool(); // Thread pool pour gérer les connexions
@@ -23,6 +31,9 @@ public class Server {
             serverSocket = new ServerSocket(PORT);
             System.out.println("Serveur lancé, en attente de connexions...");
 
+            Thread gameUpdaterThread = new Thread(new GameUpdater(clientWriters));
+            gameUpdaterThread.start();
+
             // Attente infinie de nouvelles connexions
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -30,7 +41,11 @@ public class Server {
 
                 // Création d'un thread pour gérer cette connexion
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
+                clientHandlersSet.add(clientHandler);
                 threadPool.execute(clientHandler); // Démarrage du thread
+
+
+
             }
         } catch (IOException e) {
             System.err.println("Erreur lors du démarrage du serveur : " + e.getMessage());

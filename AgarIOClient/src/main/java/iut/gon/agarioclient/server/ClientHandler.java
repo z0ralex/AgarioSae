@@ -9,7 +9,13 @@ public class ClientHandler implements Runnable {
 
     private Socket socket;
     private PrintWriter out;
+    private ObjectOutputStream objectOut;
     private BufferedReader in;
+
+    public String getClientId() {
+        return clientId;
+    }
+
     private String clientId;
 
     public ClientHandler(Socket socket) {
@@ -17,9 +23,15 @@ public class ClientHandler implements Runnable {
         try {
             this.out = new PrintWriter(socket.getOutputStream(), true);
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.objectOut = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             System.err.println("Erreur de connexion avec le client : " + e.getMessage());
         }
+    }
+
+    public void sendObject(Object obj) throws IOException {
+        objectOut.writeObject(obj);
+        objectOut.flush();
     }
 
     @Override
@@ -47,6 +59,7 @@ public class ClientHandler implements Runnable {
                 if (socket != null) {
                     socket.close();
                 }
+                Server.getClientHandlersSet().remove(this);
             } catch (IOException e) {
                 e.printStackTrace();
             }

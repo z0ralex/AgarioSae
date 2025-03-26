@@ -1,5 +1,7 @@
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.server.TestVecteur;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Button;
@@ -21,18 +23,21 @@ public class ChatController {
     private PrintWriter out;
     private BufferedReader in;
     private Socket socket;
-
+    private ObjectInputStream objectIn;
+    private GameController gameController;
     private String clientId;
 
     private String nickname;
 
 
-    public void initialize(String nickname) {
+    public void initialize(String nickname, GameController gameController) {
         this.nickname=nickname;
+        this.gameController=gameController;
         try {
             socket = new Socket("10.42.17.106", 12345); // Connexion au serveur
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
+            objectIn = new ObjectInputStream(socket.getInputStream());
 
             // Thread pour recevoir les messages du serveur
             Thread receiveMessagesThread = new Thread(() -> {
@@ -50,6 +55,22 @@ public class ChatController {
                 }
             });
             receiveMessagesThread.start();
+
+            // Thread pour recevoir des objets
+            Thread receiveObjectsThread = new Thread(() -> {
+                try {
+                    while (true) {
+                        Object receivedObject = objectIn.readObject();
+                        if (receivedObject instanceof TestVecteur) {
+                            TestVecteur vecteur = (TestVecteur) receivedObject;
+                            Platform.runLater(() -> gameController.updateFromServer(vecteur));
+                        }
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
+            receiveObjectsThread.start();
 
             // Recevoir l'ID du client
             String welcomeMessage = in.readLine(); // "Votre ID est : Client-XXXX"

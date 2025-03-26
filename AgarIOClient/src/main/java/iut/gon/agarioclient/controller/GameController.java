@@ -4,6 +4,7 @@ import iut.gon.agarioclient.model.NoEffectPelletFactory;
 import iut.gon.agarioclient.model.Pellet;
 import iut.gon.agarioclient.model.Player;
 import iut.gon.agarioclient.model.map.MapNode;
+import iut.gon.agarioclient.server.TestVecteur;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
@@ -62,6 +63,10 @@ public class GameController {
                 }.start();
             }
         });
+    }
+
+    public void updateFromServer(TestVecteur t) {
+        System.out.println(t.toString());
     }
 
     public void addPlayer(Player player) {
