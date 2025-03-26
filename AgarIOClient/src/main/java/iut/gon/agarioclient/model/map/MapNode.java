@@ -2,6 +2,10 @@ package iut.gon.agarioclient.model.map;
 
 import iut.gon.agarioclient.model.Entity;
 import javafx.geometry.Point2D;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -341,6 +345,25 @@ public class MapNode {
 
             default:
                 throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
+        }
+    }
+
+    public void drawBorders(Pane pane) {
+        if (isLeaf()) {
+            Rectangle border = new Rectangle(
+                    beginningPoint.getX(),
+                    beginningPoint.getY(),
+                    endPoint.getX() - beginningPoint.getX(),
+                    endPoint.getY() - beginningPoint.getY()
+            );
+            border.setStroke(Color.GRAY);
+            border.setFill(Color.TRANSPARENT);
+            pane.getChildren().add(border);
+        } else {
+            if (NEnode != null) NEnode.drawBorders(pane);
+            if (NWnode != null) NWnode.drawBorders(pane);
+            if (SEnode != null) SEnode.drawBorders(pane);
+            if (SWnode != null) SWnode.drawBorders(pane);
         }
     }
 }

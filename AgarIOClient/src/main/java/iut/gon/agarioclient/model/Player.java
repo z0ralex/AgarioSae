@@ -82,8 +82,11 @@ public class Player extends Entity implements PlayerComponent {
     }
 
     @Override
-    public double calculateSpeed(double cursorX, double cursorY, double panelWidth, double panelHeight) {
-        return components.stream().mapToDouble(c -> c.calculateSpeed(cursorX, cursorY, panelWidth, panelHeight)).average().orElse(0);
+    public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
+        return components.stream()
+                .mapToDouble(c -> c.calculateSpeed(cursorX, cursorY, mapWidth, mapHeight))
+                .average()
+                .orElse(0);
     }
 
     @Override

@@ -43,6 +43,7 @@ public class GameController {
         this.camera = camera;
 
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
+        root.drawBorders(pane);
 
         Player player = new Player(nickname, new Point2D(400, 300), 10);
         player.add(new PlayerLeaf(nickname, new Point2D(400, 300), 10, 5));
@@ -61,7 +62,7 @@ public class GameController {
                 new javafx.animation.AnimationTimer() {
                     @Override
                     public void handle(long now) {
-                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), pane.getWidth(), pane.getHeight());
+                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
 
                         Point2D direction = mousePosition[0].subtract(player.getPosition()).normalize();
