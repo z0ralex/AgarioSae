@@ -43,10 +43,10 @@ public class GameController {
     private double xScale;
     private double yScale;
     private MapNode root;
-    private Map<Player, Circle> playerCircles = new HashMap<>();
-    private Map<Pellet, Circle> pelletCircles = new HashMap<>();
-    private Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
-    private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
+    private final Map<Player, Circle> playerCircles = new HashMap<>();
+    private final Map<Pellet, Circle> pelletCircles = new HashMap<>();
+    private final Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
+    private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
     public void initializeGame(String nickname, ParallelCamera camera) {
         if (pane == null) {
@@ -287,6 +287,20 @@ public class GameController {
     public void spawnPellets() {
         if (pelletCircles.size() < MAX_PELLET) { // Maintain at least 100 pellets on the map
             createPellets(1);
+        }
+    }
+
+    /**
+     * permet de générer le rendu d'une entité à l'écran
+     */
+    public void renderEntity(Entity entity){
+        //TODO délèguer la méthode à l'entité ? (pas sûr que ca respecte le MVC)
+        if(entity instanceof Ennemy){
+
+        } else if(entity instanceof Player){
+
+        } else {
+            //pellet
         }
     }
 }

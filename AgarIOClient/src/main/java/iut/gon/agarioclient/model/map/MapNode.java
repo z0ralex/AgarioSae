@@ -32,7 +32,7 @@ public class MapNode {
         this.SWnode = null;
         this.parent = parent;
         this.direction = direction;
-        this.entitySet = entitySet;
+        this.entitySet = entitySet != null ? entitySet : new HashSet<>(); //ajout
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
     }
@@ -44,6 +44,7 @@ public class MapNode {
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
         this.parent = parent;
+        this.entitySet = new HashSet<>(); //ajout
 
         if(beginningPoint.getX() > endPoint.getX() || beginningPoint.getY() > endPoint.getY()){
             throw new IllegalArgumentException("beginningPoint doit avoir des coordonnées inférieures à endpoint (x ET y)");
@@ -180,10 +181,10 @@ public class MapNode {
 
         Set<Entity> entities = new HashSet<>();
 
-        entities.addAll(NEnode.getEntitySet());
-        entities.addAll(NWnode.getEntitySet());
-        entities.addAll(SEnode.getEntitySet());
-        entities.addAll(SWnode.getEntitySet());
+        if(NEnode != null) entities.addAll(NEnode.getEntitySet());
+        if(NWnode != null) entities.addAll(NWnode.getEntitySet());
+        if(SEnode != null) entities.addAll(SEnode.getEntitySet());
+        if(SWnode != null) entities.addAll(SWnode.getEntitySet());
 
         return entities;
     }
