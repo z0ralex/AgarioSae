@@ -67,6 +67,13 @@ public class GameController {
 
                         Point2D direction = mousePosition[0].subtract(player.getPosition()).normalize();
                         Point2D newPosition = player.getPosition().add(direction.multiply(player.getSpeed()));
+
+                        // Check for collisions with the map boundaries
+                        double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
+                        double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
+                        newPosition = new Point2D(newX, newY);
+
+
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
