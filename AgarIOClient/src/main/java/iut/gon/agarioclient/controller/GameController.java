@@ -95,14 +95,20 @@ public class GameController {
                     double xPosition = event.getX();
                     double yPosition = event.getY();
 
-                    double xVect = xPosition - player.getPosition().getX();
-                    double yVect = yPosition - player.getPosition().getY();
+                    double xVect = (xPosition - player.getPosition().getX()) /*- cameraCenterPoint.getX()*/;
+                    double yVect = (yPosition - player.getPosition().getY()) /*- cameraCenterPoint.getY()*/;
 
-                    // on vérifie si la souris est assez loin du joueur
-                    //if(Math.abs(xVect) < NO_MOVE_DISTANCE || Math.abs(yVect) < NO_MOVE_DISTANCE){
+                    System.out.println("Vecteur : x = " + xVect + "; y = " + yVect + "\n====================");
+
+                    if(Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE){
+                        //zone morte : reset du vecteur
+                        mouseVector.setValue(Point2D.ZERO);
+
+                    } else {
+                        // mouvement
                         mousePosition[0] = new Point2D(xPosition, yPosition); //TODO retirer
                         mouseVector.setValue(new Point2D(xVect, yVect).normalize()); //TODO pas forcément normaliser : selon l'emplacement de la souris la vitesse change
-                    //}
+                    }
                 });
 
                 new javafx.animation.AnimationTimer() {
