@@ -3,7 +3,7 @@ package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
-import javafx.animation.AnimationTimer;
+import javafx.animation.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -12,6 +12,8 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.util.Duration;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -58,7 +60,7 @@ public class GameController {
         camera.setLayoutX(cameraCenterPoint.getX());
         camera.setLayoutY(cameraCenterPoint.getY());
 
-
+        drawGrid();
 
 
         //update de la caméra si le pane change de taille
@@ -72,7 +74,7 @@ public class GameController {
         pane.heightProperty().addListener(sizeChange);
 
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
-        root.drawBorders(pane);
+        //root.drawBorders(pane);
 
         Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
         player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
@@ -146,6 +148,24 @@ public class GameController {
         });
     }
 
+    private void drawGrid() {
+        pane.getChildren().clear();
+
+        for (int x = 0; x <= X_MAX; x += 200) {
+            Line verticalLine = new Line(x, 0, x, Y_MAX);
+            verticalLine.setStroke(Color.LIGHTGRAY);
+            verticalLine.setOpacity(0.5);
+            pane.getChildren().add(verticalLine);
+        }
+
+        for (int y = 0; y <= Y_MAX; y += 200) {
+            Line horizontalLine = new Line(0, y, X_MAX, y);
+            horizontalLine.setStroke(Color.LIGHTGRAY);
+            horizontalLine.setOpacity(0.5);
+            pane.getChildren().add(horizontalLine);
+        }
+    }
+
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
         playerCircle.setFill(Color.BLUE);
@@ -168,20 +188,31 @@ public class GameController {
     }
 
     private void setZoomFromMass(double deltaMass) {
+        double targetScale = camera.getScaleX() + 1. / (deltaMass * 400.);
 
-        // formule de calcul de la taille de la camera
-        // peut être ajustee
-        double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);
+        // Assurer que le facteur de zoom reste dans des limites raisonnables
+        targetScale = Math.max(0.5, Math.min(targetScale, 3.0));
 
-        camera.setScaleX(newScale);
-        camera.setScaleY(newScale);
+        // Animation fluide avec une transition sur 300ms
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(camera.scaleXProperty(), targetScale, Interpolator.EASE_BOTH),
+                        new KeyValue(camera.scaleYProperty(), targetScale, Interpolator.EASE_BOTH)
+                )
+        );
+        timeline.play();
 
-        // le zoom change : on doit recalculer le centre de la caméra
+        // Mise à jour du centre de la caméra après l'animation
+        timeline.setOnFinished(e -> updateCameraCenter());
+    }
+
+    private void updateCameraCenter() {
         cameraCenterPoint = new Point2D(
                 (pane.getWidth() / 2) * camera.getScaleX(),
                 (pane.getHeight() / 2) * camera.getScaleY()
         );
     }
+
 
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 25);//Attention Valeur en DUR
