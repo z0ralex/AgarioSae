@@ -69,7 +69,7 @@ public class GameController {
         Player player = new Player(nickname, new Point2D(400, 300), 10);
         player.add(new PlayerLeaf(nickname, new Point2D(400, 300), 10, 5));
 
-        NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory();
+        NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
         List<Ennemy> list = f.generate(3);
         for(int i = 0; i < list.size(); i++){
             addEnnemy(list.get(i));
@@ -127,7 +127,7 @@ public class GameController {
 
                         for(int i = 0; i < list.size(); i++){
                             updateEnnemyPosition(list.get(i));
-                            checkCollisions(list.get(i));
+
                         }
                     }
                 }.start();

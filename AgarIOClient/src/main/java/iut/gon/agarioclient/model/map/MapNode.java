@@ -1,3 +1,4 @@
+// MapNode.java
 package iut.gon.agarioclient.model.map;
 
 import iut.gon.agarioclient.model.Entity;
@@ -29,7 +30,7 @@ public class MapNode {
         this.SWnode = null;
         this.parent = parent;
         this.direction = direction;
-        this.entitySet = entitySet;
+        this.entitySet = entitySet != null ? entitySet : new HashSet<>();
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
     }
@@ -40,6 +41,7 @@ public class MapNode {
     public MapNode(int level, Point2D beginningPoint, Point2D endPoint) {
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
+        this.entitySet = new HashSet<>();
 
         if(beginningPoint.getX() > endPoint.getX() || beginningPoint.getY() > endPoint.getY()){
             throw new IllegalArgumentException("beginningPoint doit avoir des coordonnées inférieures à endpoint (x ET y)");
@@ -54,7 +56,6 @@ public class MapNode {
             this.setSWnode(new MapNode(level - 1, new Point2D(beginningPoint.getX(), middle.getY()), new Point2D(middle.getX(), endPoint.getY())));
         }
     }
-
 
     //Gestion d'entité
 
@@ -73,9 +74,7 @@ public class MapNode {
         }
         if (isLeaf()) {
             addEntityToSet(e);
-        }
-
-        else {
+        } else {
             boolean isSouth = y/2 > (endPoint.getY() - beginningPoint.getY());
             //TODO vérifier si c'est bien le sud (au pire ça fera juste un décalage modèle affichage)
 
@@ -99,7 +98,6 @@ public class MapNode {
         }
     }
 
-
     public boolean positionInNode(double x, double y){
         return (x < endPoint.getX() || x > beginningPoint.getX()) ||
                 (y < endPoint.getY() || y > beginningPoint.getY());
@@ -113,7 +111,6 @@ public class MapNode {
         entitySet.add(e);
         e.setCurrentMapNode(this);
     }
-
 
     // SETTERS
     public void setNEnode(MapNode NEnode) {
@@ -143,7 +140,6 @@ public class MapNode {
     public void setDirection(Direction direction) {
         this.direction = direction;
     }
-
 
     // GETTERS
     public boolean isLeaf() {
