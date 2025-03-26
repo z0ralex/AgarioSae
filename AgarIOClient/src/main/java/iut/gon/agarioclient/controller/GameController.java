@@ -1,11 +1,9 @@
 // GameController.java
 package iut.gon.agarioclient.controller;
 
-import iut.gon.agarioclient.App;
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -14,9 +12,6 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-
-import java.util.*;
-import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +37,6 @@ public class GameController {
     private static final double PLAYER_SPAWNPOINT_Y = 300;
     private static final double NO_MOVE_DISTANCE = 10;
 
-    private double xScale;
-    private double yScale;
     private MapNode root;
     private final Map<Player, Circle> playerCircles = new HashMap<>();
     private final Map<Pellet, Circle> pelletCircles = new HashMap<>();
@@ -297,7 +290,8 @@ public class GameController {
 
                 if (distance <= eventHorizon) {
                     ennemy.setMass(ennemy.getMass() + pellet.getMass());
-                    pane.getChildren().remove(pelletCircle);
+                    //pane.getChildren().remove(pelletCircle);
+                    unrenderEntity(pellet);
                     pellet.removeFromCurrentNode();
                     return true;
                 }
@@ -329,7 +323,21 @@ public class GameController {
     }
 
     public void unrenderEntity(Entity entity){
+        Circle entityCircle;
 
+        if(entity instanceof Ennemy){
+            entityCircle = ennemyCircles.get(entity);
+            ennemyCircles.remove(entity, entityCircle);
+        } else if (entity instanceof Player) {
+            entityCircle = playerCircles.get(entity);
+            playerCircles.remove(entity, entityCircle);
+        } else {
+            //Pellet
+            entityCircle = pelletCircles.get(entity);
+            pelletCircles.remove(entity, entityCircle);
+        }
+
+        pane.getChildren().remove(entityCircle);
     }
 
     public void updateLoadedChunks(MapNode currentChunk){
