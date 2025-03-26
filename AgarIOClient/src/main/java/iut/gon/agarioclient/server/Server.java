@@ -8,16 +8,10 @@ import java.util.concurrent.*;
 public class Server {
 
     private static final int PORT = 12345; // Port d'écoute
-
-    public static Set<ClientHandler> getClientHandlersSet() {
-        return clientHandlersSet;
-    }
-
     private static ServerSocket serverSocket;
 
     private static Set<ClientHandler> clientHandlersSet = new HashSet<>();;
-
-    private static Set<PrintWriter> clientWriters = new HashSet<>();
+    private static Set<ObjectOutputStream> clientOutputStreams = new HashSet<>(); // Remplace PrintWriter par ObjectOutputStream
     private static Map<String, Boolean> clientReadyStatus = new HashMap<>(); // Suivi de l'état de préparation des clients
     private static ExecutorService threadPool = Executors.newCachedThreadPool(); // Thread pool pour gérer les connexions
 
@@ -31,9 +25,6 @@ public class Server {
             serverSocket = new ServerSocket(PORT);
             System.out.println("Serveur lancé, en attente de connexions...");
 
-            Thread gameUpdaterThread = new Thread(new GameUpdater(clientWriters));
-            gameUpdaterThread.start();
-
             // Attente infinie de nouvelles connexions
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -43,35 +34,41 @@ public class Server {
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
                 clientHandlersSet.add(clientHandler);
                 threadPool.execute(clientHandler); // Démarrage du thread
-
-
-
             }
         } catch (IOException e) {
             System.err.println("Erreur lors du démarrage du serveur : " + e.getMessage());
         }
     }
 
-    // Méthode pour ajouter un PrintWriter thread-safe
-    public static synchronized void addClientWriter(PrintWriter out, String clientId) {
-        clientWriters.add(out);
+    // Méthode pour ajouter un ObjectOutputStream thread-safe
+    public static synchronized void addClientOutputStream(ObjectOutputStream out, String clientId) {
+        clientOutputStreams.add(out);
         clientReadyStatus.put(clientId, false); // Par défaut, le client n'est pas prêt
     }
 
-    // Méthode pour supprimer un PrintWriter lors de la déconnexion
-    public static synchronized void removeClientWriter(PrintWriter out, String clientId) {
-        clientWriters.remove(out);
+    // Méthode pour supprimer un ObjectOutputStream lors de la déconnexion
+    public static synchronized void removeClientOutputStream(ObjectOutputStream out, String clientId) {
+        clientOutputStreams.remove(out);
         clientReadyStatus.remove(clientId);
     }
 
     // Méthode pour envoyer un message à tous les clients
-    public static synchronized void broadcast(String message) {
-        for (PrintWriter writer : clientWriters) {
-            writer.println(message);  // Envoi du message à tous les clients connectés
+    public static synchronized void broadcast(Object message) {
+        for (ObjectOutputStream out : clientOutputStreams) {
+            try {
+                out.writeObject(message);  // Envoi de l'objet à tous les clients
+                out.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public static Map<String, Boolean> getClientReadyStatus() {
         return clientReadyStatus;
+    }
+
+    public static Set<ClientHandler> getClientHandlersSet() {
+        return clientHandlersSet;
     }
 }

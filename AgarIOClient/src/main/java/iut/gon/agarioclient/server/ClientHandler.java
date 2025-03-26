@@ -8,30 +8,23 @@ import java.net.*;
 public class ClientHandler implements Runnable {
 
     private Socket socket;
-    private PrintWriter out;
-    private ObjectOutputStream objectOut;
-    private BufferedReader in;
-
-    public String getClientId() {
-        return clientId;
-    }
-
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
     private String clientId;
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
         try {
-            this.out = new PrintWriter(socket.getOutputStream(), true);
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.objectOut = new ObjectOutputStream(socket.getOutputStream());
+            this.out = new ObjectOutputStream(socket.getOutputStream()); // Remplace PrintWriter par ObjectOutputStream
+            this.in = new ObjectInputStream(socket.getInputStream()); // Utilise ObjectInputStream pour les objets
         } catch (IOException e) {
             System.err.println("Erreur de connexion avec le client : " + e.getMessage());
         }
     }
 
     public void sendObject(Object obj) throws IOException {
-        objectOut.writeObject(obj);
-        objectOut.flush();
+        out.writeObject(obj);
+        out.flush();
     }
 
     @Override
@@ -39,19 +32,17 @@ public class ClientHandler implements Runnable {
         try {
             clientId = Server.generateClientId();
             System.out.println("ID du client généré : " + clientId);
-            out.println("Bienvenue! Votre ID est : " + clientId); // Message explicite
+            out.writeObject("Bienvenue! Votre ID est : " + clientId); // Message d'accueil avec un objet
 
-            Server.addClientWriter(out, clientId);
+            Server.addClientOutputStream(out, clientId);
 
-            String message;
-            while ((message = in.readLine()) != null) {
-                System.out.println("Message reçu de " + clientId + ": " + message);
-
-                if (message.startsWith("CHAT: ")) {
-                    Server.broadcast("CHAT: " + message.substring(6));
+            Object message;
+            while ((message = in.readObject()) != null) {  // Lecture d'objets
+                if (message instanceof String && ((String) message).startsWith("CHAT: ")) {
+                    Server.broadcast(message); // Diffusion du message texte en tant qu'objet
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             System.err.println("Erreur du client " + clientId + ": " + e.getMessage());
         } finally {
             // Nettoyage après déconnexion
@@ -63,10 +54,11 @@ public class ClientHandler implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Server.removeClientWriter(out, clientId); // Retirer proprement le client
+            Server.removeClientOutputStream(out, clientId); // Retirer proprement le client
         }
     }
 
+    public String getClientId() {
+        return clientId;
+    }
 }
-
-
