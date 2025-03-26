@@ -62,3 +62,5 @@ crashlytics-build.properties
 # Created by .ignore support plugin (hsz.mobi)
 /AgarIOClient/src/main/Tests/MapNodeTest.java
 /AgarIOClient/src/main/Tests/
+
+/.metadata/

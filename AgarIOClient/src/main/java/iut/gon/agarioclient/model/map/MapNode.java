@@ -1,3 +1,4 @@
+// MapNode.java
 package iut.gon.agarioclient.model.map;
 
 import iut.gon.agarioclient.model.Entity;
@@ -40,12 +41,9 @@ public class MapNode {
      * @param level niveau de l'arbre (0 = feuille)
      */
     public MapNode(int level, Point2D beginningPoint, Point2D endPoint, MapNode parent) {
-
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
         this.parent = parent;
-
-
 
         if(beginningPoint.getX() > endPoint.getX() || beginningPoint.getY() > endPoint.getY()){
             throw new IllegalArgumentException("beginningPoint doit avoir des coordonnées inférieures à endpoint (x ET y)");
@@ -90,9 +88,7 @@ public class MapNode {
         }
         if (isLeaf()) {
             addEntityToSet(e);
-        }
-
-        else {
+        } else {
             boolean isSouth = y/2 > (endPoint.getY() - beginningPoint.getY());
             //TODO vérifier si c'est bien le sud (au pire ça fera juste un décalage modèle affichage)
 
@@ -115,7 +111,6 @@ public class MapNode {
             }
         }
     }
-
 
     public boolean positionInNode(double x, double y){
         return (x < endPoint.getX() || x > beginningPoint.getX()) ||
@@ -221,11 +216,7 @@ public class MapNode {
     // GETTERS des node dans une direction
 
     public MapNode getNorthElt() {
-        //System.out.println("=============================\nNORTH");
-        if (parent == null){
-            //System.out.println("impossible");
-            return null;
-        }
+        if (parent == null) return null;
 
         MapNode parentNorth = parent.getNorthElt();
 
