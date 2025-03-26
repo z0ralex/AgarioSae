@@ -13,9 +13,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class GameController {
@@ -66,7 +64,7 @@ public class GameController {
 
         //update de la caméra si le pane change de taille
 
-        ChangeListener sizeChange = (obs, oldWidth, newWidth)->{
+        ChangeListener<? super Number> sizeChange = (obs, oldWidth, newWidth)->{
             cameraCenterPoint = new Point2D(pane.getWidth() / 2,
                     pane.getHeight() / 2);
         };
@@ -76,6 +74,7 @@ public class GameController {
 
 
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
+
         root.drawBorders(pane);
 
         Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
@@ -106,7 +105,7 @@ public class GameController {
                     double xVect = (xPosition - player.getPosition().getX()) /*- cameraCenterPoint.getX()*/;
                     double yVect = (yPosition - player.getPosition().getY()) /*- cameraCenterPoint.getY()*/;
 
-                    System.out.println("Vecteur : x = " + xVect + "; y = " + yVect + "\n====================");
+                    // System.out.println("Vecteur : x = " + xVect + "; y = " + yVect + "\n====================");
 
                     if(Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE){
                         //zone morte : reset du vecteur
@@ -226,6 +225,10 @@ public class GameController {
 
     public void createPellets(int count) {
         List<Pellet> pellets = pelletFactory.generatePellets(count);
+
+
+
+
         for (Pellet pellet : pellets) {
             addPellet(pellet);
         }
@@ -234,6 +237,9 @@ public class GameController {
     public void addPellet(Pellet pellet) {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
         root.addEntity(pellet);
+
+
+
         pelletCircle.setFill(Color.GREEN);
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
@@ -270,8 +276,8 @@ public class GameController {
     public void checkCollisions(Ennemy ennemy) {
         Circle ennemyCircle = ennemyCircles.get(ennemy);
         if (ennemyCircle != null) {
-            double ennemyRadius = ennemyCircle.getRadius();
-            double eventHorizon = ennemyRadius + 100;
+            double enemyRadius = ennemyCircle.getRadius();
+            double eventHorizon = enemyRadius + 100;
 
             pelletCircles.entrySet().removeIf(entry -> {
                 Pellet pellet = entry.getKey();

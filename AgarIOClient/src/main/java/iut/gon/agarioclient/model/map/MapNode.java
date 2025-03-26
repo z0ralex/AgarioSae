@@ -6,6 +6,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,8 +19,8 @@ public class MapNode {
     private MapNode parent;
     private Direction direction;
     private Set<Entity> entitySet;
-    private Point2D beginningPoint;
-    private Point2D endPoint;
+    private final Point2D beginningPoint;
+    private final Point2D endPoint;
 
     // CONSTRUCTEURS
 
@@ -37,9 +39,13 @@ public class MapNode {
     /**
      * @param level niveau de l'arbre (0 = feuille)
      */
-    public MapNode(int level, Point2D beginningPoint, Point2D endPoint) {
+    public MapNode(int level, Point2D beginningPoint, Point2D endPoint, MapNode parent) {
+
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
+        this.parent = parent;
+
+
 
         if(beginningPoint.getX() > endPoint.getX() || beginningPoint.getY() > endPoint.getY()){
             throw new IllegalArgumentException("beginningPoint doit avoir des coordonnées inférieures à endpoint (x ET y)");
@@ -48,11 +54,22 @@ public class MapNode {
         if(level > 0) {
             Point2D middle = beginningPoint.midpoint(endPoint);
 
-            this.setNEnode(new MapNode(level - 1, new Point2D(middle.getX(), beginningPoint.getY()), new Point2D(endPoint.getX(), middle.getY())));
-            this.setNWnode(new MapNode(level - 1, beginningPoint, middle));
-            this.setSEnode(new MapNode(level - 1, middle, endPoint));
-            this.setSWnode(new MapNode(level - 1, new Point2D(beginningPoint.getX(), middle.getY()), new Point2D(middle.getX(), endPoint.getY())));
+            this.setNEnode(new MapNode(level - 1,
+                    new Point2D(middle.getX(), beginningPoint.getY()),
+                    new Point2D(endPoint.getX(), middle.getY()), this));
+
+            this.setNWnode(new MapNode(level - 1, beginningPoint, middle, this));
+
+            this.setSEnode(new MapNode(level - 1, middle, endPoint, this));
+
+            this.setSWnode(new MapNode(level - 1,
+                    new Point2D(beginningPoint.getX(), middle.getY()),
+                    new Point2D(middle.getX(), endPoint.getY()), this));
         }
+    }
+
+    public MapNode(int level, Point2D beginningPoint, Point2D endPoint) {
+        this(level, beginningPoint, endPoint, null);
     }
 
 
@@ -204,35 +221,36 @@ public class MapNode {
     // GETTERS des node dans une direction
 
     public MapNode getNorthElt() {
-        if (parent == null) return null;
+        //System.out.println("=============================\nNORTH");
+        if (parent == null){
+            //System.out.println("impossible");
+            return null;
+        }
 
         MapNode parentNorth = parent.getNorthElt();
 
-        switch(direction){
-            case NORTH_EAST:
+        switch (direction) {
+            case NORTH_EAST -> {
                 if (parentNorth == null) {
                     return null;
                 }
-
                 return parentNorth.getSEnode();
-
-            case NORTH_WEST:
+            }
+            case NORTH_WEST -> {
                 if (parentNorth == null) {
                     return null;
                 }
-
                 return parentNorth.getSWnode();
-
-            case SOUTH_EAST:
+            }
+            case SOUTH_EAST -> {
                 return parent.getNEnode();
-
-            case SOUTH_WEST:
+            }
+            case SOUTH_WEST -> {
                 return parent.getNWnode();
-
-            default:
-                if (direction == null) return null;
-
+            }
+            default -> {
                 throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
+            }
         }
     }
 
@@ -242,28 +260,26 @@ public class MapNode {
         MapNode parentSouth = parent.getSouthElt();
 
         switch (direction) {
-            case NORTH_EAST:
+            case NORTH_EAST -> {
                 return parent.getSEnode();
-
-            case NORTH_WEST:
+            }
+            case NORTH_WEST -> {
                 return parent.getSWnode();
-
-            case SOUTH_EAST:
+            }
+            case SOUTH_EAST -> {
                 if (parentSouth == null) { // fin de la map
                     return null;
                 }
-
                 return parentSouth.getNEnode();
-
-            case SOUTH_WEST:
+            }
+            case SOUTH_WEST -> {
                 if (parentSouth == null) { // fin de la map
                     return null;
                 }
-
                 return parentSouth.getNWnode();
-
-            default:
-                throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
+            }
+            default ->
+                    throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
         }
     }
 
@@ -273,28 +289,26 @@ public class MapNode {
         MapNode parentEast = parent.getEastElt();
 
         switch (direction) {
-            case NORTH_EAST:
+            case NORTH_EAST -> {
                 if (parentEast == null) { // fin de la map
                     return null;
                 }
-
                 return parentEast.getNWnode();
-
-            case NORTH_WEST:
+            }
+            case NORTH_WEST -> {
                 return parent.getNEnode();
-
-            case SOUTH_EAST:
+            }
+            case SOUTH_EAST -> {
                 if (parentEast == null) { // fin de la map
                     return null;
                 }
-
                 return parentEast.getSWnode();
-
-            case SOUTH_WEST:
+            }
+            case SOUTH_WEST -> {
                 return parent.getSEnode();
-
-            default:
-                throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
+            }
+            default ->
+                    throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
         }
     }
 
@@ -304,28 +318,26 @@ public class MapNode {
         MapNode parentWest = parent.getWestElt();
 
         switch (direction) {
-            case NORTH_EAST:
+            case NORTH_EAST -> {
                 return parent.getNWnode();
-
-            case NORTH_WEST:
+            }
+            case NORTH_WEST -> {
                 if (parentWest == null) { // fin de la map
                     return null;
                 }
-
                 return parentWest.getNEnode();
-
-            case SOUTH_EAST:
+            }
+            case SOUTH_EAST -> {
                 return parent.getSWnode();
-
-            case SOUTH_WEST:
+            }
+            case SOUTH_WEST -> {
                 if (parentWest == null) { // fin de la map
                     return null;
                 }
-
                 return parentWest.getSEnode();
-
-            default:
-                throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
+            }
+            default ->
+                    throw new IllegalStateException("direction inconnue (nouvelle direction ajoutée à l'enum ?). Direction = " + direction.toString());
         }
     }
 
@@ -346,5 +358,60 @@ public class MapNode {
             if (SEnode != null) SEnode.drawBorders(pane);
             if (SWnode != null) SWnode.drawBorders(pane);
         }
+    }
+
+    /**
+     * Renvoie les nodes autour de cette node
+     * @param radius int le rayon en terme de chunk (plus petite node possible)
+     * @param set Set<MapNode> le set en cours de récupération, sert pour éviter de passer 2x par la même node
+     * @return Set<MapNode> un set contenant les nodes comprises dans le rayon
+     */
+    private Set<MapNode> getSurroundingNodes(int radius, Set<MapNode> set){
+        //System.out.println("appel recursif : set.size() = " + set.size());
+
+        //if(isLeaf()) System.out.println("feuille");
+
+        if(set.contains(this)) return set; // on est déjà passé par là
+
+        set.add(this);
+
+        if(radius == 0){
+            //System.out.println("ARRET");
+            //condition d'arrêt
+            return set;
+        }
+
+        ArrayList<MapNode> listSurroundingNodes = new ArrayList<>(Arrays.asList(
+                getNorthElt(),
+                getSouthElt(),
+                getEastElt(),
+                getWestElt()
+        ));
+
+        //System.out.println("nodes a coté :");
+        listSurroundingNodes.forEach((node) -> {
+            //System.out.println("- node");
+        });
+
+        for (MapNode node: listSurroundingNodes) {
+            if(node != null){ //évite des problèmes avec les limites de la carte
+                //System.out.println("boucle");
+                Set<MapNode> newSet = node.getSurroundingNodes(radius - 1, set);
+                set.addAll(newSet);
+            } /*else {
+                System.out.println("node null");
+            }*/
+        }
+
+        return set;
+    }
+
+    /**
+     * Renvoie les nodes autour de cette node
+     * @param radius int le rayon en terme de chunk (plus petite node possible)
+     * @return Set<MapNode> un set contenant les nodes comprises dans le rayon
+     */
+    public Set<MapNode> getSurroundingNodes(int radius){
+        return getSurroundingNodes(radius, new HashSet<MapNode>());
     }
 }
