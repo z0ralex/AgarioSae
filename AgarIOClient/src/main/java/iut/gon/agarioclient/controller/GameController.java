@@ -3,9 +3,9 @@ package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.ParallelCamera;
@@ -16,7 +16,6 @@ import javafx.scene.shape.Circle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class GameController {
 
@@ -39,7 +38,6 @@ public class GameController {
     private static final double PLAYER_SPAWNPOINT_Y = 300;
     private static final double NO_MOVE_DISTANCE = 10;
 
-
     private double xScale;
     private double yScale;
     private MapNode root;
@@ -54,59 +52,66 @@ public class GameController {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
 
+        cameraCenterPoint = new Point2D(pane.getWidth() / 2., pane.getHeight() / 2.);
         this.camera = camera;
+        camera.setLayoutX(cameraCenterPoint.getX());
+        camera.setLayoutY(cameraCenterPoint.getY());
+
+        ChangeListener sizeChange = (obs, oldWidth, newWidth) -> {
+            cameraCenterPoint = new Point2D(pane.getWidth() / 2, pane.getHeight() / 2);
+        };
+
+        pane.widthProperty().addListener(sizeChange);
+        pane.heightProperty().addListener(sizeChange);
 
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
         root.drawBorders(pane);
 
+        Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
+        player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
+
         iaStratEatPelletsOnly = new IAStratEatPelletsOnly(root);
 
-
         addPlayer(player);
-
-        //Ennemy ennemy = new Ennemy("IA", new Point2D(500, 400), 10, iaStratEatPelletsOnly, 5.0);
-        //addEnnemy(ennemy);
-
-        createPellets(INITIAL_PELLET_NB); // Create 20 pellets initially
+        createPellets(INITIAL_PELLET_NB);
 
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
-                final Point2D[] mousePosition = {new Point2D(400, 300)};
+                final Point2D[] mousePosition = {new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y)};
+                final SimpleObjectProperty<Point2D> mouseVector = new SimpleObjectProperty<>(Point2D.ZERO);
 
                 newScene.setOnMouseMoved(event -> {
                     double xPosition = event.getX();
                     double yPosition = event.getY();
 
-                    double xVect = (xPosition - player.getPosition().getX()) /*- cameraCenterPoint.getX()*/;
-                    double yVect = (yPosition - player.getPosition().getY()) /*- cameraCenterPoint.getY()*/;
+                    double xVect = (xPosition - player.getPosition().getX());
+                    double yVect = (yPosition - player.getPosition().getY());
 
-                    System.out.println("Vecteur : x = " + xVect + "; y = " + yVect + "\n====================");
-
-                    if(Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE){
-                        //zone morte : reset du vecteur
+                    if (Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE) {
                         mouseVector.setValue(Point2D.ZERO);
-
                     } else {
-                        // mouvement
-                        mousePosition[0] = new Point2D(xPosition, yPosition); //TODO retirer
-                        mouseVector.setValue(new Point2D(xVect, yVect).normalize()); //TODO pas forcément normaliser : selon l'emplacement de la souris la vitesse change
+                        mousePosition[0] = new Point2D(xPosition, yPosition);
+                        mouseVector.setValue(new Point2D(xVect, yVect).normalize());
                     }
                 });
 
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
-                        Point2D newPosition = player.calculateNewPosition(mousePosition[0], X_MAX, Y_MAX);
+                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
+                        player.setSpeed(speed);
+
+                        Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
+
+                        double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
+                        double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
+                        newPosition = new Point2D(newX, newY);
+
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
                         player.checkCollisions(pelletCircles, pane);
                         spawnPellets();
-
-                        // Execute AI strategy
-                        ennemy.executeStrat();
-
-                        ennemy.checkCollisions(pelletCircles, pane);
                     }
                 }.start();
             }
@@ -119,32 +124,24 @@ public class GameController {
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
 
-        // change la position de la camera en fonction de la position du joueur
         player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
-
             double x = newPoint.getX() - cameraCenterPoint.getX();
             double y = newPoint.getY() - cameraCenterPoint.getY();
-
             camera.setLayoutX(x);
             camera.setLayoutY(y);
         });
 
         player.massProperty().addListener((obs, oldMass, newMass) -> {
-            playerCircle.setRadius(player.calculateRadius()); // update du radius du joueur
-            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue()); // update du zoom de la camera
+            playerCircle.setRadius(player.calculateRadius());
+            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue());
         });
     }
 
     private void setZoomFromMass(double deltaMass) {
-
-        // formule de calcul de la taille de la camera
-        // peut être ajustee
         double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);
-
         camera.setScaleX(newScale);
         camera.setScaleY(newScale);
 
-        // le zoom change : on doit recalculer le centre de la caméra
         cameraCenterPoint = new Point2D(
                 (pane.getWidth() / 2) * camera.getScaleX(),
                 (pane.getHeight() / 2) * camera.getScaleY()
@@ -156,17 +153,16 @@ public class GameController {
         ennemyCircle.setFill(Color.RED);
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
-        System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
             double y = newPoint.getY() - ((pane.getHeight() / 2) * camera.getScaleY());
-            ennemyCircle.setCenterX( newPoint.getX());
-            ennemyCircle.setCenterY( newPoint.getY());
+            ennemyCircle.setCenterX(newPoint.getX());
+            ennemyCircle.setCenterY(newPoint.getY());
         });
 
         e.massProperty().addListener((obs, oldMass, newMass) -> {
-            ennemyCircle.setRadius(e.calculateRadius()); // update du radius du joueur
+            ennemyCircle.setRadius(e.calculateRadius());
         });
     }
 
@@ -175,6 +171,14 @@ public class GameController {
         if (playerCircle != null) {
             playerCircle.setCenterX(player.getPosition().getX());
             playerCircle.setCenterY(player.getPosition().getY());
+        }
+    }
+
+    public void updateEnnemyPosition(Ennemy ennemy) {
+        Circle ennemyCircle = ennemyCircles.get(ennemy);
+        if (ennemyCircle != null) {
+            ennemyCircle.setCenterX(ennemy.getPosition().getX());
+            ennemyCircle.setCenterY(ennemy.getPosition().getY());
         }
     }
 
@@ -194,7 +198,7 @@ public class GameController {
     }
 
     public void spawnPellets() {
-        if (pelletCircles.size() < MAX_PELLET) { // Maintain at least 100 pellets on the map
+        if (pelletCircles.size() < MAX_PELLET) {
             createPellets(1);
         }
     }
