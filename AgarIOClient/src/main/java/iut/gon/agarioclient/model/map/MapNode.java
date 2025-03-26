@@ -89,11 +89,11 @@ public class MapNode {
         }
         if (isLeaf()) {
             addEntityToSet(e);
-        } else {
-            boolean isSouth = y/2 > (endPoint.getY() - beginningPoint.getY());
-            //TODO vérifier si c'est bien le sud (au pire ça fera juste un décalage modèle affichage)
 
-            if(x/2 > endPoint.getX() - beginningPoint.getX()){
+        } else {
+            boolean isSouth = y > (endPoint.getY() + beginningPoint.getY())/2;
+
+            if(x > (endPoint.getX() + beginningPoint.getX())/2){
                 //East
 
                 if(isSouth){
@@ -114,8 +114,8 @@ public class MapNode {
     }
 
     public boolean positionInNode(double x, double y){
-        return (x < endPoint.getX() || x > beginningPoint.getX()) ||
-                (y < endPoint.getY() || y > beginningPoint.getY());
+        return (x < endPoint.getX() && x > beginningPoint.getX()) &&
+                (y < endPoint.getY() && y > beginningPoint.getY());
     }
 
     private void addEntityToSet(Entity e) {
@@ -379,11 +379,6 @@ public class MapNode {
                 getEastElt(),
                 getWestElt()
         ));
-
-        //System.out.println("nodes a coté :");
-        listSurroundingNodes.forEach((node) -> {
-            //System.out.println("- node");
-        });
 
         for (MapNode node: listSurroundingNodes) {
             if(node != null){ //évite des problèmes avec les limites de la carte

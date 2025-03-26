@@ -1,9 +1,11 @@
 // GameController.java
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.App;
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.animation.AnimationTimer;
+import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -59,8 +61,6 @@ public class GameController {
         camera.setLayoutY(cameraCenterPoint.getY());
 
 
-
-
         //update de la caméra si le pane change de taille
 
         ChangeListener<? super Number> sizeChange = (obs, oldWidth, newWidth)->{
@@ -75,13 +75,18 @@ public class GameController {
         root.drawBorders(pane);
 
         Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
+
         player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
 
         NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
+
         List<Ennemy> list = f.generate(3);
         for(int i = 0; i < list.size(); i++){
-            addEnnemy(list.get(i));
+            addEnnemy(list.get(i)); //TODO render selon distance
+            root.addEntity(list.get(i));
         }
+
+        root.addEntity(player);
 
         addPlayer(player);
         createPellets(INITIAL_PELLET_NB);
@@ -159,6 +164,12 @@ public class GameController {
 
             camera.setLayoutX(x);
             camera.setLayoutY(y);
+
+
+
+//            if(!player.getCurrentMapNode().positionInNode(newPoint.getX(), newPoint.getY())){
+//                System.out.println("en dehors");
+//            }
         });
 
         player.massProperty().addListener((obs, oldMass, newMass) -> {
@@ -198,7 +209,7 @@ public class GameController {
         });
 
         e.massProperty().addListener((obs, oldMass, newMass) -> {
-            ennemyCircle.setRadius(e.calculateRadius()); // update du radius du joueur
+            ennemyCircle.setRadius(e.calculateRadius()); // update du radius de l'ennemi
         });
     }
 
@@ -222,13 +233,13 @@ public class GameController {
     public void createPellets(int count) {
         List<Pellet> pellets = pelletFactory.generatePellets(count);
         for (Pellet pellet : pellets) {
-            addPellet(pellet);
+            root.addEntity(pellet);
+            addPellet(pellet);  //TODO render selon distance
         }
     }
 
     public void addPellet(Pellet pellet) {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
-        root.addEntity(pellet);
         pelletCircle.setFill(Color.GREEN);
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
@@ -295,12 +306,18 @@ public class GameController {
      */
     public void renderEntity(Entity entity){
         //TODO délèguer la méthode à l'entité ? (pas sûr que ca respecte le MVC)
+
         if(entity instanceof Ennemy){
-
+            addEnnemy((Ennemy) entity);
         } else if(entity instanceof Player){
-
+            addPlayer((Player) entity);
         } else {
             //pellet
+            addPellet((Pellet) entity);
         }
+    }
+
+    public void unrenderEntity(Entity entity){
+
     }
 }
