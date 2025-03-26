@@ -51,6 +51,7 @@ public class GameController {
     private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
     public void initializeGame(String nickname, ParallelCamera camera) {
+
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
@@ -157,25 +158,37 @@ public class GameController {
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
 
+        player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)->{
+            if(newChunk != null){
+                updateLoadedChunks(newChunk);
+            }
+        });
+
         // change la position de la camera en fonction de la position du joueur
         player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
-            double x = newPoint.getX() - cameraCenterPoint.getX();
-            double y = newPoint.getY() - cameraCenterPoint.getY();
-
-            camera.setLayoutX(x);
-            camera.setLayoutY(y);
-
-
-
-//            if(!player.getCurrentMapNode().positionInNode(newPoint.getX(), newPoint.getY())){
-//                System.out.println("en dehors");
-//            }
+            onPlayerPositionChanged(player, newPoint);
         });
 
         player.massProperty().addListener((obs, oldMass, newMass) -> {
             playerCircle.setRadius(player.calculateRadius()); // update du radius du joueur
             setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue()); // update du zoom de la camera
         });
+    }
+
+    private void onPlayerPositionChanged(Player player, Point2D newPoint){
+        double x = newPoint.getX() - cameraCenterPoint.getX();
+        double y = newPoint.getY() - cameraCenterPoint.getY();
+
+        camera.setLayoutX(x);
+        camera.setLayoutY(y);
+
+
+        //mets à jour le chunk du joueur
+        if(!player.getCurrentMapNode().positionInNode(newPoint.getX(), newPoint.getY())){
+
+            player.removeFromCurrentNode();
+            root.addEntity(player);
+        }
     }
 
     private void setZoomFromMass(double deltaMass) {
@@ -202,8 +215,6 @@ public class GameController {
         System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
-//            double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
-//            double y = newPoint.getY() - ((pane.getHeight() / 2) * camera.getScaleY());
             ennemyCircle.setCenterX( newPoint.getX());
             ennemyCircle.setCenterY( newPoint.getY());
         });
@@ -319,5 +330,9 @@ public class GameController {
 
     public void unrenderEntity(Entity entity){
 
+    }
+
+    public void updateLoadedChunks(MapNode currentChunk){
+        System.out.println("update du chunk");
     }
 }

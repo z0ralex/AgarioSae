@@ -7,10 +7,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class MapNode {
     private MapNode NEnode;
@@ -79,8 +76,8 @@ public class MapNode {
      * @param e
      */
     public void addEntity(Entity e) {
-        double x = e.getPosition().getX();
-        double y = e.getPosition().getY();
+        long x = Math.round(e.getPosition().getX());
+        long y = Math.round(e.getPosition().getY());
 
         if (!positionInNode(x, y)) {
             throw new IllegalArgumentException("L'entité n'est pas dans cette node : \nCoordonnées de l'entité "
@@ -114,8 +111,8 @@ public class MapNode {
     }
 
     public boolean positionInNode(double x, double y){
-        return (x < endPoint.getX() && x > beginningPoint.getX()) &&
-                (y < endPoint.getY() && y > beginningPoint.getY());
+        return (x <= endPoint.getX() && x >= beginningPoint.getX()) &&
+                (y <= endPoint.getY() && y >= beginningPoint.getY());
     }
 
     private void addEntityToSet(Entity e) {
@@ -401,4 +398,6 @@ public class MapNode {
     public Set<MapNode> getSurroundingNodes(int radius){
         return getSurroundingNodes(radius, new HashSet<MapNode>());
     }
+
+
 }
