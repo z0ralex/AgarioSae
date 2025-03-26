@@ -16,6 +16,6 @@ public class TestVecteur implements Serializable {
 
     @Override
     public String toString() {
-        return "Vecteur(" + x + ", " + y + ", " + z + ")";
+        return "Vecteura(" + x + ", " + y + ", " + z + ")";
     }
 }

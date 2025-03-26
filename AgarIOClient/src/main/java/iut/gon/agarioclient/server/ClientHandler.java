@@ -12,6 +12,10 @@ public class ClientHandler implements Runnable {
     private ObjectInputStream in;
     private String clientId;
 
+    public ObjectOutputStream getOut() {
+        return out;
+    }
+
     public ClientHandler(Socket socket) {
         this.socket = socket;
         try {
@@ -32,13 +36,17 @@ public class ClientHandler implements Runnable {
         try {
             clientId = Server.generateClientId();
             System.out.println("ID du client généré : " + clientId);
+            String s = "Bienvenue! Votre ID est : " + clientId;
+            System.out.println(s);
             out.writeObject("Bienvenue! Votre ID est : " + clientId); // Message d'accueil avec un objet
+            out.flush();
 
             Server.addClientOutputStream(out, clientId);
 
             Object message;
             while ((message = in.readObject()) != null) {  // Lecture d'objets
                 if (message instanceof String && ((String) message).startsWith("CHAT: ")) {
+                    System.out.println(message);
                     Server.broadcast(message); // Diffusion du message texte en tant qu'objet
                 }
             }

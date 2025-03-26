@@ -52,7 +52,7 @@ public class WelcomeController {
                 gameController.initializeGame(nickname);
 
                 ChatController chatController = rightPanelLoader.getController();
-                chatController.initialize(nickname, gameController);
+                chatController.initialize(nickname);
 
                 Scene gameScene = new Scene(hbox);
                 stage.setScene(gameScene);

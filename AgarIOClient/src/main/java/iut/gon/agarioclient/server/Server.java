@@ -24,7 +24,8 @@ public class Server {
         try {
             serverSocket = new ServerSocket(PORT);
             System.out.println("Serveur lancé, en attente de connexions...");
-
+            GameUpdater gameUpdater = new GameUpdater(clientHandlersSet);
+            threadPool.execute(gameUpdater);
             // Attente infinie de nouvelles connexions
             while (true) {
                 Socket clientSocket = serverSocket.accept();

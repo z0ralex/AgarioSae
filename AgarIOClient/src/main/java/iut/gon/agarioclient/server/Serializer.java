@@ -4,8 +4,8 @@ import java.io.*;
 public class Serializer {
 
     // Envoi d'un objet sur un flux de sortie
-    public static <T extends Serializable> void sendObject(T object, PrintWriter oos) throws IOException {
-        oos.print(object);
+    public static <T extends Serializable> void sendObject(T object, ObjectOutputStream oos) throws IOException {
+        oos.writeObject(object);
         oos.flush();
     }
 
