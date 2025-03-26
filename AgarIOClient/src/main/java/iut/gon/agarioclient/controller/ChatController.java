@@ -31,23 +31,22 @@ public class ChatController {
 
 
     public void initialize(String nickname, GameController gameController) {
-        this.nickname=nickname;
-        this.gameController=gameController;
+        this.nickname = nickname;
+        this.gameController = gameController;
         try {
             socket = new Socket("10.42.17.106", 12345); // Connexion au serveur
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
-            objectIn = new ObjectInputStream(socket.getInputStream());
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream())); // Pour les messages texte
+            out = new PrintWriter(socket.getOutputStream(), true); // Pour envoyer des messages texte
+            DataInputStream dataIn = new DataInputStream(socket.getInputStream()); // Pour les objets
 
-            // Thread pour recevoir les messages du serveur
+            // Thread pour recevoir les messages du serveur (texte)
             Thread receiveMessagesThread = new Thread(() -> {
                 try {
                     String message;
                     while ((message = in.readLine()) != null) {
-                        // On ne veut afficher que les messages de chat (et non ceux comme "Bienvenue...")
                         if (message.startsWith("CHAT: ")) {
                             final String msg = message.substring(6); // On enlève le préfixe "CHAT: "
-                            javafx.application.Platform.runLater(() -> chatArea.appendText(msg + "\n"));
+                            Platform.runLater(() -> chatArea.appendText(msg + "\n"));
                         }
                     }
                 } catch (IOException e) {
@@ -56,9 +55,10 @@ public class ChatController {
             });
             receiveMessagesThread.start();
 
-            // Thread pour recevoir des objets
+            // Thread pour recevoir des objets (données sérialisées)
             Thread receiveObjectsThread = new Thread(() -> {
                 try {
+                    ObjectInputStream objectIn = new ObjectInputStream(dataIn); // Créer un ObjectInputStream pour lire les objets
                     while (true) {
                         Object receivedObject = objectIn.readObject();
                         if (receivedObject instanceof TestVecteur) {
@@ -78,7 +78,6 @@ public class ChatController {
             if (welcomeMessage != null && welcomeMessage.startsWith("Bienvenue! Votre ID est : ")) {
                 clientId = welcomeMessage.split(": ")[1].split(" ")[0]; // Extraire l'ID du message
             } else {
-                // Si le message ne correspond pas, afficher un message d'erreur ou gérer autrement
                 System.err.println("Erreur : message d'accueil invalide");
             }
 
@@ -86,6 +85,9 @@ public class ChatController {
             e.printStackTrace();
         }
     }
+
+
+
 
 
     @FXML
