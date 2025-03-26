@@ -44,15 +44,19 @@ public class ChatController {
 
                             // Si le message de bienvenue est reçu, on peut l'interpréter pour extraire l'ID si besoin
                             if (msg.startsWith("Bienvenue! Votre ID est : ")) {
+                                System.out.println(msg);
                                 clientId = msg.substring("Bienvenue! Votre ID est : ".length());
                                 // On envoie le message "pret" au serveur pour indiquer que le client est prêt
                                 out.writeObject("pret");
+                                System.out.println("pret");
                                 out.flush();
                             }
+                            if (msg.startsWith("CHAT: ")){
+                                // Affichage dans la zone de chat (en enlevant le préfixe "CHAT: " s'il y en a un)
+                                String messageToDisplay = msg.replaceFirst("^CHAT: ", "");
+                                Platform.runLater(() -> chatArea.appendText(messageToDisplay + "\n"));
+                            }
 
-                            // Affichage dans la zone de chat (en enlevant le préfixe "CHAT: " s'il y en a un)
-                            String messageToDisplay = msg.replaceFirst("^CHAT: ", "");
-                            Platform.runLater(() -> chatArea.appendText(messageToDisplay + "\n"));
                         } else if (message instanceof TestVecteur) {
                             final TestVecteur vecteur = (TestVecteur) message;
                             Platform.runLater(() -> {
