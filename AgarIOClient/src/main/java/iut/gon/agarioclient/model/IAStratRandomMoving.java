@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.model;
 
+import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
 import java.util.Random;
@@ -9,6 +10,9 @@ public class IAStratRandomMoving implements IA{
 
     private long tookDecisionAt = System.currentTimeMillis();
     private int dirSelector = 4;
+    private MapNode root;
+
+    public IAStratRandomMoving(MapNode root){ this.root = root;}
 
     public void execute(Ennemy e) {
         Random r = new Random();

@@ -138,6 +138,7 @@ public class GameController {
 
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
+        root.addEntity(player);
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
@@ -157,10 +158,13 @@ public class GameController {
 
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 25);//Attention Valeur en DUR
-        if (e.getStrat() instanceof IAStratEatPelletsOnly) {
-            ennemyCircle.setFill(Color.YELLOW);
-        } else {
+        root.addEntity(e);
+        if (e.getStrat() instanceof IAStratEatPlayers) {
             ennemyCircle.setFill(Color.RED);
+        } else if (e.getStrat() instanceof IAStratRandomMoving){
+            ennemyCircle.setFill(Color.GREEN);
+        } else {
+            ennemyCircle.setFill(Color.BLUE);
         }
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
