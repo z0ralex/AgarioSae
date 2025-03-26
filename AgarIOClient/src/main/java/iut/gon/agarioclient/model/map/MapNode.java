@@ -1,4 +1,3 @@
-// MapNode.java
 package iut.gon.agarioclient.model.map;
 
 import iut.gon.agarioclient.model.Entity;
@@ -30,7 +29,7 @@ public class MapNode {
         this.SWnode = null;
         this.parent = parent;
         this.direction = direction;
-        this.entitySet = entitySet != null ? entitySet : new HashSet<>();
+        this.entitySet = entitySet;
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
     }
@@ -41,13 +40,12 @@ public class MapNode {
     public MapNode(int level, Point2D beginningPoint, Point2D endPoint) {
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
-        this.entitySet = new HashSet<>();
 
-        if (beginningPoint.getX() > endPoint.getX() || beginningPoint.getY() > endPoint.getY()) {
+        if(beginningPoint.getX() > endPoint.getX() || beginningPoint.getY() > endPoint.getY()){
             throw new IllegalArgumentException("beginningPoint doit avoir des coordonnées inférieures à endpoint (x ET y)");
         }
 
-        if (level > 0) {
+        if(level > 0) {
             Point2D middle = beginningPoint.midpoint(endPoint);
 
             this.setNEnode(new MapNode(level - 1, new Point2D(middle.getX(), beginningPoint.getY()), new Point2D(endPoint.getX(), middle.getY())));
@@ -57,7 +55,8 @@ public class MapNode {
         }
     }
 
-    // Gestion d'entité
+
+    //Gestion d'entité
 
     /**
      * Ajoute l'entité à la map
@@ -74,16 +73,21 @@ public class MapNode {
         }
         if (isLeaf()) {
             addEntityToSet(e);
-        } else {
-            boolean isSouth = y > (endPoint.getY() + beginningPoint.getY()) / 2;
+        }
 
-            if (x > (endPoint.getX() + beginningPoint.getX()) / 2) {
-                // East
-                if (isSouth) {
+        else {
+            boolean isSouth = y/2 > (endPoint.getY() - beginningPoint.getY());
+            //TODO vérifier si c'est bien le sud (au pire ça fera juste un décalage modèle affichage)
+
+            if(x/2 > endPoint.getX() - beginningPoint.getX()){
+                //East
+
+                if(isSouth){
                     getSEnode().addEntity(e);
                 } else {
                     getNEnode().addEntity(e);
                 }
+
             } else {
                 // West
                 if (isSouth) {
@@ -95,9 +99,10 @@ public class MapNode {
         }
     }
 
-    public boolean positionInNode(double x, double y) {
-        return (x >= beginningPoint.getX() && x <= endPoint.getX()) &&
-                (y >= beginningPoint.getY() && y <= endPoint.getY());
+
+    public boolean positionInNode(double x, double y){
+        return (x < endPoint.getX() || x > beginningPoint.getX()) ||
+                (y < endPoint.getY() || y > beginningPoint.getY());
     }
 
     private void addEntityToSet(Entity e) {
@@ -107,8 +112,8 @@ public class MapNode {
 
         entitySet.add(e);
         e.setCurrentMapNode(this);
-        System.out.println("Entity added: " + e);
     }
+
 
     // SETTERS
     public void setNEnode(MapNode NEnode) {
@@ -138,6 +143,7 @@ public class MapNode {
     public void setDirection(Direction direction) {
         this.direction = direction;
     }
+
 
     // GETTERS
     public boolean isLeaf() {
@@ -194,6 +200,7 @@ public class MapNode {
         return direction;
     }
 
+
     // GETTERS des node dans une direction
 
     public MapNode getNorthElt() {
@@ -201,7 +208,7 @@ public class MapNode {
 
         MapNode parentNorth = parent.getNorthElt();
 
-        switch (direction) {
+        switch(direction){
             case NORTH_EAST:
                 if (parentNorth == null) {
                     return null;
@@ -340,6 +347,4 @@ public class MapNode {
             if (SWnode != null) SWnode.drawBorders(pane);
         }
     }
-
-
 }

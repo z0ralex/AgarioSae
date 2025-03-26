@@ -3,6 +3,8 @@ package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -14,18 +16,29 @@ import javafx.scene.shape.Circle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class GameController {
 
     @FXML
     private Pane pane;
 
+    private Point2D cameraCenterPoint;
     private ParallelCamera camera;
 
     public static final int X_MAX = 8000;
     public static final int Y_MAX = 6000;
     private static final int INITIAL_PELLET_NB = 20;
-    private static final int MAX_PELLET = 10000;
+    private static final int MAX_PELLET = 500;
+
+    private static final int INITIAL_PLAYER_MASS = 10;
+
+    private static final int INITIAL_PLAYER_SPEED = 5;
+
+    private static final double PLAYER_SPAWNPOINT_X = 400;
+    private static final double PLAYER_SPAWNPOINT_Y = 300;
+    private static final double NO_MOVE_DISTANCE = 10;
+
 
     private double xScale;
     private double yScale;
@@ -48,12 +61,11 @@ public class GameController {
 
         iaStratEatPelletsOnly = new IAStratEatPelletsOnly(root);
 
-        Player player = new Player(nickname, new Point2D(400, 300), 10);
-        player.add(new PlayerLeaf(nickname, new Point2D(400, 300), 10, 5));
+
         addPlayer(player);
 
-        Ennemy ennemy = new Ennemy("IA", new Point2D(500, 400), 10, iaStratEatPelletsOnly, 5.0);
-        addEnnemy(ennemy);
+        //Ennemy ennemy = new Ennemy("IA", new Point2D(500, 400), 10, iaStratEatPelletsOnly, 5.0);
+        //addEnnemy(ennemy);
 
         createPellets(INITIAL_PELLET_NB); // Create 20 pellets initially
 
@@ -62,7 +74,23 @@ public class GameController {
                 final Point2D[] mousePosition = {new Point2D(400, 300)};
 
                 newScene.setOnMouseMoved(event -> {
-                    mousePosition[0] = new Point2D(event.getX(), event.getY());
+                    double xPosition = event.getX();
+                    double yPosition = event.getY();
+
+                    double xVect = (xPosition - player.getPosition().getX()) /*- cameraCenterPoint.getX()*/;
+                    double yVect = (yPosition - player.getPosition().getY()) /*- cameraCenterPoint.getY()*/;
+
+                    System.out.println("Vecteur : x = " + xVect + "; y = " + yVect + "\n====================");
+
+                    if(Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE){
+                        //zone morte : reset du vecteur
+                        mouseVector.setValue(Point2D.ZERO);
+
+                    } else {
+                        // mouvement
+                        mousePosition[0] = new Point2D(xPosition, yPosition); //TODO retirer
+                        mouseVector.setValue(new Point2D(xVect, yVect).normalize()); //TODO pas forcément normaliser : selon l'emplacement de la souris la vitesse change
+                    }
                 });
 
                 new AnimationTimer() {
@@ -91,9 +119,12 @@ public class GameController {
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
 
+        // change la position de la camera en fonction de la position du joueur
         player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
-            double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
-            double y = newPoint.getY() - ((pane.getHeight() / 2) * camera.getScaleY());
+
+            double x = newPoint.getX() - cameraCenterPoint.getX();
+            double y = newPoint.getY() - cameraCenterPoint.getY();
+
             camera.setLayoutX(x);
             camera.setLayoutY(y);
         });
@@ -105,8 +136,19 @@ public class GameController {
     }
 
     private void setZoomFromMass(double deltaMass) {
-        camera.setScaleX(camera.getScaleX() + 1. / (deltaMass * 100.));
-        camera.setScaleY(camera.getScaleY() + 1. / (deltaMass * 100.));
+
+        // formule de calcul de la taille de la camera
+        // peut être ajustee
+        double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);
+
+        camera.setScaleX(newScale);
+        camera.setScaleY(newScale);
+
+        // le zoom change : on doit recalculer le centre de la caméra
+        cameraCenterPoint = new Point2D(
+                (pane.getWidth() / 2) * camera.getScaleX(),
+                (pane.getHeight() / 2) * camera.getScaleY()
+        );
     }
 
     public void addEnnemy(Ennemy e) {
