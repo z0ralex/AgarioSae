@@ -143,7 +143,7 @@ public class GameController {
     }
 
     private void setZoomFromMass(double deltaMass) {
-        System.out.println(camera.scaleXProperty().doubleValue());
+        //System.out.println(camera.scaleXProperty().doubleValue());
         camera.setScaleX(camera.getScaleX() + 1. / (deltaMass * 100.));
         camera.setScaleY(camera.getScaleY() + 1. / (deltaMass * 100.));
     }
