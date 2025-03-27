@@ -74,7 +74,7 @@ public class WelcomeController {
 
     private boolean connectToServer() {
         try {
-            Socket socket = new Socket("10.42.17.106", 12345);
+            Socket socket = new Socket("10.42.17.86", 12345);
             socket.close();
             return true;
         } catch (IOException e) {

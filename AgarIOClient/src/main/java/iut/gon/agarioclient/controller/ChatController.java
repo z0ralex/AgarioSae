@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.server.Serializer;
 import iut.gon.agarioclient.server.TestVecteur;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -8,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
 public class ChatController {
 
@@ -29,16 +31,17 @@ public class ChatController {
     public void initialize(String nickname) {
         this.nickname = nickname;
         try {
-            socket = new Socket("10.42.17.106", 12345); // Connexion au serveur
+            socket = new Socket("10.42.17.86", 12345); // Connexion au serveur
             in = new ObjectInputStream(socket.getInputStream()); // Pour recevoir des objets
             out = new ObjectOutputStream(socket.getOutputStream()); // Pour envoyer des objets
 
             // Thread pour recevoir les messages du serveur (texte ou objets)
             Thread receiveMessagesThread = new Thread(() -> {
+                Object message = null;
                 try {
                     while (true) {
-                        Object message = in.readObject();
-
+                        //Object message = in.readObject();
+                        message = Serializer.receiveObject(in);
                         if (message instanceof String) {
                             final String msg = (String) message;
 
@@ -51,12 +54,13 @@ public class ChatController {
                                 System.out.println("pret");
                                 out.flush();
                             }
-                            if (msg.startsWith("CHAT: ")){
+                            if (msg.startsWith("CHAT: ")) {
                                 // Affichage dans la zone de chat (en enlevant le préfixe "CHAT: " s'il y en a un)
                                 String messageToDisplay = msg.replaceFirst("^CHAT: ", "");
                                 Platform.runLater(() -> chatArea.appendText(messageToDisplay + "\n"));
                             }
-
+                        }else if(message instanceof ArrayList<?>) {
+                            ArrayList<?> ar = (ArrayList<?>) message;
                         } else if (message instanceof TestVecteur) {
                             final TestVecteur vecteur = (TestVecteur) message;
                             Platform.runLater(() -> {
@@ -67,6 +71,7 @@ public class ChatController {
                         }
                     }
                 } catch (IOException | ClassNotFoundException e) {
+                    System.out.println(message);
                     e.printStackTrace();
                 }
             });
