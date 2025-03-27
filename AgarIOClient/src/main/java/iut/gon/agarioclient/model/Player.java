@@ -1,6 +1,7 @@
 // Player.java
 package iut.gon.agarioclient.model;
 
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -8,6 +9,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,9 @@ public class Player extends Entity implements PlayerComponent {
         return components;
     }
 
+    private Point2D lastPosition = getPosition();
+
+
     @Override
     public double getMass() {
         return components.stream().mapToDouble(PlayerComponent::getMass).sum();
@@ -51,6 +56,17 @@ public class Player extends Entity implements PlayerComponent {
         this.mass.set(mass);
     }
 
+    public Point2D getDirection() {
+        Point2D currentPosition = getPosition();
+        Point2D direction = currentPosition.subtract(lastPosition);
+
+        if (direction.magnitude() == 0) {
+            return Point2D.ZERO;
+        }
+        return direction.normalize();
+    }
+
+
     @Override
     public Point2D getPosition() {
         double x = components.stream().mapToDouble(c -> c.getPosition().getX()).average().orElse(0);
@@ -60,11 +76,13 @@ public class Player extends Entity implements PlayerComponent {
 
     @Override
     public void setPosition(Point2D position) {
+        this.lastPosition = getPosition();
         this.position.set(position);
         for (PlayerComponent component : components) {
             component.setPosition(position);
         }
     }
+
 
     @Override
     public double getSpeed() {
@@ -134,9 +152,23 @@ public class Player extends Entity implements PlayerComponent {
             double distance = getPosition().distance(pellet.getPosition());
 
             if (distance <= eventHorizon) {
-                setMass(getMass() + pellet.getMass());
-                pane.getChildren().remove(pelletCircle);
-                pellet.removeFromCurrentNode();
+                Point2D direction = getPosition().subtract(pellet.getPosition()).normalize();
+                double speed = getSpeed();
+                double transitionDuration = Math.max(100, distance / speed);
+                Point2D predictedPosition = getPosition().add(direction.multiply(speed * (transitionDuration / 1000.0)));
+                double toX = predictedPosition.getX() - pellet.getPosition().getX();
+                double toY = predictedPosition.getY() - pellet.getPosition().getY();
+                TranslateTransition transition = new TranslateTransition(Duration.millis(transitionDuration), pelletCircle);
+                transition.setToX(toX);
+                transition.setToY(toY);
+                transition.setOnFinished(event ->{
+                    setMass(getMass() + pellet.getMass());
+                    pane.getChildren().remove(pelletCircle);
+                    pellet.removeFromCurrentNode();
+                });
+
+                transition.play();
+
                 return true;
             }
             return false;
