@@ -48,7 +48,7 @@ public class GameController implements Initializable {
     private SubScene gameSubscene;
 
     @FXML
-    private StackPane chat;
+    private  Pane minimap;
 
     private Point2D cameraOffsetPoint;
     private Stage stage;
@@ -75,6 +75,9 @@ public class GameController implements Initializable {
     private Map<Player, Circle> playerCircles = new HashMap<>();
     private Map<Pellet, Circle> pelletCircles = new HashMap<>();
     private Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
+
+    private Map<Player, Circle> minimapPlayerCircles = new HashMap<>();
+    private Map<Ennemy, Circle> minimapEnnemyCircles = new HashMap<>();
     private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
     private AnimationManager animationManager;
 
@@ -140,6 +143,9 @@ public class GameController implements Initializable {
 
         addPlayer(player);
         createPellets(INITIAL_PELLET_NB);
+
+        addPlayerToMinimap(player);
+
 
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -207,14 +213,14 @@ public class GameController implements Initializable {
                         } else{
                             playerCircles.get(player).setOpacity(1);
                         }
-                        player.checkCollisionsWithEnemies(ennemyCircles, pane, animationManager);
+                        player.checkCollisionsWithEnemies(ennemyCircles, minimapEnnemyCircles, pane, minimap, animationManager);
                         spawnPellets();
 
                         for (int i = 0; i < list.size(); i++) {
                             updateEnnemyPosition(list.get(i));
                             list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
-                            list.get(i).checkCollisionsWithEnemies(ennemyCircles, pane, animationManager);
-                            list.get(i).checkCollisionsWithPlayers(playerCircles, pane, animationManager);
+                            list.get(i).checkCollisionsWithEnemies(ennemyCircles, minimapEnnemyCircles, pane,minimap, animationManager);
+                            list.get(i).checkCollisionsWithPlayers(playerCircles,minimapPlayerCircles, pane, minimap, animationManager);
 
                         }
 
@@ -231,8 +237,10 @@ public class GameController implements Initializable {
             // Clear all game elements
             pane.getChildren().clear();
             playerCircles.clear();
+            minimapPlayerCircles.clear();
             pelletCircles.clear();
             ennemyCircles.clear();
+            minimapEnnemyCircles.clear();
 
             // Load welcome view
             FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/iut/gon/agarioclient/welcome-view.fxml"));
@@ -298,6 +306,23 @@ public class GameController implements Initializable {
         });
     }
 
+    private void addPlayerToMinimap(Player player) {
+        double minimapScaleX = minimap.getWidth() / X_MAX;
+        double minimapScaleY = minimap.getHeight() / Y_MAX;
+
+        Circle miniPlayer = new Circle(
+                player.getPosition().getX() * minimapScaleX,
+                player.getPosition().getY() * minimapScaleY,
+                player.calculateRadius() * 0.1,  // Réduction de la taille du joueur
+                Color.BLUE
+        );
+
+        minimapPlayerCircles.put(player, miniPlayer);
+        minimap.getChildren().add(miniPlayer);
+
+    }
+
+
     private void onPlayerPositionChanged(Player player, Point2D newPos) {
         double x = (newPos.getX() - cameraOffsetPoint.getX()) ;
         double y = (newPos.getY() - cameraOffsetPoint.getY()) ;
@@ -355,7 +380,32 @@ public class GameController implements Initializable {
         e.massProperty().addListener((obs, oldMass, newMass) -> {
             ennemyCircle.setRadius(e.calculateRadius()); // update du radius du joueur
         });
+        addEnnemyToMinimap(e);
     }
+
+    private void addEnnemyToMinimap(Ennemy ennemy) {
+        double minimapScaleX = minimap.getWidth() / X_MAX;
+        double minimapScaleY = minimap.getHeight() / Y_MAX;
+
+        Color color = (ennemy.getStrat() instanceof IAStratEatPlayers) ? Color.RED : Color.GREEN;
+
+        Circle miniEnnemy = new Circle(
+                ennemy.getPosition().getX() * minimapScaleX,
+                ennemy.getPosition().getY() * minimapScaleY,
+                ennemy.calculateRadius() * 0.1,  // Taille réduite
+                color
+        );
+
+        minimapEnnemyCircles.put(ennemy, miniEnnemy);
+        minimap.getChildren().add(miniEnnemy);
+
+        // Suivi des mouvements de l'ennemi
+        ennemy.positionProperty().addListener((obs, oldPos, newPos) -> {
+            miniEnnemy.setCenterX(newPos.getX() * minimapScaleX);
+            miniEnnemy.setCenterY(newPos.getY() * minimapScaleY);
+        });
+    }
+
 
     public void updatePlayerPosition(Player player) {
         Circle playerCircle = playerCircles.get(player);
@@ -363,13 +413,28 @@ public class GameController implements Initializable {
             playerCircle.setCenterX(player.getPosition().getX());
             playerCircle.setCenterY(player.getPosition().getY());
         }
+        Circle miniPlayerCircle = minimapPlayerCircles.get(player);
+        if(miniPlayerCircle != null){
+            double minimapScaleX = minimap.getWidth() / X_MAX;
+            double minimapScaleY = minimap.getHeight() / Y_MAX;
+            miniPlayerCircle.setCenterX(player.getPosition().getX() * minimapScaleX);
+            miniPlayerCircle.setCenterY(player.getPosition().getY() * minimapScaleY);
+        }
     }
+
 
     public void updateEnnemyPosition(Ennemy e) {
         Circle ennemyCircle = ennemyCircles.get(e);
         if (ennemyCircle != null) {
             ennemyCircle.setCenterX(e.getPosition().getX());
             ennemyCircle.setCenterY(e.getPosition().getY());
+        }
+        Circle miniEnnemyCircle = minimapEnnemyCircles.get(e);
+        if(miniEnnemyCircle!=null){
+            double minimapScaleX = minimap.getWidth() / X_MAX;
+            double minimapScaleY = minimap.getHeight() / Y_MAX;
+            miniEnnemyCircle.setCenterX(e.getPosition().getX() * minimapScaleX);
+            miniEnnemyCircle.setCenterY(e.getPosition().getY() * minimapScaleY);
         }
     }
 
@@ -415,29 +480,6 @@ public class GameController implements Initializable {
         pelletCircle.toBack();
     }
 
-    public void checkCollisions(Ennemy ennemy) {
-        Circle ennemyCircle = ennemyCircles.get(ennemy);
-        if (ennemyCircle != null) {
-            double enemyRadius = ennemyCircle.getRadius();
-            double eventHorizon = enemyRadius + 100;
-
-            pelletCircles.entrySet().removeIf(entry -> {
-                Pellet pellet = entry.getKey();
-                Circle pelletCircle = entry.getValue();
-                double distance = ennemy.getPosition().distance(pellet.getPosition());
-
-                if (distance <= eventHorizon) {
-                    ennemy.setMass(ennemy.getMass() + pellet.getMass());
-                    //pane.getChildren().remove(pelletCircle);
-                    unrenderEntity(pellet);
-                    pellet.removeFromCurrentNode();
-                    return true;
-                }
-                return false;
-            });
-        }
-    }
-
     public void spawnPellets() {
         if (pelletCircles.size() < MAX_PELLET) {
             createPellets(100);
@@ -460,23 +502,6 @@ public class GameController implements Initializable {
         }
     }
 
-    public void unrenderEntity(Entity entity) {
-        Circle entityCircle;
-        if (entity instanceof Ennemy) {
-
-            entityCircle = ennemyCircles.get(entity);
-            ennemyCircles.remove(entity, entityCircle);
-        } else if (entity instanceof Player) {
-            entityCircle = playerCircles.get(entity);
-            playerCircles.remove(entity, entityCircle);
-        } else {
-            //Pellet
-            entityCircle = pelletCircles.get(entity);
-            pelletCircles.remove(entity, entityCircle);
-        }
-
-        pane.getChildren().remove(entityCircle);
-    }
 
     public void updateLoadedChunks(MapNode currentChunk) {
         //System.out.println("update du chunk");

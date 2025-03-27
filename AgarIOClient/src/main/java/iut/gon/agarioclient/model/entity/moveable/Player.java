@@ -220,13 +220,20 @@ public class Player extends Entity implements PlayerComponent {
         return isVisible;
     }
 
-    public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, Pane pane, AnimationManager animationManager) {
+    public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles,
+                                           Map<Ennemy, Circle> minimapEnnemyCircles,
+                                           Pane pane,
+                                           Pane minimap,
+                                           AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
 
-        ennemyCircles.entrySet().removeIf(entry -> {
+        List<Ennemy> toRemove = new ArrayList<>();
+
+        for (Map.Entry<Ennemy, Circle> entry : ennemyCircles.entrySet()) {
             Ennemy ennemy = entry.getKey();
             Circle ennemyCircle = entry.getValue();
+            Circle miniEnnemyCircle = minimapEnnemyCircles.get(ennemy);
             double distance = getPosition().distance(ennemy.getPosition());
             double overlap = Math.max(0, playerRadius + ennemy.calculateRadius() - distance);
 
@@ -234,20 +241,33 @@ public class Player extends Entity implements PlayerComponent {
                 animationManager.playPelletAbsorption(ennemyCircle, getPosition());
                 setMass(getMass() + ennemy.getMass());
                 pane.getChildren().remove(ennemyCircle);
+                minimap.getChildren().remove(miniEnnemyCircle);
                 ennemy.markForRemoval();
-                return true;
+                toRemove.add(ennemy);
             }
-            return false;
-        });
+        }
+
+        for (Ennemy e : toRemove) {
+            ennemyCircles.remove(e);
+            minimapEnnemyCircles.remove(e);
+        }
     }
 
-    public void checkCollisionsWithPlayers(Map<Player, Circle> playerCircles, Pane pane, AnimationManager animationManager) {
+
+    public void checkCollisionsWithPlayers(Map<Player, Circle> playerCircles,
+                                           Map<Player, Circle> minimapPlayerCircles,
+                                           Pane pane,
+                                           Pane minimap,
+                                           AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
 
-        playerCircles.entrySet().removeIf(entry -> {
+        List<Player> toRemove = new ArrayList<>();
+
+        for (Map.Entry<Player, Circle> entry : playerCircles.entrySet()) {
             Player otherPlayer = entry.getKey();
             Circle otherPlayerCircle = entry.getValue();
+            Circle miniOtherPlayerCircle = minimapPlayerCircles.get(otherPlayer);
             double distance = getPosition().distance(otherPlayer.getPosition());
             double overlap = Math.max(0, playerRadius + otherPlayer.calculateRadius() - distance);
 
@@ -256,19 +276,26 @@ public class Player extends Entity implements PlayerComponent {
 
                 setMass(getMass() + otherPlayer.getMass());
                 pane.getChildren().remove(otherPlayerCircle);
+                minimap.getChildren().remove(miniOtherPlayerCircle);
                 otherPlayer.markForRemoval();
-                return true;
+                toRemove.add(otherPlayer);
             } else if (this == otherPlayer && overlap >= playerRadius * 0.33) {
                 animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
 
                 setMass(getMass() + otherPlayer.getMass());
                 pane.getChildren().remove(otherPlayerCircle);
+                minimap.getChildren().remove(miniOtherPlayerCircle);
                 otherPlayer.markForRemoval();
-                return true;
+                toRemove.add(otherPlayer);
             }
-            return false;
-        });
+        }
+
+        for (Player p : toRemove) {
+            playerCircles.remove(p);
+            minimapPlayerCircles.remove(p);
+        }
     }
+
 
     public void markForRemoval() {
         this.markedForRemoval = true;
