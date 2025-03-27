@@ -86,11 +86,12 @@ public class ParametreController {
         try {
             FXMLLoader welcomeLoader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/welcome-view.fxml"));
             Parent welcomeView = welcomeLoader.load();
+
             WelcomeController welcomeController = welcomeLoader.getController();
             welcomeController.setNickname(nickname);
+            welcomeController.setStage(stage);
 
             Scene welcomeScene = new Scene(welcomeView);
-            Stage stage = (Stage) ipField.getScene().getWindow();
             stage.setScene(welcomeScene);
             stage.setTitle("Welcome to AgarIO");
         } catch (IOException e) {
