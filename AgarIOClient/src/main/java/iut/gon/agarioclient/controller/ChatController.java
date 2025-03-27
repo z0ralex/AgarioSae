@@ -30,10 +30,22 @@ public class ChatController {
     private String host;
     private Integer port;
 
+
     public void initialize(String nickname, String host, Integer port) {
+
+        System.out.println("ici");
+
+        if(host==null && port == null){
+            chatArea.setStyle("-fx-background-color: transparent;");
+            messageField.setStyle("-fx-background-color: transparent;");
+            sendButton.setStyle("-fx-background-color: transparent;");
+        }
+
         this.nickname = nickname;
         this.host=host;
         this.port=port;
+
+
         try {
             socket = new Socket(this.host, this.port); // Connexion au serveur
             in = new ObjectInputStream(socket.getInputStream()); // Pour recevoir des objets

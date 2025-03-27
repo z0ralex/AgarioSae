@@ -15,6 +15,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Window;
@@ -37,6 +38,9 @@ public class GameController implements Initializable {
     private Pane pane;
     @FXML
     private SubScene gameSubscene;
+
+    @FXML
+    private StackPane chat;
 
     private Point2D cameraOffsetPoint;
     private ParallelCamera camera;
@@ -75,6 +79,7 @@ public class GameController implements Initializable {
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
+
 
         cameraOffsetPoint = new Point2D(container.getWidth() / 2., container.getHeight() / 2.);
         this.camera = camera;

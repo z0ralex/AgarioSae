@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
@@ -56,9 +57,14 @@ public class ParametreController {
                     FXMLLoader chatLoader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/chat-view.fxml"));
                     Parent chatView = chatLoader.load();
 
-                    HBox hBox = new HBox();
-                    hBox.getChildren().addAll(gameView,chatView);
-                    hBox.setSpacing(10);
+                    AnchorPane anchorPane = new AnchorPane();
+                    anchorPane.getChildren().addAll(gameView,chatView);
+                    AnchorPane.setTopAnchor(chatView,10.);
+                    AnchorPane.setRightAnchor(chatView,10.);
+                    AnchorPane.setTopAnchor(gameView, 0.0);
+                    AnchorPane.setBottomAnchor(gameView, 0.0);
+                    AnchorPane.setLeftAnchor(gameView, 0.0);
+                    AnchorPane.setRightAnchor(gameView, 0.0);
 
                     GameController gameController = gameLoader.getController();
                     gameController.initializeGame(nickname, camera);
@@ -66,7 +72,7 @@ public class ParametreController {
                     ChatController chatController = chatLoader.getController();
                     chatController.initialize(nickname,ip, Integer.valueOf(port));
 
-                    Scene gameScene = new Scene(hBox);
+                    Scene gameScene = new Scene(anchorPane);
                     stage.setScene(gameScene);
                     stage.setTitle("Jeu en ligne");
                 } else {
@@ -80,7 +86,6 @@ public class ParametreController {
         }
     }
 
-    // Méthode appelée lors du clic sur "Annuler"
     @FXML
     private void onAnnulerButtonClick(ActionEvent event) {
         try {
@@ -100,7 +105,6 @@ public class ParametreController {
     }
 
 
-    // Méthode pour afficher une alerte
     private void showAlert(String title, String message) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle(title);
@@ -109,7 +113,6 @@ public class ParametreController {
         alert.showAndWait();
     }
 
-    // Méthode pour tester la connexion au serveur
     private boolean connectToServer(String ip, int port) {
         try {
             Socket socket = new Socket(ip, port);
