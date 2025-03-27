@@ -6,6 +6,7 @@ import iut.gon.agarioclient.model.entity.pellet.PartialInvisibilityPellet;
 import iut.gon.agarioclient.model.entity.pellet.SpeedBoostPellet;
 import iut.gon.agarioclient.model.entity.pellet.SpeedReductionPellet;
 import iut.gon.agarioclient.model.entity.pellet.Pellet;
+import iut.gon.agarioclient.model.map.MapNode;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -169,7 +170,7 @@ public class Player extends Entity implements PlayerComponent {
         return new Point2D(newX, newY);
     }
 
-    public void checkCollisionsWithPellet(Map<Pellet, Circle> pelletCircles, Pane pane, AnimationManager animationManager) {
+    public void checkCollisionsWithPellet(Map<Pellet, Circle> pelletCircles, /*Pane pane,*/ AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius + 10;
 
@@ -199,7 +200,7 @@ public class Player extends Entity implements PlayerComponent {
                     this.isVisible = false;
                 }
                 setMass(getMass() + pellet.getMass());
-                pane.getChildren().remove(pelletCircle);
+                //pane.getChildren().remove(pelletCircle); //TODO: Remove pane
                 pellet.removeFromCurrentNode();
                 return true;
             }
@@ -220,7 +221,7 @@ public class Player extends Entity implements PlayerComponent {
         return isVisible;
     }
 
-    public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, Pane pane, AnimationManager animationManager) {
+    public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
 
@@ -233,7 +234,7 @@ public class Player extends Entity implements PlayerComponent {
             if (getMass() >= ennemy.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
                 animationManager.playPelletAbsorption(ennemyCircle, getPosition());
                 setMass(getMass() + ennemy.getMass());
-                pane.getChildren().remove(ennemyCircle);
+                //pane.getChildren().remove(ennemyCircle); //TODO: Remove pane
                 ennemy.markForRemoval();
                 return true;
             }
@@ -241,7 +242,7 @@ public class Player extends Entity implements PlayerComponent {
         });
     }
 
-    public void checkCollisionsWithPlayers(Map<Player, Circle> playerCircles, Pane pane, AnimationManager animationManager) {
+    public void checkCollisionsWithPlayers(Map<Player, Circle> playerCircles,  AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
 
@@ -255,14 +256,14 @@ public class Player extends Entity implements PlayerComponent {
                 animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
 
                 setMass(getMass() + otherPlayer.getMass());
-                pane.getChildren().remove(otherPlayerCircle);
+                //pane.getChildren().remove(otherPlayerCircle); //TODO: Remove pane
                 otherPlayer.markForRemoval();
                 return true;
             } else if (this == otherPlayer && overlap >= playerRadius * 0.33) {
                 animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
 
                 setMass(getMass() + otherPlayer.getMass());
-                pane.getChildren().remove(otherPlayerCircle);
+                //pane.getChildren().remove(otherPlayerCircle); //TODO: Remove pane
                 otherPlayer.markForRemoval();
                 return true;
             }

@@ -189,7 +189,7 @@ public class GameController implements Initializable {
                             list.get(i).setSpeed(speedE);
                         }
 
-                        Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed())/*.multiply(scale.doubleValue())*/); //TODO scaling
+                        Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
 
                         // Check for collisions with the map boundaries
                         double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
@@ -199,20 +199,20 @@ public class GameController implements Initializable {
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
-                        player.checkCollisionsWithPellet(pelletCircles, pane, animationManager);
+                        player.checkCollisionsWithPellet(pelletCircles,  animationManager);
                         if(!(player.isVisible())){
                             playerCircles.get(player).setOpacity(0.02);
                         } else{
                             playerCircles.get(player).setOpacity(1);
                         }
-                        player.checkCollisionsWithEnemies(ennemyCircles, pane, animationManager);
+                        player.checkCollisionsWithEnemies(ennemyCircles, animationManager);
                         spawnPellets();
 
                         for (int i = 0; i < list.size(); i++) {
                             updateEnnemyPosition(list.get(i));
                             list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
-                            list.get(i).checkCollisionsWithEnemies(ennemyCircles, pane, animationManager);
-                            list.get(i).checkCollisionsWithPlayers(playerCircles, pane, animationManager);
+                            list.get(i).checkCollisionsWithEnemies(ennemyCircles, animationManager);
+                            list.get(i).checkCollisionsWithPlayers(playerCircles, animationManager);
 
                         }
 
@@ -279,11 +279,13 @@ public class GameController implements Initializable {
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
         playerCircle.toFront();
+
         player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)-> {
             if (newChunk != null){
                 updateLoadedChunks(newChunk);
             }
         });
+
         // change la position de la camera en fonction de la position du joueur
         player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             onPlayerPositionChanged(player, newPoint);
@@ -312,7 +314,7 @@ public class GameController implements Initializable {
     }
 
     private void setZoomFromMass(double deltaMass) {
-        //System.out.println("scale : " + scale.doubleValue());
+
         // formule de calcul de la taille de la camera
         // peut être ajustee
         double newScale = camera.getScaleX() + 1. / (deltaMass * 200.);
