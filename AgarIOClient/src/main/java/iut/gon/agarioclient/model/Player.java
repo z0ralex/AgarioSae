@@ -17,12 +17,12 @@ public class Player extends Entity implements PlayerComponent {
     protected List<PlayerComponent> components = new ArrayList<>();
     private ObjectProperty<Point2D> position;
     private DoubleProperty mass;
+    private boolean markedForRemoval = false;
 
     public Player(String id, Point2D position, double mass) {
         super(id, position, mass);
         this.position = new SimpleObjectProperty<>(position);
         this.mass = new SimpleDoubleProperty(mass);
-
     }
 
     public void add(PlayerComponent component) {
@@ -146,14 +146,15 @@ public class Player extends Entity implements PlayerComponent {
 
     public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, Pane pane) {
         double playerRadius = calculateRadius();
-        double eventHorizon = playerRadius / 2;
+        double eventHorizon = playerRadius * 0.33;
 
         ennemyCircles.entrySet().removeIf(entry -> {
             Ennemy ennemy = entry.getKey();
             Circle ennemyCircle = entry.getValue();
             double distance = getPosition().distance(ennemy.getPosition());
+            double overlap = Math.max(0, playerRadius + ennemy.calculateRadius() - distance);
 
-            if (distance <= eventHorizon && getMass() > ennemy.getMass() * 1.1) { // 10% size advantage
+            if (getMass() >= ennemy.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
                 setMass(getMass() + ennemy.getMass());
                 pane.getChildren().remove(ennemyCircle);
                 ennemy.markForRemoval();
@@ -161,6 +162,40 @@ public class Player extends Entity implements PlayerComponent {
             }
             return false;
         });
+    }
+
+    public void checkCollisionsWithPlayers(Map<Player, Circle> playerCircles, Pane pane) {
+        double playerRadius = calculateRadius();
+        double eventHorizon = playerRadius * 0.33;
+
+        playerCircles.entrySet().removeIf(entry -> {
+            Player otherPlayer = entry.getKey();
+            Circle otherPlayerCircle = entry.getValue();
+            double distance = getPosition().distance(otherPlayer.getPosition());
+            double overlap = Math.max(0, playerRadius + otherPlayer.calculateRadius() - distance);
+
+            if (this != otherPlayer && getMass() >= otherPlayer.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
+                setMass(getMass() + otherPlayer.getMass());
+                pane.getChildren().remove(otherPlayerCircle);
+                otherPlayer.markForRemoval();
+                return true;
+            } else if (this == otherPlayer && overlap >= playerRadius * 0.33) {
+                setMass(getMass() + otherPlayer.getMass());
+                pane.getChildren().remove(otherPlayerCircle);
+                otherPlayer.markForRemoval();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public void markForRemoval() {
+        this.markedForRemoval = true;
+        this.removeFromCurrentNode();
+    }
+
+    public boolean isMarkedForRemoval() {
+        return markedForRemoval;
     }
 
     public void setInvisible(boolean b) {
