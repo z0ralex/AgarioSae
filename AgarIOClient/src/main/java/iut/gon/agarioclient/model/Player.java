@@ -103,7 +103,7 @@ public class Player extends Entity implements PlayerComponent {
     @Override
     public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
         double mass = getMass();
-        return (mass / Math.pow(mass, 1.44)) * 10;
+        return (mass / Math.pow(mass, 1.1)) * 10;
     }
 
     @Override
