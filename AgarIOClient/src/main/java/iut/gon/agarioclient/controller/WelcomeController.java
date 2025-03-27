@@ -87,7 +87,7 @@ public class WelcomeController {
                 Scene gameScene = new Scene(newView);
                 stage.setScene(gameScene);
                 stage.setTitle("Jeu en local");
-                gameScene.setCamera(camera);
+                //gameScene.setCamera(camera);
 
             } catch (Exception e) {
                 e.printStackTrace();
