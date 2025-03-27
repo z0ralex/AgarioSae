@@ -130,8 +130,8 @@ public class GameController implements Initializable {
                     double xVect = (xPosition - (player.getPosition().getX() - camera.getLayoutX()))/* * scale.doubleValue()*/;
                     double yVect = (yPosition - (player.getPosition().getY() - camera.getLayoutY()))/* * scale.doubleValue()*/;
 
-                    System.out.printf("Souris : [%.0f, %.0f], Joueur : [%.0f, %.0f], Vecteur : [%.0f, %.0f], Camera: [%.0f, %.0f]\n", event.getX(), event.getY(), player.getPosition().getX(),
-                            player.getPosition().getY(), xVect, yVect, camera.getLayoutX(), camera.getLayoutY());
+                    //System.out.printf("Souris : [%.0f, %.0f], Joueur : [%.0f, %.0f], Vecteur : [%.0f, %.0f], Camera: [%.0f, %.0f]\n", event.getX(), event.getY(), player.getPosition().getX(),
+                            //player.getPosition().getY(), xVect, yVect, camera.getLayoutX(), camera.getLayoutY());
 
 
                     if (Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE) {
@@ -243,7 +243,7 @@ public class GameController implements Initializable {
     }
 
     private void setZoomFromMass(double deltaMass) {
-        System.out.println("scale : " + scale.doubleValue());
+        //System.out.println("scale : " + scale.doubleValue());
         // formule de calcul de la taille de la camera
         // peut être ajustee
         double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);

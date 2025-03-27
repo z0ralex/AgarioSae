@@ -31,13 +31,14 @@ public class ParametreController {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+        this.ipField.setText("10.42.17.86"); //remplissage automatique du champ pour faciliter le developpement
+        this.portField.setText("12345"); //Pour le developpement
     }
 
     @FXML
     private void onValiderButtonClick(ActionEvent event) {
         String ip = ipField.getText().trim();
         String port = portField.getText().trim();
-
         // Validation simple
         if (ip.isEmpty() || port.isEmpty()) {
             showAlert("Erreur", "Veuillez remplir tous les champs.");
@@ -68,7 +69,6 @@ public class ParametreController {
                     Scene gameScene = new Scene(hBox);
                     stage.setScene(gameScene);
                     stage.setTitle("Jeu en ligne");
-                    gameScene.setCamera(camera);
                 } else {
                     showAlert("Erreur de connexion", "Impossible de se connecter au serveur.");
                 }
