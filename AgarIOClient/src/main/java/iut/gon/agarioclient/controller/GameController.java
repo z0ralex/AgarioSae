@@ -3,6 +3,7 @@ package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
+import javafx.animation.TranslateTransition;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -12,6 +13,7 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,7 +152,7 @@ public class GameController {
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
-
+        playerCircle.toFront();
         player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)->{
             if(newChunk != null){
                 updateLoadedChunks(newChunk);
@@ -256,18 +258,36 @@ public class GameController {
             double playerRadius = playerCircle.getRadius();
             double eventHorizon = playerRadius + 100;
 
-            pelletCircles.entrySet().removeIf(entry -> { //retire les pellets qui sont trop proches du joueur
+            pelletCircles.entrySet().removeIf(entry -> { //retirer les pellets qui sont trop proches du joueur
 
                 Pellet pellet = entry.getKey();
                 Circle pelletCircle = entry.getValue();
                 double distance = player.getPosition().distance(pellet.getPosition());
 
                 if (distance <= eventHorizon) {
-                    // pellet mangé
 
-                    player.setMass(player.getMass() + pellet.getMass());
-                    pane.getChildren().remove(pelletCircle);
-                    pellet.removeFromCurrentNode();
+                    Point2D direction = player.getDirection();
+                    double speed = player.getSpeed();
+
+                    double transitionDuration = Math.max(100, distance / speed);
+
+                    Point2D predictedPosition = player.getPosition().add(direction.multiply(speed * (transitionDuration / 1000.0)));
+
+                    double toX = predictedPosition.getX() - pellet.getPosition().getX();
+                    double toY = predictedPosition.getY() - pellet.getPosition().getY();
+
+                    TranslateTransition transition = new TranslateTransition(Duration.millis(transitionDuration), pelletCircle);
+                    transition.setToX(toX);
+                    transition.setToY(toY);
+
+                    transition.setOnFinished(event -> {
+                        player.setMass(player.getMass() + pellet.getMass());
+                        pane.getChildren().remove(pelletCircle);
+                        pellet.removeFromCurrentNode();
+                        playerCircles.get(player).toFront();
+                    });
+
+                    transition.play();
 
                     return true;
                 }
