@@ -55,7 +55,7 @@ public class GameController implements Initializable {
     private final Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
     private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
-    private SimpleDoubleProperty scale = new SimpleDoubleProperty(1.0);
+    private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1.0);
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -120,12 +120,9 @@ public class GameController implements Initializable {
                     double xPosition = event.getX();
                     double yPosition = event.getY();
 
-
-                    double xVect = (xPosition - (player.getPosition().getX() - camera.getLayoutX()))/* * scale.doubleValue()*/;
-                    double yVect = (yPosition - (player.getPosition().getY() - camera.getLayoutY()))/* * scale.doubleValue()*/;
-
-                    System.out.printf("Souris : [%.0f, %.0f], Joueur : [%.0f, %.0f], Vecteur : [%.0f, %.0f], Camera: [%.0f, %.0f]\n", event.getX(), event.getY(), player.getPosition().getX(),
-                            player.getPosition().getY(), xVect, yVect, camera.getLayoutX(), camera.getLayoutY());
+                    //TODO scaling
+                    double xVect = xPosition - (player.getPosition().getX() - camera.getLayoutX()) / scale.doubleValue();
+                    double yVect = yPosition - (player.getPosition().getY() - camera.getLayoutY()) / scale.doubleValue();
 
 
                     if (Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE) {
@@ -152,7 +149,7 @@ public class GameController implements Initializable {
                         }
 
 
-                        Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()).multiply(scale.doubleValue()));
+                        Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed())/*.multiply(scale.doubleValue())*/); //TODO scaling
 
                         // Check for collisions with the map boundaries
                         double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
@@ -199,8 +196,9 @@ public class GameController implements Initializable {
     }
 
     private void onPlayerPositionChanged(Player player, Point2D newPos) {
-        double x = (newPos.getX() - cameraOffsetPoint.getX()) * scale.doubleValue();
-        double y = (newPos.getY() - cameraOffsetPoint.getY()) * scale.doubleValue();
+        double x = (newPos.getX() - cameraOffsetPoint.getX()) ;
+        double y = (newPos.getY() - cameraOffsetPoint.getY()) ;
+
 
         camera.setLayoutX(x);
         camera.setLayoutY(y);
@@ -220,8 +218,8 @@ public class GameController implements Initializable {
         // peut être ajustee
         double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);
 
-        /*camera.setScaleX(newScale);
-        camera.setScaleY(newScale);*/
+        camera.setScaleX(newScale);
+        camera.setScaleY(newScale);
 
         // le zoom change : on doit recalculer le centre de la caméra
         cameraOffsetPoint = new Point2D(
@@ -235,11 +233,10 @@ public class GameController implements Initializable {
         ennemyCircle.setFill(Color.RED);
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
-        //System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
-            ennemyCircle.setCenterX((newPoint.getX())*scale.doubleValue());
-            ennemyCircle.setCenterY((newPoint.getY()) * scale.doubleValue());
+            ennemyCircle.setCenterX((newPoint.getX()));
+            ennemyCircle.setCenterY((newPoint.getY()));
         });
 
         e.massProperty().addListener((obs, oldMass, newMass) -> {
