@@ -22,6 +22,7 @@ public class Player extends Entity implements PlayerComponent {
         super(id, position, mass);
         this.position = new SimpleObjectProperty<>(position);
         this.mass = new SimpleDoubleProperty(mass);
+
     }
 
     public void add(PlayerComponent component) {

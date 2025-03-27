@@ -24,6 +24,6 @@ public class Pellet extends Entity {
      * @return the radius of the pellet
      */
     public double calculateRadius() {
-        return 5;
+        return 10;
     }
 }

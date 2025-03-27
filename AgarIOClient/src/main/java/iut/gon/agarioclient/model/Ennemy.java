@@ -10,7 +10,6 @@ import java.util.Map;
 public class Ennemy extends Player {
     private IA strat;
     private Point2D posE;
-    private double massE;
 
     private boolean markedForRemoval = false;
 
@@ -18,7 +17,6 @@ public class Ennemy extends Player {
         super(id, position, mass);
         this.posE = position;
         this.strat = strat;
-        this.massE = mass;
     }
 
     public IA getStrat() {
@@ -41,16 +39,6 @@ public class Ennemy extends Player {
     @Override
     public Point2D getPosition() {
         return posE;
-    }
-
-    @Override
-    public void setMass(double m) {
-        this.massE = m;
-    }
-
-    @Override
-    public double getMass() {
-        return this.massE;
     }
 
     @Override

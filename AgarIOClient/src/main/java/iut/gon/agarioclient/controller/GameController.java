@@ -101,6 +101,8 @@ public class GameController {
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
+                        cleanupMarkedEnemies();
+
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
 
@@ -135,6 +137,16 @@ public class GameController {
             }
         });
     }
+    private void cleanupMarkedEnemies() {
+        ennemyCircles.entrySet().removeIf(entry -> {
+            if (entry.getKey().isMarkedForRemoval()) {
+                pane.getChildren().remove(entry.getValue());
+                entry.getKey().removeFromCurrentNode();
+                return true;
+            }
+            return false;
+        });
+    }
 
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
@@ -160,15 +172,14 @@ public class GameController {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 25);//Attention Valeur en DUR
         root.addEntity(e);
         if (e.getStrat() instanceof IAStratEatPlayers) {
-            ennemyCircle.setFill(Color.RED);
+            ennemyCircle.setFill(Color.ORANGE);
         } else if (e.getStrat() instanceof IAStratRandomMoving){
-            ennemyCircle.setFill(Color.GREEN);
+            ennemyCircle.setFill(Color.RED);
         } else {
-            ennemyCircle.setFill(Color.BLUE);
+            ennemyCircle.setFill(Color.PURPLE);
         }
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
-        System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
