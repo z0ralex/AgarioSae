@@ -1,6 +1,7 @@
 // Player.java
 package iut.gon.agarioclient.model;
 
+import iut.gon.agarioclient.controller.AnimationManager;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -123,7 +124,7 @@ public class Player extends Entity implements PlayerComponent {
         return new Point2D(newX, newY);
     }
 
-    public void checkCollisions(Map<Pellet, Circle> pelletCircles, Pane pane) {
+    public void checkCollisions(Map<Pellet, Circle> pelletCircles, Pane pane, AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius + 100;
 
@@ -133,6 +134,8 @@ public class Player extends Entity implements PlayerComponent {
             double distance = getPosition().distance(pellet.getPosition());
 
             if (distance <= eventHorizon) {
+                animationManager.playPelletAbsorption(pelletCircle, getPosition());
+
                 setMass(getMass() + pellet.getMass());
                 pane.getChildren().remove(pelletCircle);
                 pellet.removeFromCurrentNode();
@@ -142,7 +145,7 @@ public class Player extends Entity implements PlayerComponent {
         });
     }
 
-    public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, Pane pane) {
+    public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, Pane pane, AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
 
@@ -153,6 +156,7 @@ public class Player extends Entity implements PlayerComponent {
             double overlap = Math.max(0, playerRadius + ennemy.calculateRadius() - distance);
 
             if (getMass() >= ennemy.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
+                animationManager.playPelletAbsorption(ennemyCircle, getPosition());
                 setMass(getMass() + ennemy.getMass());
                 pane.getChildren().remove(ennemyCircle);
                 ennemy.markForRemoval();

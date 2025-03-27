@@ -45,11 +45,14 @@ public class GameController {
     private Map<Pellet, Circle> pelletCircles = new HashMap<>();
     private Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
     private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
+    private AnimationManager animationManager;
 
     public void initializeGame(String nickname, ParallelCamera camera) {
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
+
+        animationManager = new AnimationManager(pane);
 
         cameraCenterPoint = new Point2D(pane.getWidth() / 2., pane.getHeight() / 2.);
         this.camera = camera;
@@ -121,8 +124,8 @@ public class GameController {
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
-                        player.checkCollisions(pelletCircles, pane);
-                        player.checkCollisionsWithEnemies(ennemyCircles, pane); // Add this line
+                        player.checkCollisions(pelletCircles, pane, animationManager);
+                        player.checkCollisionsWithEnemies(ennemyCircles, pane, animationManager);
                         spawnPellets();
 
                         for (int i = 0; i < list.size(); i++) {
