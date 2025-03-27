@@ -7,10 +7,7 @@ import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Circle;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Game {
     //Constantes
@@ -27,10 +24,14 @@ public class Game {
     private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
     //TODO changer ça
-    private List<Ennemy> enemyList;
-    private Set<Pellet> pellets;
-    private Set<Player> players;
+    private final List<Ennemy> enemyList;
+    private final Set<Pellet> pellets;
+    private final Set<Player> players;
 
+    public static boolean isValidPosition(Point2D pos){
+        return (pos.getX() >= 0 && pos.getX() <= X_MAX) &&
+                (pos.getY() >= 0 && pos.getY() <= Y_MAX);
+    }
 
     public Game(){
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
@@ -41,7 +42,7 @@ public class Game {
         NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
         enemyList = f.generate(10);
         pellets = new HashSet<>();
-
+        players = new HashSet<>();
     }
 
     public MapNode getRoot() {
@@ -51,24 +52,25 @@ public class Game {
     /**
      * mets à jour le jeu
      */
-    public void nextTick(){
+    public synchronized HashMap<Entity, Set<Entity>> nextTick(){
+        HashMap<Entity, Set<Entity>> map = new HashMap<>();
+        for(Player p: players){
+            checkEntityChunck(p);
+        }
+
         for (Ennemy ennemy : enemyList) {
             ennemy.executeStrat();
             double speedE = ennemy.calculateSpeed(ennemy.getPosition().getX(), ennemy.getPosition().getY(), X_MAX, Y_MAX);
             ennemy.setSpeed(speedE);
         }
 
-        spawnPellets();
+        spawnPellets().forEach((pellet -> {
+            map.put(pellet, null);
+        }));
 
-        for (Ennemy ennemy : enemyList) { //TODO refactor si on fait l'opti
-            Set<Entity> eaten = new HashSet<>();
 
-            //redrawEnemy(ennemy);
-            eaten.addAll(ennemy.checkCollisions(pellets));
-            eaten.addAll(ennemy.checkCollisionsWithEnemies(enemyList));
-            eaten.addAll(ennemy.checkCollisionsWithPlayers(players));
-
-        }
+        map.putAll(getEatenEntities());
+        return map;
     }
 
     /**
@@ -91,19 +93,24 @@ public class Game {
         root.addEntity(e);
     }
 
-    public void spawnPellets() {
+    public List<Pellet> spawnPellets() {
         if (pellets.size() < MAX_PELLET) {
-            createPellets(100);
+            return createPellets(100);
         }
+
+        return new ArrayList<>();
     }
 
-    public void createPellets(int count) {
-        //TODO separer vue/modele
-        List<Pellet> pellets = pelletFactory.generatePellets(count);
-        for (Pellet pellet : pellets) {
+    public List<Pellet> createPellets(int count) {
+
+        List<Pellet> pelletsList = pelletFactory.generatePellets(count);
+        for (Pellet pellet : pelletsList) {
             getRoot().addEntity(pellet);
             root.addEntity(pellet);
+            pellets.add(pellet);
         }
+
+        return pelletsList;
     }
     public Player addPlayer(String nickname){
         Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
@@ -126,7 +133,31 @@ public class Game {
         }
     }
 
-    public HashMap<Entity, Set<Entity>> getEatenEntities(){
 
+    //TODO a refactor si on fait l'optimisation
+    public HashMap<Entity, Set<Entity>> getEatenEntities(){
+        HashMap<Entity, Set<Entity>> eatenMap = new HashMap<>();
+
+        for (Ennemy ennemy : enemyList) {
+            Set<Entity> eaten = new HashSet<>();
+
+            eaten.addAll(ennemy.checkCollisions(pellets));
+            eaten.addAll(ennemy.checkCollisionsWithEnemies(enemyList));
+            eaten.addAll(ennemy.checkCollisionsWithPlayers(players));
+
+            eatenMap.put(ennemy, eaten);
+        }
+
+        for(Player player : players){
+            Set<Entity> eaten = new HashSet<>();
+
+            eaten.addAll(player.checkCollisionsWithEnemies(enemyList));
+            eaten.addAll(player.checkCollisionsWithPellet(pellets));
+            eaten.addAll(player.checkCollisionsWithPlayers(players));
+
+            eatenMap.put(player, eaten);
+        }
+
+        return eatenMap;
     }
 }

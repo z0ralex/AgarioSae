@@ -1,6 +1,7 @@
 // Entity.java
 package iut.gon.agarioclient.model.entity.moveable;
 
+import iut.gon.agarioclient.model.Game;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -57,7 +58,9 @@ public class Entity {
      * @param position the new position of the entity
      */
     public void setPosition(Point2D position) {
-        this.position.set(position);
+        if(Game.isValidPosition(position)){
+            this.position.set(position);
+        }
     }
 
     public SimpleObjectProperty<Point2D> positionProperty(){
@@ -96,8 +99,11 @@ public class Entity {
     }
 
     public void removeFromCurrentNode(){
-        currentMapNode.getValue().getEntitySet().remove(this);
-        currentMapNode.setValue(null);
+        MapNode node  = currentMapNode.getValue();
+        if(node != null){
+            node.getEntitySet().remove(this);
+            currentMapNode.setValue(null);
+        }
     }
 
     public SimpleObjectProperty<MapNode> currentMapNodeProperty(){

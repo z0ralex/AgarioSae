@@ -1,6 +1,7 @@
 // Ennemy.java
 package iut.gon.agarioclient.model.entity.moveable;
 
+import iut.gon.agarioclient.model.Game;
 import iut.gon.agarioclient.model.entity.ia.IA;
 import iut.gon.agarioclient.model.entity.pellet.Pellet;
 import javafx.beans.property.DoubleProperty;
@@ -48,7 +49,9 @@ public class Ennemy extends Player {
 
     @Override
     public void setPosition(Point2D newPos) {
-        this.posE = newPos;
+        if(Game.isValidPosition(newPos)) {
+            this.posE = newPos;
+        }
     }
 
     @Override

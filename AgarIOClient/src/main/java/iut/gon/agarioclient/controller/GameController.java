@@ -161,30 +161,23 @@ public class GameController implements Initializable {
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
+                        HashMap<Entity, Set<Entity>> eatenMap = game.nextTick();
+
                         if (!player.isAlive()) {
                             Platform.runLater(() -> handlePlayerDeath()); //purement client
                             stop();
                             return;
                         }
 
-                        game.checkEntityChunck(player); //va falloir changer ça
+                        
 
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
-
 
                         game.moveEntity(player, mouseVector.getValue());
 
                         //graphique
                         redrawPlayer(player);
-
-                        //TODO serveur PUTAIN C'EST CHAUD CA
-                        Set<Pellet> eatenPellets = player.checkCollisionsWithPellet(pelletCircles.keySet());
-
-                        for (Pellet p: eatenPellets) {
-                            animationManager.playPelletAbsorption(pelletCircles.get(p), player.getPosition());
-                            unrenderEntity(p);
-                        }
 
                         //client
                         if(!(player.isVisible())){
@@ -193,26 +186,34 @@ public class GameController implements Initializable {
                             playerCircles.get(player).setOpacity(1);
                         }
 
-                        //TODO la meme qu'en haut
-                        Set<Ennemy> eatenEnemies = player.checkCollisionsWithEnemies(ennemyCircles.keySet());
+                        //pour toutes les entités existantes actuellement
+                        for (Entity eatingEntity : eatenMap.keySet()){
+                            renderEntity(eatingEntity);
 
-                        for (Ennemy e: eatenEnemies) {
-                            animationManager.playPelletAbsorption(ennemyCircles.get(e), player.getPosition());
-                            unrenderEntity(e);
+                            if(eatenMap.get(eatingEntity) != null){
+                                for (Entity eatenEntity : eatenMap.get(eatingEntity)) {
+                                    animationManager.playPelletAbsorption(getEntityCircle(eatenEntity),
+                                            eatingEntity.getPosition());
+
+                                    unrenderEntity(eatenEntity);
+                                }
+                            }
                         }
-
-
-
-
-
-
-
                     }
                 }.start();
             }
         });
     }
 
+    private Circle getEntityCircle(Entity e){
+        if(e instanceof Ennemy){
+            return ennemyCircles.get(e);
+        } else if (e instanceof Player) {
+            return playerCircles.get(e);
+        }
+
+        return pelletCircles.get(e);
+    }
 
 
 
