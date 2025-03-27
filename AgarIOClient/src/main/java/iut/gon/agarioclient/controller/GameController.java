@@ -310,6 +310,8 @@ public class GameController implements Initializable {
         double minimapScaleX = minimap.getWidth() / X_MAX;
         double minimapScaleY = minimap.getHeight() / Y_MAX;
 
+        double minimapPlayerRadius = player.calculateRadius() * 0.1;
+
         Circle miniPlayer = new Circle(
                 player.getPosition().getX() * minimapScaleX,
                 player.getPosition().getY() * minimapScaleY,
@@ -387,6 +389,8 @@ public class GameController implements Initializable {
         double minimapScaleX = minimap.getWidth() / X_MAX;
         double minimapScaleY = minimap.getHeight() / Y_MAX;
 
+        double minimapEnnemyRadius = ennemy.calculateRadius() * 0.1;
+
         Color color = (ennemy.getStrat() instanceof IAStratEatPlayers) ? Color.RED : Color.GREEN;
 
         Circle miniEnnemy = new Circle(
@@ -419,6 +423,8 @@ public class GameController implements Initializable {
             double minimapScaleY = minimap.getHeight() / Y_MAX;
             miniPlayerCircle.setCenterX(player.getPosition().getX() * minimapScaleX);
             miniPlayerCircle.setCenterY(player.getPosition().getY() * minimapScaleY);
+            double minimapPlayerRadius = Math.min(Math.max(3,player.calculateRadius()*0.03),20);
+            miniPlayerCircle.setRadius(minimapPlayerRadius);
         }
     }
 
@@ -435,6 +441,9 @@ public class GameController implements Initializable {
             double minimapScaleY = minimap.getHeight() / Y_MAX;
             miniEnnemyCircle.setCenterX(e.getPosition().getX() * minimapScaleX);
             miniEnnemyCircle.setCenterY(e.getPosition().getY() * minimapScaleY);
+
+            double minimapEnnemyRadius = Math.min(Math.max(3,e.calculateRadius()*0.03),20);
+            miniEnnemyCircle.setRadius(minimapEnnemyRadius);
         }
     }
 
