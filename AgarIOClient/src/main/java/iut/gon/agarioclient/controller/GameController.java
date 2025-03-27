@@ -70,7 +70,7 @@ public class GameController {
         player.add(new PlayerLeaf(nickname, new Point2D(400, 300), 10, 5));
 
         NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
-        List<Ennemy> list = f.generate(3);
+        List<Ennemy> list = f.generate(10);
         for(int i = 0; i < list.size(); i++){
             addEnnemy(list.get(i));
         }

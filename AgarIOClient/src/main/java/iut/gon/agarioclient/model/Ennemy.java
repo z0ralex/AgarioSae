@@ -12,6 +12,8 @@ public class Ennemy extends Player {
     private Point2D posE;
     private double massE;
 
+    private boolean markedForRemoval = false;
+
     public Ennemy(String id, Point2D position, double mass, IA strat, double speed) {
         super(id, position, mass);
         this.posE = position;
@@ -51,6 +53,11 @@ public class Ennemy extends Player {
         return this.massE;
     }
 
+    @Override
+    public double calculateRadius() {
+        return 10 * Math.sqrt(getMass());
+    }
+
     public void checkCollisions(Map<Pellet, Circle> pelletCircles, Pane pane) {
         double ennemyRadius = calculateRadius();
         double eventHorizon = ennemyRadius + 100;
@@ -68,5 +75,14 @@ public class Ennemy extends Player {
             }
             return false;
         });
+    }
+
+    public void markForRemoval() {
+        this.markedForRemoval = true;
+        this.removeFromCurrentNode();
+    }
+
+    public boolean isMarkedForRemoval() {
+        return markedForRemoval;
     }
 }

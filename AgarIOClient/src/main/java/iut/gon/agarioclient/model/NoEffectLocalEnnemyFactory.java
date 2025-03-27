@@ -15,27 +15,33 @@ public class NoEffectLocalEnnemyFactory implements LocalEnnemyFactory{
 
     @Override
     public List<Ennemy> generate(int quantity) {
-        List<Ennemy> list = new ArrayList<>();
-        for(int i = 0; i < quantity / 3; i++){//Strat Random
-            Random r = new Random();
-            Point2D p = new Point2D(r.nextInt(786, 986), r.nextInt(375, 575));
-            list.add(new Ennemy(UUID.randomUUID().toString(), p, 15,new IAStratRandomMoving(root),5.0));
+        List<Ennemy> ennemies = new ArrayList<>();
+        Random random = new Random();
+
+        for (int i = 0; i < quantity; i++) {
+            Point2D position = new Point2D(random.nextInt(786, 986), random.nextInt(375, 575));
+            double mass = 10 + random.nextDouble() * 20;
+            double speed = 1 + random.nextDouble() * 2;
+            IA strategy;
+
+            switch (i % 3) {
+                case 0:
+                    strategy = new IAStratEatPelletsOnly(root);
+                    break;
+                case 1:
+                    strategy = new IAStratEatPlayers(root);
+                    break;
+                case 2:
+                    strategy = new IAStratEatPlayers(root);
+                    break;
+                default:
+                    strategy = new IAStratEatPelletsOnly(root);
+            }
+
+            Ennemy ennemy = new Ennemy(UUID.randomUUID().toString(), position, mass, strategy, speed);
+            ennemies.add(ennemy);
         }
 
-        for (int i = 0; i < quantity / 3; i++) { // Strat Pellets
-            Random r = new Random();
-
-            Point2D p = new Point2D(r.nextInt(786, 986), r.nextInt(375, 575));
-            list.add(new Ennemy(UUID.randomUUID().toString(), p, 15, new IAStratEatPelletsOnly(root), 5.0));
-        }
-
-        for (int i = 0; i < quantity / 3; i++) { // Strat Players
-            Random r = new Random();
-
-            Point2D p = new Point2D(r.nextInt(786, 986), r.nextInt(375, 575));
-            list.add(new Ennemy(UUID.randomUUID().toString(), p, 15, new IAStratEatPlayers(root), 5.0));
-        }
-
-        return list;
+        return ennemies;
     }
 }
