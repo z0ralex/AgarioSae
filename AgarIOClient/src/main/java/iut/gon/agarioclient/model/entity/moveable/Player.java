@@ -1,7 +1,11 @@
 // Player.java
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.moveable;
 
 import iut.gon.agarioclient.controller.AnimationManager;
+import iut.gon.agarioclient.model.entity.pellet.PartialInvisibilityPellet;
+import iut.gon.agarioclient.model.entity.pellet.SpeedBoostPellet;
+import iut.gon.agarioclient.model.entity.pellet.SpeedReductionPellet;
+import iut.gon.agarioclient.model.entity.pellet.Pellet;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -177,19 +181,19 @@ public class Player extends Entity implements PlayerComponent {
             if (distance <= eventHorizon) {
                 animationManager.playPelletAbsorption(pelletCircle, getPosition());
 
-                if(pellet instanceof  SpeedReductionPellet){
+                if(pellet instanceof SpeedReductionPellet){
                     this.gotEffectedAt = System.currentTimeMillis();
                     this.affectedUntil = System.currentTimeMillis() + 4000;
                     this.setSpecialEffect(0.5);
                 }
 
-                if(pellet instanceof  SpeedBoostPellet){
+                if(pellet instanceof SpeedBoostPellet){
                     this.gotEffectedAt = System.currentTimeMillis();
                     this.affectedUntil = System.currentTimeMillis() + 4000;
                     this.setSpecialEffect(2);
                 }
 
-                if(pellet instanceof  PartialInvisibilityPellet){
+                if(pellet instanceof PartialInvisibilityPellet){
                     this.gotInvisbileAt = System.currentTimeMillis();
                     this.InvisbileUntil = System.currentTimeMillis() + 4000;
                     this.isVisible = false;

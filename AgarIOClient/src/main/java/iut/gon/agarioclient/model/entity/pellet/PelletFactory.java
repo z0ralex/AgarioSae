@@ -1,11 +1,6 @@
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.pellet;
 
-import javafx.geometry.Point2D;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 /**
  * The EntityFactory class is responsible for creating instances of game entities such as players and pellets.

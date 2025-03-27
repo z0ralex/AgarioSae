@@ -1,4 +1,4 @@
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.pellet;
 
 import iut.gon.agarioclient.controller.GameController;
 import javafx.geometry.Point2D;

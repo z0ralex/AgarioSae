@@ -1,5 +1,5 @@
 // Entity.java
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.moveable;
 
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.beans.property.DoubleProperty;

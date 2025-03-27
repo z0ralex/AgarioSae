@@ -2,12 +2,14 @@
 package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.App;
-import iut.gon.agarioclient.model.*;
+import iut.gon.agarioclient.model.entity.ia.IAStratEatPlayers;
+import iut.gon.agarioclient.model.entity.ia.IAStratRandomMoving;
+import iut.gon.agarioclient.model.entity.moveable.*;
+import iut.gon.agarioclient.model.entity.pellet.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleDoubleProperty;
 import iut.gon.agarioclient.server.TestVecteur;
-import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -24,12 +26,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.stage.Window;
+
 import java.net.URL;
 import javafx.scene.shape.Line;
-import javafx.util.Duration;
+
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,8 +168,6 @@ public class GameController implements Initializable {
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
-                        System.out.println(player.isAlive());
-
                         if (!player.isAlive()) {
                             Platform.runLater(() -> handlePlayerDeath());
                             stop();
@@ -316,7 +315,7 @@ public class GameController implements Initializable {
         //System.out.println("scale : " + scale.doubleValue());
         // formule de calcul de la taille de la camera
         // peut être ajustee
-        double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);
+        double newScale = camera.getScaleX() + 1. / (deltaMass * 200.);
 
         camera.setScaleX(newScale);
         camera.setScaleY(newScale);
@@ -385,10 +384,10 @@ public class GameController implements Initializable {
 
         Random couleur = new Random();
 
-        if(pellet instanceof PartialInvisibilityPellet ){
+        if(pellet instanceof PartialInvisibilityPellet){
             pelletCircle.setFill(Color.CYAN);
             pelletCircle.setRadius(15.0);
-        } else if(pellet instanceof SpeedReductionPellet ){
+        } else if(pellet instanceof SpeedReductionPellet){
             pelletCircle.setFill(Color.YELLOW);
             pelletCircle.setRadius(15.0);
         }else if(pellet instanceof SpeedBoostPellet){

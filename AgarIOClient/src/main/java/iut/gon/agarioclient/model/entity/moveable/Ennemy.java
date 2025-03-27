@@ -1,6 +1,8 @@
 // Ennemy.java
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.moveable;
 
+import iut.gon.agarioclient.model.entity.ia.IA;
+import iut.gon.agarioclient.model.entity.pellet.Pellet;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Point2D;

@@ -1,7 +1,7 @@
 // MapNode.java
 package iut.gon.agarioclient.model.map;
 
-import iut.gon.agarioclient.model.Entity;
+import iut.gon.agarioclient.model.entity.moveable.Entity;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;

@@ -1,5 +1,9 @@
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.moveable;
 
+import iut.gon.agarioclient.model.entity.ia.IA;
+import iut.gon.agarioclient.model.entity.ia.IAStratEatPelletsOnly;
+import iut.gon.agarioclient.model.entity.ia.IAStratEatPlayers;
+import iut.gon.agarioclient.model.entity.ia.IAStratRandomMoving;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 

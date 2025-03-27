@@ -1,5 +1,5 @@
 // EffectPelletFactory.java
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.pellet;
 
 import javafx.geometry.Point2D;
 

@@ -1,9 +1,6 @@
-package iut.gon.agarioclient.model;
-
-import javafx.geometry.Point2D;
+package iut.gon.agarioclient.model.entity.moveable;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface LocalEnnemyFactory {
 

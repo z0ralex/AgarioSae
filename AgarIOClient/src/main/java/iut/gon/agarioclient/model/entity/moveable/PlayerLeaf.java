@@ -1,5 +1,5 @@
 // PlayerLeaf.java
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.moveable;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;

@@ -1,5 +1,6 @@
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.pellet;
 
+import iut.gon.agarioclient.model.entity.moveable.Entity;
 import javafx.geometry.Point2D;
 
 /**

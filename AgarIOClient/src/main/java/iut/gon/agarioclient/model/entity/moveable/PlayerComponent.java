@@ -1,4 +1,4 @@
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.moveable;
 
 import javafx.geometry.Point2D;
 

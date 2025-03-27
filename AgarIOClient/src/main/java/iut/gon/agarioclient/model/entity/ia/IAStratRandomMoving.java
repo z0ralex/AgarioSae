@@ -1,11 +1,11 @@
-package iut.gon.agarioclient.model;
+package iut.gon.agarioclient.model.entity.ia;
 
 import iut.gon.agarioclient.controller.GameController;
+import iut.gon.agarioclient.model.entity.moveable.Ennemy;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 public class IAStratRandomMoving implements IA{
 
