@@ -29,7 +29,7 @@ public class NoEffectLocalEnnemyFactory implements LocalEnnemyFactory{
                     strategy = new IAStratRandomMoving(root);
                     break;
                 case 1:
-                    strategy = new IAStratEatPelletsOnly(root);
+                    strategy = new IAStratEatPlayers(root);
                     break;
                 case 2:
                     strategy = new IAStratRandomMoving(root);

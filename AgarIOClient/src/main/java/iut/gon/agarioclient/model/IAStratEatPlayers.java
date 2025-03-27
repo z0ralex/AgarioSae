@@ -39,7 +39,7 @@ public class IAStratEatPlayers implements IA{
 
     private void moveToPlayer(Ennemy ennemy, Player target) {
         Point2D direction = target.getPosition().subtract(ennemy.getPosition()).normalize();
-        Point2D newPosition = ennemy.getPosition().add(direction.multiply(10));
+        Point2D newPosition = ennemy.getPosition().add(direction.multiply(ennemy.getSpeed()));
         ennemy.setPosition(newPosition);
     }
 

@@ -173,7 +173,6 @@ public class GameController {
 
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
-        System.out.println("playerCircle: " + playerCircle + " player: " + player.getMass());
 
         root.addEntity(player);
         playerCircle.setFill(Color.BLUE);
@@ -252,7 +251,6 @@ public class GameController {
         }
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
-        System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
@@ -309,7 +307,6 @@ public class GameController {
 
     public void checkCollisions(Ennemy ennemy) {
         Circle ennemyCircle = ennemyCircles.get(ennemy);
-        System.out.println("la");
         if (ennemyCircle != null) {
             double enemyRadius = ennemyCircle.getRadius();
             double eventHorizon = enemyRadius + 100;
@@ -355,7 +352,6 @@ public class GameController {
 
     public void unrenderEntity(Entity entity){
         Circle entityCircle;
-        System.out.println("ici");
         if(entity instanceof Ennemy){
             entityCircle = ennemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);

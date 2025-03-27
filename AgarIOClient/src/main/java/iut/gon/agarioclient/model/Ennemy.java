@@ -13,6 +13,7 @@ public class Ennemy extends Player {
     private IA strat;
     private Point2D posE;
     private DoubleProperty mass;
+    private double speed;
     private boolean markedForRemoval = false;
 
     public Ennemy(String id, Point2D position, double mass, IA strat, double speed) {
@@ -20,6 +21,7 @@ public class Ennemy extends Player {
         this.posE = position;
         this.strat = strat;
         this.mass = new SimpleDoubleProperty(mass);
+        this.speed = speed;
         System.out.println("Ennemy created with mass: " + mass);
     }
 
@@ -56,6 +58,16 @@ public class Ennemy extends Player {
     }
 
     @Override
+    public double getSpeed() {
+        return speed;
+    }
+
+    @Override
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
+    @Override
     public double calculateRadius() {
         double radius = 10 * Math.sqrt(getMass());
         return radius;
@@ -64,7 +76,7 @@ public class Ennemy extends Player {
     @Override
     public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
         double mass = getMass();
-        return (mass / Math.pow(mass, 1.1)) * 10;
+        return (mass / Math.pow(mass, 1.44)) * 10;
     }
 
     public void checkCollisions(Map<Pellet, Circle> pelletCircles, Map<Ennemy, Circle> ennemyCircles, Pane pane) {
@@ -78,7 +90,6 @@ public class Ennemy extends Player {
 
             if (distance <= eventHorizon) {
                 setMass(getMass() + pellet.getMass());
-                System.out.println("Radius after eating pellet: " + calculateRadius());
                 pane.getChildren().remove(pelletCircle);
                 pellet.removeFromCurrentNode();
 
@@ -86,7 +97,6 @@ public class Ennemy extends Player {
                 Circle ennemyCircle = ennemyCircles.get(this);
                 if (ennemyCircle != null) {
                     ennemyCircle.setRadius(calculateRadius());
-                    System.out.println(ennemyCircle);
                 }
                 return true;
             }
