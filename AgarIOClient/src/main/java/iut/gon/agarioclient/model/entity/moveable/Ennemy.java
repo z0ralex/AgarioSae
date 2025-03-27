@@ -9,7 +9,9 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Ennemy extends Player {
     private IA strat;
@@ -85,29 +87,23 @@ public class Ennemy extends Player {
         return ((mass / Math.pow(mass, 1.1)) * 10);
     }
 
-    public void checkCollisions(Map<Pellet, Circle> pelletCircles, Map<Ennemy, Circle> ennemyCircles, Pane pane) {
+    public Set<Pellet> checkCollisions(Set<Pellet> pellets) {
         double ennemyRadius = calculateRadius();
         double eventHorizon = ennemyRadius + 10;
+        Set<Pellet> eatenPellets = new HashSet<>();
 
-        pelletCircles.entrySet().removeIf(entry -> {
-            Pellet pellet = entry.getKey();
-            Circle pelletCircle = entry.getValue();
+        pellets.forEach(pellet -> {
             double distance = getPosition().distance(pellet.getPosition());
 
             if (distance <= eventHorizon) {
                 setMass(getMass() + pellet.getMass());
-                pane.getChildren().remove(pelletCircle);
+                eatenPellets.add(pellet);
                 pellet.removeFromCurrentNode();
 
-                // Update the radius of the enemy's circle
-                Circle ennemyCircle = ennemyCircles.get(this);
-                if (ennemyCircle != null) {
-                    ennemyCircle.setRadius(calculateRadius());
-                }
-                return true;
             }
-            return false;
         });
+
+        return eatenPellets;
     }
 
     public void markForRemoval() {

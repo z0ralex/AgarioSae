@@ -218,12 +218,31 @@ public class GameController implements Initializable {
 
                         spawnPellets();
 
-                        for (int i = 0; i < list.size(); i++) {
-                            updateEnemyPosition(list.get(i));
-                            list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
-                            list.get(i).checkCollisionsWithEnemies(ennemyCircles.keySet());
-                            list.get(i).checkCollisionsWithPlayers(playerCircles.keySet());
+                        for (Ennemy ennemy : list) {
+                            Set<Entity> eaten = new HashSet<>();
 
+                            updateEnemyPosition(ennemy);
+                            eaten.addAll(ennemy.checkCollisions(pelletCircles.keySet()));
+                            eaten.addAll(ennemy.checkCollisionsWithEnemies(ennemyCircles.keySet()));
+                            eaten.addAll(ennemy.checkCollisionsWithPlayers(playerCircles.keySet()));
+
+                            for (Entity e: eaten) {
+                                Circle entityCircle;
+                                if(e instanceof Ennemy){
+                                    entityCircle = ennemyCircles.get(e);
+                                } else if(e instanceof Player){
+                                    entityCircle = playerCircles.get(e);
+                                } else {
+                                    entityCircle = pelletCircles.get(e);
+                                }
+
+                                animationManager.playPelletAbsorption(entityCircle, ennemy.getPosition());
+                                unrenderEntity(e);
+                            }
+
+                            //update le rayon du cercle de l'ennemi
+                            Circle circle = ennemyCircles.get(ennemy);
+                            if(circle != null) circle.setRadius(ennemy.calculateRadius());
                         }
 
 
