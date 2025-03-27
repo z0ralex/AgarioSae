@@ -4,6 +4,7 @@ package iut.gon.agarioclient.controller;
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.animation.AnimationTimer;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -14,6 +15,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.stage.Window;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -53,10 +55,13 @@ public class GameController implements Initializable {
     private final Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
     private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
+    private SimpleDoubleProperty scale = new SimpleDoubleProperty(1.0);
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         gameSubscene.widthProperty().bind(container.widthProperty());
         gameSubscene.heightProperty().bind(container.heightProperty());
+
 
     }
 
@@ -71,10 +76,7 @@ public class GameController implements Initializable {
         camera.setLayoutX(cameraOffsetPoint.getX());
         camera.setLayoutY(cameraOffsetPoint.getY());
 
-        //System.out.println(pane.getScene().equals(gameSubscene));
-//       gameSubscene.widthProperty().bind(pane.widthProperty());
-//       gameSubscene.heightProperty().bind(pane.heightProperty()); //BUGGE
-        //pane.scene
+        scale.bind(camera.scaleXProperty());
 
         gameSubscene.setCamera(camera);
         //update de la caméra si le pane change de taille
@@ -119,13 +121,12 @@ public class GameController implements Initializable {
                     double yPosition = event.getY();
 
 
-
-
-                    double xVect = xPosition - Math.abs(player.getPosition().getX() - camera.getLayoutX());
-                    double yVect = yPosition - Math.abs(player.getPosition().getY() - camera.getLayoutY());
+                    double xVect = (xPosition - (player.getPosition().getX() - camera.getLayoutX()))/* * scale.doubleValue()*/;
+                    double yVect = (yPosition - (player.getPosition().getY() - camera.getLayoutY()))/* * scale.doubleValue()*/;
 
                     System.out.printf("Souris : [%.0f, %.0f], Joueur : [%.0f, %.0f], Vecteur : [%.0f, %.0f], Camera: [%.0f, %.0f]\n", event.getX(), event.getY(), player.getPosition().getX(),
                             player.getPosition().getY(), xVect, yVect, camera.getLayoutX(), camera.getLayoutY());
+
 
                     if (Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE) {
                         //zone morte : reset du vecteur
@@ -133,6 +134,7 @@ public class GameController implements Initializable {
                     } else {
                         // mouvement
                         mousePosition[0] = new Point2D(xPosition, yPosition); //TODO retirer
+
                         mouseVector.setValue(new Point2D(xVect, yVect).normalize()); //TODO pas forcément normaliser : selon l'emplacement de la souris la vitesse change
                     }
                 });
@@ -150,7 +152,7 @@ public class GameController implements Initializable {
                         }
 
 
-                        Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
+                        Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()).multiply(scale.doubleValue()));
 
                         // Check for collisions with the map boundaries
                         double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
@@ -197,8 +199,8 @@ public class GameController implements Initializable {
     }
 
     private void onPlayerPositionChanged(Player player, Point2D newPos) {
-        double x = newPos.getX() - cameraOffsetPoint.getX();
-        double y = newPos.getY() - cameraOffsetPoint.getY();
+        double x = (newPos.getX() - cameraOffsetPoint.getX()) * scale.doubleValue();
+        double y = (newPos.getY() - cameraOffsetPoint.getY()) * scale.doubleValue();
 
         camera.setLayoutX(x);
         camera.setLayoutY(y);
@@ -213,13 +215,13 @@ public class GameController implements Initializable {
     }
 
     private void setZoomFromMass(double deltaMass) {
-
+        System.out.println("scale : " + scale.doubleValue());
         // formule de calcul de la taille de la camera
         // peut être ajustee
         double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);
 
-        camera.setScaleX(newScale);
-        camera.setScaleY(newScale);
+        /*camera.setScaleX(newScale);
+        camera.setScaleY(newScale);*/
 
         // le zoom change : on doit recalculer le centre de la caméra
         cameraOffsetPoint = new Point2D(
@@ -236,8 +238,8 @@ public class GameController implements Initializable {
         //System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
-            ennemyCircle.setCenterX(newPoint.getX());
-            ennemyCircle.setCenterY(newPoint.getY());
+            ennemyCircle.setCenterX((newPoint.getX())*scale.doubleValue());
+            ennemyCircle.setCenterY((newPoint.getY()) * scale.doubleValue());
         });
 
         e.massProperty().addListener((obs, oldMass, newMass) -> {
