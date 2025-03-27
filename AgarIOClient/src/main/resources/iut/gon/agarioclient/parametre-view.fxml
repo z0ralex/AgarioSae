@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Pos?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="iut.gon.agarioclient.controller.ParametreController"
+            prefHeight="300.0" prefWidth="400.0">
+
+    <VBox alignment="CENTER" spacing="20" AnchorPane.topAnchor="50" AnchorPane.leftAnchor="50" AnchorPane.rightAnchor="50">
+
+        <Label text="Paramètre" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+
+        <TextField fx:id="ipField" promptText="Entrez l'adresse IP du serveur" style="-fx-font-size: 14px; -fx-padding: 10px; -fx-min-width: 250px;"/>
+
+        <TextField fx:id="portField" promptText="Entrez le port du serveur" style="-fx-font-size: 14px; -fx-padding: 10px; -fx-min-width: 250px;"/>
+
+        <HBox alignment="CENTER" spacing="15">
+            <Button text="Valider" onAction="#onValiderButtonClick" style="-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #4CAF50; -fx-text-fill: white;" />
+            <Button text="Annuler" onAction="#onAnnulerButtonClick" style="-fx-font-size: 16px; -fx-padding: 10px 20px; -fx-background-color: #f44336; -fx-text-fill: white;" />
+        </HBox>
+
+    </VBox>
+
+</AnchorPane>

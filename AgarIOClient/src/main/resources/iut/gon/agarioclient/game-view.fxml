@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.SubScene?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 
-<Pane xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="iut.gon.agarioclient.controller.GameController"
-      fx:id="pane"
-      prefHeight="1200.0" prefWidth="1600.0">
-</Pane>
+<AnchorPane fx:id="container" prefHeight="800.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="iut.gon.agarioclient.controller.GameController">
+   <children>
+       <SubScene fx:id="gameSubscene" height="800.0" width="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+           <root>
+               <!--simulation de minimap-->
+               <Pane fx:id="pane" minHeight="300.0" minWidth="400.0" prefHeight="1200.0" prefWidth="1600.0" />
+           </root>
+       </SubScene>
+      <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: red;" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+   </children>
+</AnchorPane>
