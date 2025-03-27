@@ -8,18 +8,27 @@ import java.net.*;
 public class ClientHandler implements Runnable {
 
     private Socket socket;
-    private PrintWriter out;
-    private BufferedReader in;
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
     private String clientId;
+
+    public ObjectOutputStream getOut() {
+        return out;
+    }
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
         try {
-            this.out = new PrintWriter(socket.getOutputStream(), true);
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.out = new ObjectOutputStream(socket.getOutputStream()); // Remplace PrintWriter par ObjectOutputStream
+            this.in = new ObjectInputStream(socket.getInputStream()); // Utilise ObjectInputStream pour les objets
         } catch (IOException e) {
             System.err.println("Erreur de connexion avec le client : " + e.getMessage());
         }
+    }
+
+    public void sendObject(Object obj) throws IOException {
+        out.writeObject(obj);
+        out.flush();
     }
 
     @Override
@@ -27,33 +36,48 @@ public class ClientHandler implements Runnable {
         try {
             clientId = Server.generateClientId();
             System.out.println("ID du client généré : " + clientId);
-            out.println("Bienvenue! Votre ID est : " + clientId); // Message explicite
+            String s = "Bienvenue! Votre ID est : " + clientId;
+            System.out.println(s);
+            out.writeObject(s); // Envoi du message d'accueil
+            out.flush();
 
-            Server.addClientWriter(out, clientId);
+            Server.addClientOutputStream(out, clientId);
 
-            String message;
-            while ((message = in.readLine()) != null) {
-                System.out.println("Message reçu de " + clientId + ": " + message);
-
-                if (message.startsWith("CHAT: ")) {
-                    Server.broadcast("CHAT: "+clientId + ": " + message.substring(6));
+            Object message;
+            while ((message = in.readObject()) != null) {
+                if (message instanceof String) {
+                    String msg = (String) message;
+                    // Vérifier si le client signale qu'il est prêt
+                    if (msg.equalsIgnoreCase("pret")) {
+                        System.out.println("Le client " + clientId + " est prêt.");
+                        Server.getClientReadyStatus().put(clientId, true);
+                    }
+                    // Si c'est un message de chat
+                    else if (msg.startsWith("CHAT: ")) {
+                        System.out.println("Message du client " + clientId + ": " + msg);
+                        Server.broadcast(msg);
+                    }
+                } else {
+                    System.err.println("Type inconnu reçu : " + message.getClass());
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             System.err.println("Erreur du client " + clientId + ": " + e.getMessage());
         } finally {
-            // Nettoyage après déconnexion
             try {
                 if (socket != null) {
                     socket.close();
                 }
+                Server.getClientHandlersSet().remove(this);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Server.removeClientWriter(out, clientId); // Retirer proprement le client
+            Server.removeClientOutputStream(out, clientId);
         }
     }
 
+
+    public String getClientId() {
+        return clientId;
+    }
 }
-
-

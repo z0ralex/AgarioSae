@@ -1,22 +1,37 @@
 package iut.gon.agarioclient.server;
+import java.io.*;
+import java.util.Random;
+import java.util.Set;
 
 public  class GameUpdater implements Runnable {
+    private Set<ClientHandler> clientWriters;
+
+    public GameUpdater(Set<ClientHandler> clients) {
+        this.clientWriters = clients;
+    }
     @Override
     public void run() {
-        while (true) {
-            try {
+        try {
+            while (true) {
+                Random random = new Random();
+                TestVecteur vecteur = new TestVecteur(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
-
-                // Mettre à jour l'état du jeu ici (positions, scores, etc.)
-                String gameState = "État du jeu mis à jour : ..."; // Exemple d'état
-                Server.broadcast(gameState);
-
-                // Attendre 33ms pour maintenir une mise à jour à 30 FPS
-                Thread.sleep(33);
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                // Envoyer l'objet uniquement aux clients prêts
+                for (ClientHandler client : Server.getClientHandlersSet()) {
+                    Boolean isReady = Server.getClientReadyStatus().get(client.getClientId());
+                    if (isReady != null && isReady) {  // Seulement si le client a répondu "pret"
+                        try {
+                            client.sendObject(vecteur);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                Thread.sleep(1000); // Pause d'une seconde entre chaque envoi (adapter si nécessaire)
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
+
 }
