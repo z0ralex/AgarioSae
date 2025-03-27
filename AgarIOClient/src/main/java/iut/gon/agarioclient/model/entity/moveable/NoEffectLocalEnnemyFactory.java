@@ -11,6 +11,7 @@ import java.util.*;
 
 public class NoEffectLocalEnnemyFactory implements LocalEnnemyFactory{
 
+    private static int num = 0;
     private MapNode root;
 
     public NoEffectLocalEnnemyFactory(MapNode root) {
@@ -42,7 +43,8 @@ public class NoEffectLocalEnnemyFactory implements LocalEnnemyFactory{
                     strategy = new IAStratEatPelletsOnly(root);
             }
 
-            Ennemy ennemy = new Ennemy(UUID.randomUUID().toString(), position, mass, strategy, speed);
+            num++;
+            Ennemy ennemy = new Ennemy("BOT - "+num, position, mass, strategy, speed);
             ennemies.add(ennemy);
         }
 

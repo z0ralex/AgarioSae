@@ -3,7 +3,6 @@
 <?import javafx.scene.SubScene?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.StackPane?>
 
 <AnchorPane fx:id="container" prefHeight="800.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="iut.gon.agarioclient.controller.GameController">
    <children>
@@ -13,6 +12,9 @@
                <Pane fx:id="pane" minHeight="300.0" minWidth="400.0" prefHeight="1200.0" prefWidth="1600.0" />
            </root>
        </SubScene>
-      <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: red;" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+       <Pane fx:id="minimap" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2;" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0">
+       </Pane>
+      <Pane fx:id="classement" prefHeight="240.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2;" AnchorPane.bottomAnchor="220.0" AnchorPane.rightAnchor="10.0" />
+
    </children>
 </AnchorPane>

@@ -222,7 +222,7 @@ public class Player extends Entity implements PlayerComponent {
         return isVisible;
     }
 
-
+    //TODO merge minimap
     public Set<Ennemy> checkCollisionsWithEnemies(Collection<Ennemy> enemies) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
@@ -231,17 +231,33 @@ public class Player extends Entity implements PlayerComponent {
         enemies.forEach(enemy -> {
             double distance = getPosition().distance(enemy.getPosition());
             double overlap = Math.max(0, playerRadius + enemy.calculateRadius() - distance);
+//        List<Ennemy> toRemove = new ArrayList<>();
+//
+//        for (Map.Entry<Ennemy, Circle> entry : ennemyCircles.entrySet()) {
+//            Ennemy ennemy = entry.getKey();
+//            Circle ennemyCircle = entry.getValue();
+//            Circle miniEnnemyCircle = minimapEnnemyCircles.get(ennemy);
+//            double distance = getPosition().distance(ennemy.getPosition());
+//            double overlap = Math.max(0, playerRadius + ennemy.calculateRadius() - distance);
 
             if (getMass() >= enemy.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
                 eaten.add(enemy);
                 //animationManager.playPelletAbsorption(enemyCircle, getPosition());
                 setMass(getMass() + enemy.getMass());
                 //pane.getChildren().remove(ennemyCircle); //TODO: Remove pane
+//                minimap.getChildren().remove(miniEnnemyCircle);
                 enemy.markForRemoval();
+                //toRemove.add(enemy);
 
             }
         });
         return eaten;
+
+
+//        for (Ennemy e : toRemove) {
+//            ennemyCircles.remove(e);
+//            minimapEnnemyCircles.remove(e);
+//        }
     }
 
     public Set<Player> checkCollisionsWithPlayers(Collection<Player> playerCircles) {
@@ -273,6 +289,7 @@ public class Player extends Entity implements PlayerComponent {
         });
         return eaten;
     }
+
 
     public void markForRemoval() {
         if(!markedForRemoval){

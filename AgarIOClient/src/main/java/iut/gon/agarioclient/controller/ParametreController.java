@@ -70,6 +70,8 @@ public class ParametreController {
                     GameController gameController = gameLoader.getController();
                     gameController.initializeGame(nickname, camera, new Game());
 
+                    gameController.setStage(stage);
+
                     ChatController chatController = chatLoader.getController();
                     chatController.initialize(nickname,ip, Integer.valueOf(port));
 

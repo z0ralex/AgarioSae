@@ -14,11 +14,15 @@ import iut.gon.agarioclient.server.TestVecteur;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.*;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.ParallelCamera;
 import javafx.scene.Parent;
@@ -37,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import javafx.stage.Stage;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class GameController implements Initializable {
 
@@ -49,11 +54,16 @@ public class GameController implements Initializable {
     private SubScene gameSubscene;
 
     @FXML
-    private StackPane chat;
+    private  Pane minimap;
+
+    @FXML
+    private Pane classement ;
 
     private Point2D cameraOffsetPoint;
     private Stage stage;
 
+    //TODO retirer
+    private Point2D cameraCenterPoint;
     private ParallelCamera camera;
 
 
@@ -78,7 +88,12 @@ public class GameController implements Initializable {
     private final Map<Pellet, Circle> pelletCircles = new HashMap<>();
     private final Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
     private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
+
+    private Map<Player, Circle> minimapPlayerCircles = new HashMap<>();
+    private Map<Ennemy, Circle> minimapEnnemyCircles = new HashMap<>();
     private AnimationManager animationManager;
+
+    private String nickname;
 
     public void setStage(Stage stage){
         this.stage = stage;
@@ -100,8 +115,11 @@ public class GameController implements Initializable {
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
-
+        this.nickname = nickname;
         animationManager = new AnimationManager(pane);
+
+        //TODO retirer
+        cameraCenterPoint = new Point2D(pane.getWidth() / 2., pane.getHeight() / 2.);
 
         cameraOffsetPoint = new Point2D(container.getWidth() / 2., container.getHeight() / 2.);
         this.camera = camera;
@@ -123,6 +141,10 @@ public class GameController implements Initializable {
 
         Player player = game.addPlayer(nickname);
         addPlayer(player);
+
+        addPlayerToMinimap(player);
+
+        afficherClassement();
 
         //partie controller
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -163,7 +185,6 @@ public class GameController implements Initializable {
                         }
 
 
-
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
 
@@ -172,16 +193,22 @@ public class GameController implements Initializable {
                         //graphique
                         redrawPlayer(player);
 
-                        //client
+
+                        afficherClassement();
+
                         if(!(player.isVisible())){
                             playerCircles.get(player).setOpacity(0.02);
                         } else{
                             playerCircles.get(player).setOpacity(1);
                         }
+                        /*player.checkCollisionsWithEnemies(ennemyCircles, minimapEnnemyCircles, pane, minimap, animationManager);
+                        spawnPellets();*/
 
+                        //updateEnnemyPosition
                         //pour toutes les entités existantes actuellement
                         for (Entity eatingEntity : eatenMap.keySet()){
                             renderEntity(eatingEntity);
+
 
                             if(eatenMap.get(eatingEntity) != null){
                                 for (Entity eatenEntity : eatenMap.get(eatingEntity)) {
@@ -215,13 +242,60 @@ public class GameController implements Initializable {
 
 
 
+    public void afficherClassement() {
+        // Créer une liste de paires (entité, masse) pour les joueurs et ennemis
+        ObservableList<Map.Entry<String, Double>> classement = FXCollections.observableArrayList();
+
+        // Ajouter les joueurs
+        for (Map.Entry<Player, Circle> entry : playerCircles.entrySet()) {
+            Player player = entry.getKey();
+            classement.add(new AbstractMap.SimpleEntry<>(player.getId(), player.getMass()));
+        }
+
+        // Ajouter les ennemis
+        for (Map.Entry<Ennemy, Circle> entry : ennemyCircles.entrySet()) {
+            Ennemy ennemy = entry.getKey();
+            classement.add(new AbstractMap.SimpleEntry<>(ennemy.getId(), ennemy.getMass()));
+        }
+
+        // Trier par masse, du plus grand au plus petit
+        classement.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue()));
+
+        // Limiter aux 10 premiers
+        List<Map.Entry<String, Double>> top10 = classement.stream().limit(10).collect(Collectors.toList());
+
+        // Afficher dans le Pane de classement
+        afficherTop10(top10);
+    }
+
+    public void afficherTop10(List<Map.Entry<String, Double>> top10) {
+        classement.getChildren().clear(); // Vider le Pane avant de remplir
+
+        int position = 1;
+        String str="Classement : \n";
+        for (Map.Entry<String, Double> entry : top10) {
+            String nom = entry.getKey();
+            Double masse = entry.getValue();
+
+            str+=(position + ". Score : " + nom + " : " + String.format("%.2f", masse) + "\n");
+            position++;
+        }
+        Label label = new Label(str);
+        label.setStyle("-fx-font-size: 14px; -fx-text-fill: black; ");
+        label.setPadding(new Insets(10, 10, 10, 10));
+        classement.getChildren().add(label);
+    }
+
+
     private void handlePlayerDeath() {
         try {
             // Clear all game elements
             pane.getChildren().clear();
             playerCircles.clear();
+            minimapPlayerCircles.clear();
             pelletCircles.clear();
             ennemyCircles.clear();
+            minimapEnnemyCircles.clear();
 
             // Load welcome view
             FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/iut/gon/agarioclient/welcome-view.fxml"));
@@ -230,6 +304,7 @@ public class GameController implements Initializable {
 
             WelcomeController welcomeController = fxmlLoader.getController();
             welcomeController.setStage(stage);
+            welcomeController.setNickname(nickname);
 
             stage.setTitle("Welcome to AgarIO");
             stage.setScene(scene);
@@ -287,6 +362,25 @@ public class GameController implements Initializable {
         });
     }
 
+    private void addPlayerToMinimap(Player player) {
+        double minimapScaleX = minimap.getWidth() / X_MAX;
+        double minimapScaleY = minimap.getHeight() / Y_MAX;
+
+        double minimapPlayerRadius = player.calculateRadius() * 0.1;
+
+        Circle miniPlayer = new Circle(
+                player.getPosition().getX() * minimapScaleX,
+                player.getPosition().getY() * minimapScaleY,
+                player.calculateRadius() * 0.1,  // Réduction de la taille du joueur
+                Color.BLUE
+        );
+
+        minimapPlayerCircles.put(player, miniPlayer);
+        minimap.getChildren().add(miniPlayer);
+
+    }
+
+
     private void onPlayerPositionChanged(Player player, Point2D newPos) {
         double x = (newPos.getX() - cameraOffsetPoint.getX()) ;
         double y = (newPos.getY() - cameraOffsetPoint.getY()) ;
@@ -300,7 +394,7 @@ public class GameController implements Initializable {
     }
 
     private void setZoomFromMass(double deltaMass) {
-
+        //System.out.println("scale : " + scale.doubleValue());
         // formule de calcul de la taille de la camera
         // peut être ajustee
         double newScale = camera.getScaleX() + 1. / (deltaMass * 200.);
@@ -341,7 +435,34 @@ public class GameController implements Initializable {
         e.massProperty().addListener((obs, oldMass, newMass) -> {
             ennemyCircle.setRadius(e.calculateRadius()); // update du radius du joueur
         });
+        addEnnemyToMinimap(e);
     }
+
+    private void addEnnemyToMinimap(Ennemy ennemy) {
+        double minimapScaleX = minimap.getWidth() / X_MAX;
+        double minimapScaleY = minimap.getHeight() / Y_MAX;
+
+        double minimapEnnemyRadius = ennemy.calculateRadius() * 0.1;
+
+        Color color = (ennemy.getStrat() instanceof IAStratEatPlayers) ? Color.RED : Color.GREEN;
+
+        Circle miniEnnemy = new Circle(
+                ennemy.getPosition().getX() * minimapScaleX,
+                ennemy.getPosition().getY() * minimapScaleY,
+                ennemy.calculateRadius() * 0.1,  // Taille réduite
+                color
+        );
+
+        minimapEnnemyCircles.put(ennemy, miniEnnemy);
+        minimap.getChildren().add(miniEnnemy);
+
+        // Suivi des mouvements de l'ennemi
+        ennemy.positionProperty().addListener((obs, oldPos, newPos) -> {
+            miniEnnemy.setCenterX(newPos.getX() * minimapScaleX);
+            miniEnnemy.setCenterY(newPos.getY() * minimapScaleY);
+        });
+    }
+
 
     public void redrawPlayer(Player player) {
         Circle playerCircle = playerCircles.get(player);
@@ -349,7 +470,17 @@ public class GameController implements Initializable {
             playerCircle.setCenterX(player.getPosition().getX());
             playerCircle.setCenterY(player.getPosition().getY());
         }
+        Circle miniPlayerCircle = minimapPlayerCircles.get(player);
+        if(miniPlayerCircle != null){
+            double minimapScaleX = minimap.getWidth() / X_MAX;
+            double minimapScaleY = minimap.getHeight() / Y_MAX;
+            miniPlayerCircle.setCenterX(player.getPosition().getX() * minimapScaleX);
+            miniPlayerCircle.setCenterY(player.getPosition().getY() * minimapScaleY);
+            double minimapPlayerRadius = Math.min(Math.max(3,player.calculateRadius()*0.03),20);
+            miniPlayerCircle.setRadius(minimapPlayerRadius);
+        }
     }
+
 
     public void redrawEnemy(Ennemy e) {
         Circle ennemyCircle = ennemyCircles.get(e);
@@ -357,6 +488,16 @@ public class GameController implements Initializable {
             ennemyCircle.setCenterX(e.getPosition().getX());
             ennemyCircle.setCenterY(e.getPosition().getY());
             ennemyCircle.setRadius(e.calculateRadius());
+        }
+        Circle miniEnnemyCircle = minimapEnnemyCircles.get(e);
+        if(miniEnnemyCircle!=null){
+            double minimapScaleX = minimap.getWidth() / X_MAX;
+            double minimapScaleY = minimap.getHeight() / Y_MAX;
+            miniEnnemyCircle.setCenterX(e.getPosition().getX() * minimapScaleX);
+            miniEnnemyCircle.setCenterY(e.getPosition().getY() * minimapScaleY);
+
+            double minimapEnnemyRadius = Math.min(Math.max(3,e.calculateRadius()*0.03),20);
+            miniEnnemyCircle.setRadius(minimapEnnemyRadius);
         }
     }
 
