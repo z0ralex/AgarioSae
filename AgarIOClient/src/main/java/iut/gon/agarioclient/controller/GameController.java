@@ -162,7 +162,7 @@ public class GameController {
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
-                        player.checkCollisions(pelletCircles, pane, animationManager);
+                        player.checkCollisionsWithPellet(pelletCircles, pane, animationManager);
                         player.checkCollisionsWithEnemies(ennemyCircles, pane, animationManager);
                         spawnPellets();
 

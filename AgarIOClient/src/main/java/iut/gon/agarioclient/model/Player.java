@@ -142,7 +142,7 @@ public class Player extends Entity implements PlayerComponent {
         return new Point2D(newX, newY);
     }
 
-    public void checkCollisions(Map<Pellet, Circle> pelletCircles, Pane pane, AnimationManager animationManager) {
+    public void checkCollisionsWithPellet(Map<Pellet, Circle> pelletCircles, Pane pane, AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius + 100;
 
