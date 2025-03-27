@@ -174,11 +174,7 @@ public class GameController implements Initializable {
                             return;
                         }
 
-                        if (player.getCurrentMapNode() != null &&
-                                !player.getCurrentMapNode().positionInNode(player.getPosition().getX(), player.getPosition().getY())) {
-                            player.removeFromCurrentNode();
-                            root.addEntity(player);
-                        }
+                        checkEntityChunck(player);
 
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX); //TODO changer
                         player.setSpeed(speed);
@@ -199,20 +195,34 @@ public class GameController implements Initializable {
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
-                        player.checkCollisionsWithPellet(pelletCircles,  animationManager);
+
+                        Set<Pellet> eatenPellets = player.checkCollisionsWithPellet(pelletCircles.keySet());
+
+                        for (Pellet p: eatenPellets) {
+                            animationManager.playPelletAbsorption(pelletCircles.get(p), player.getPosition());
+                            unrenderEntity(p);
+                        }
+
                         if(!(player.isVisible())){
                             playerCircles.get(player).setOpacity(0.02);
                         } else{
                             playerCircles.get(player).setOpacity(1);
                         }
-                        player.checkCollisionsWithEnemies(ennemyCircles, animationManager);
+
+                        Set<Ennemy> eatenEnemies = player.checkCollisionsWithEnemies(ennemyCircles.keySet());
+
+                        for (Ennemy e: eatenEnemies) {
+                            animationManager.playPelletAbsorption(ennemyCircles.get(e), player.getPosition());
+                            unrenderEntity(e);
+                        }
+
                         spawnPellets();
 
                         for (int i = 0; i < list.size(); i++) {
-                            updateEnnemyPosition(list.get(i));
+                            updateEnemyPosition(list.get(i));
                             list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
-                            list.get(i).checkCollisionsWithEnemies(ennemyCircles, animationManager);
-                            list.get(i).checkCollisionsWithPlayers(playerCircles, animationManager);
+                            list.get(i).checkCollisionsWithEnemies(ennemyCircles.keySet());
+                            list.get(i).checkCollisionsWithPlayers(playerCircles.keySet());
 
                         }
 
@@ -222,6 +232,19 @@ public class GameController implements Initializable {
                 }.start();
             }
         });
+    }
+
+    /**
+     * vérifie si l'entité s'est déplacée hors de son chunck, si oui on la déplace sur la map aussi
+     * @param entity
+     */
+    private void checkEntityChunck(Entity entity){
+        if (entity.getCurrentMapNode() != null &&
+                !entity.getCurrentMapNode().positionInNode(entity.getPosition().getX(), entity.getPosition().getY())) {
+
+            entity.removeFromCurrentNode();
+            root.addEntity(entity);
+        }
     }
 
     private void handlePlayerDeath() {
@@ -364,7 +387,7 @@ public class GameController implements Initializable {
         }
     }
 
-    public void updateEnnemyPosition(Ennemy e) {
+    public void updateEnemyPosition(Ennemy e) {
         Circle ennemyCircle = ennemyCircles.get(e);
         if (ennemyCircle != null) {
             ennemyCircle.setCenterX(e.getPosition().getX());
@@ -384,7 +407,7 @@ public class GameController implements Initializable {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
         root.addEntity(pellet);
 
-        Random couleur = new Random();
+        Random color = new Random();
 
         if(pellet instanceof PartialInvisibilityPellet){
             pelletCircle.setFill(Color.CYAN);
@@ -396,7 +419,7 @@ public class GameController implements Initializable {
             pelletCircle.setFill(Color.MAGENTA);
             pelletCircle.setRadius(15.0);
         }else {
-            int selector = couleur.nextInt(6);
+            int selector = color.nextInt(6);
             switch (selector){
                 case 0: pelletCircle.setFill(Color.DARKVIOLET); break;
                 case 1: pelletCircle.setFill(Color.BLUE); break;
@@ -465,6 +488,8 @@ public class GameController implements Initializable {
 
             entityCircle = ennemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);
+            pane.getChildren().remove(entityCircle);
+
         } else if (entity instanceof Player) {
             entityCircle = playerCircles.get(entity);
             playerCircles.remove(entity, entityCircle);

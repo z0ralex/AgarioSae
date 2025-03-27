@@ -10,10 +10,5 @@ public class PartialInvisibilityPellet extends EffectPellet {
         super(id, position, mass);
     }
 
-    @Override
-    public void applyEffect(Player player) {
-
-    }
-
 
 }

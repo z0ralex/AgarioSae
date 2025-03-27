@@ -15,9 +15,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Player extends Entity implements PlayerComponent {
     protected List<PlayerComponent> components = new ArrayList<>();
@@ -170,17 +168,18 @@ public class Player extends Entity implements PlayerComponent {
         return new Point2D(newX, newY);
     }
 
-    public void checkCollisionsWithPellet(Map<Pellet, Circle> pelletCircles, /*Pane pane,*/ AnimationManager animationManager) {
+    public Set<Pellet> checkCollisionsWithPellet(Set<Pellet> pellets) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius + 10;
+        Set<Pellet> eatenPellets = new HashSet<>();
 
-        pelletCircles.entrySet().removeIf(entry -> {
-            Pellet pellet = entry.getKey();
-            Circle pelletCircle = entry.getValue();
+        pellets.forEach(pellet -> {
+            //Circle pelletCircle = entry.getValue();
             double distance = getPosition().distance(pellet.getPosition());
 
             if (distance <= eventHorizon) {
-                animationManager.playPelletAbsorption(pelletCircle, getPosition());
+                //animationManager.playPelletAbsorption(pelletCircle, getPosition());
+                eatenPellets.add(pellet);
 
                 if(pellet instanceof SpeedReductionPellet){
                     this.gotEffectedAt = System.currentTimeMillis();
@@ -202,18 +201,20 @@ public class Player extends Entity implements PlayerComponent {
                 setMass(getMass() + pellet.getMass());
                 //pane.getChildren().remove(pelletCircle); //TODO: Remove pane
                 pellet.removeFromCurrentNode();
-                return true;
+
+            } else {
+                    //Reset Speed
+                if (System.currentTimeMillis() > affectedUntil) {
+                    this.setSpecialEffect(1.0);
+                }
+                //Reset Invisibility
+                if (System.currentTimeMillis() > InvisbileUntil) {
+                    this.isVisible = true;
+                }
             }
-            //Reset Speed
-            if(System.currentTimeMillis() > affectedUntil){
-                this.setSpecialEffect(1.0);
-            }
-            //Reset Invisibility
-            if(System.currentTimeMillis() > InvisbileUntil){
-                this.isVisible = true;
-            }
-            return false;
         });
+
+        return eatenPellets;
     }
 
 
@@ -221,60 +222,64 @@ public class Player extends Entity implements PlayerComponent {
         return isVisible;
     }
 
-    public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, AnimationManager animationManager) {
+
+    public Set<Ennemy> checkCollisionsWithEnemies(Set<Ennemy> enemies) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
+        Set<Ennemy> eaten = new HashSet<>();
 
-        ennemyCircles.entrySet().removeIf(entry -> {
-            Ennemy ennemy = entry.getKey();
-            Circle ennemyCircle = entry.getValue();
-            double distance = getPosition().distance(ennemy.getPosition());
-            double overlap = Math.max(0, playerRadius + ennemy.calculateRadius() - distance);
+        enemies.forEach(enemy -> {
+            double distance = getPosition().distance(enemy.getPosition());
+            double overlap = Math.max(0, playerRadius + enemy.calculateRadius() - distance);
 
-            if (getMass() >= ennemy.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
-                animationManager.playPelletAbsorption(ennemyCircle, getPosition());
-                setMass(getMass() + ennemy.getMass());
+            if (getMass() >= enemy.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
+                eaten.add(enemy);
+                //animationManager.playPelletAbsorption(enemyCircle, getPosition());
+                setMass(getMass() + enemy.getMass());
                 //pane.getChildren().remove(ennemyCircle); //TODO: Remove pane
-                ennemy.markForRemoval();
-                return true;
+                enemy.markForRemoval();
+
             }
-            return false;
         });
+        return eaten;
     }
 
-    public void checkCollisionsWithPlayers(Map<Player, Circle> playerCircles,  AnimationManager animationManager) {
+    public Set<Player> checkCollisionsWithPlayers(Set<Player> playerCircles) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
+        Set<Player> eaten = new HashSet<>();
 
-        playerCircles.entrySet().removeIf(entry -> {
-            Player otherPlayer = entry.getKey();
-            Circle otherPlayerCircle = entry.getValue();
+        playerCircles.forEach(otherPlayer -> {
+
             double distance = getPosition().distance(otherPlayer.getPosition());
             double overlap = Math.max(0, playerRadius + otherPlayer.calculateRadius() - distance);
 
-            if (this != otherPlayer && getMass() >= otherPlayer.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
-                animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
+
+            if ((this != otherPlayer && getMass() >= otherPlayer.getMass() * 1.33 && overlap >= playerRadius * 0.33) ||
+                    (this == otherPlayer && overlap >= playerRadius * 0.33)) {
+                //animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
+                eaten.add(otherPlayer);
+                setMass(getMass() + otherPlayer.getMass());
+                //pane.getChildren().remove(otherPlayerCircle); //TODO: Remove pane
+                otherPlayer.markForRemoval();
+            } /*else if  {
+                //animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
 
                 setMass(getMass() + otherPlayer.getMass());
                 //pane.getChildren().remove(otherPlayerCircle); //TODO: Remove pane
                 otherPlayer.markForRemoval();
                 return true;
-            } else if (this == otherPlayer && overlap >= playerRadius * 0.33) {
-                animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
-
-                setMass(getMass() + otherPlayer.getMass());
-                //pane.getChildren().remove(otherPlayerCircle); //TODO: Remove pane
-                otherPlayer.markForRemoval();
-                return true;
-            }
-            return false;
+            }*/
         });
+        return eaten;
     }
 
     public void markForRemoval() {
-        this.markedForRemoval = true;
-        removeFromCurrentNode();
-        components.clear();
+        if(!markedForRemoval){
+            this.markedForRemoval = true;
+            removeFromCurrentNode();
+            components.clear();
+        }
     }
 
     public boolean isMarkedForRemoval() {

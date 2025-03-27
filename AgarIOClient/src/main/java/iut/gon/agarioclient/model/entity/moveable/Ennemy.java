@@ -111,8 +111,10 @@ public class Ennemy extends Player {
     }
 
     public void markForRemoval() {
-        this.markedForRemoval = true;
-        this.removeFromCurrentNode();
+        if(!markedForRemoval){
+            this.markedForRemoval = true;
+            this.removeFromCurrentNode();
+        }
     }
 
     public boolean isMarkedForRemoval() {

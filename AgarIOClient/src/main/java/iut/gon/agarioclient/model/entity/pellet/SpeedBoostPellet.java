@@ -13,13 +13,5 @@ public class SpeedBoostPellet extends EffectPellet {
     }
 
 
-    @Override
-    public void applyEffect(Player player) {
-        if (player.getGotEffectedAt() + 2000 > System.currentTimeMillis()) {
-            player.setSpecialEffect(2);
-        } else {
-            player.setSpecialEffect(1);
-        }
 
-    }
 }
