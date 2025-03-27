@@ -147,7 +147,11 @@ public class GameController {
                             updateEnnemyPosition(list.get(i));
                             list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
                         }
-                        System.out.println(player.getGotEffectedAt());
+                        if(!(player.isVisible())){
+                            playerCircles.get(player).setOpacity(0.02);
+                        } else{
+                            playerCircles.get(player).setOpacity(1);
+                        }
                     }
                 }.start();
             }

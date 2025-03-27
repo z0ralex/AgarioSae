@@ -20,9 +20,16 @@ public class Player extends Entity implements PlayerComponent {
     private DoubleProperty mass;
     private boolean markedForRemoval = false;
 
+    private boolean isVisible = true;
+
     private long affectedUntil = -1;
     private double specialEffect = 1;
     private long gotEffectedAt;
+
+    private long gotInvisbileAt = -1;
+
+    private long InvisbileUntil = -1;
+
 
     public Player(String id, Point2D position, double mass) {
         super(id, position, mass);
@@ -169,27 +176,42 @@ public class Player extends Entity implements PlayerComponent {
 
                 if(pellet instanceof  SpeedReductionPellet){
                     this.gotEffectedAt = System.currentTimeMillis();
-                    this.affectedUntil = System.currentTimeMillis() + 5000;
+                    this.affectedUntil = System.currentTimeMillis() + 4000;
                     this.setSpecialEffect(0.5);
                 }
 
                 if(pellet instanceof  SpeedBoostPellet){
                     this.gotEffectedAt = System.currentTimeMillis();
-                    this.affectedUntil = System.currentTimeMillis() + 5000;
+                    this.affectedUntil = System.currentTimeMillis() + 4000;
                     this.setSpecialEffect(2);
+                }
+
+                if(pellet instanceof  PartialInvisibilityPellet){
+                    this.gotInvisbileAt = System.currentTimeMillis();
+                    this.InvisbileUntil = System.currentTimeMillis() + 4000;
+                    this.isVisible = false;
                 }
                 setMass(getMass() + pellet.getMass());
                 pane.getChildren().remove(pelletCircle);
                 pellet.removeFromCurrentNode();
                 return true;
             }
+            //Reset Speed
             if(System.currentTimeMillis() > affectedUntil){
                 this.setSpecialEffect(1.0);
+            }
+            //Reset Invisibility
+            if(System.currentTimeMillis() > InvisbileUntil){
+                this.isVisible = true;
             }
             return false;
         });
 
 
+    }
+
+    public boolean isVisible() {
+        return isVisible;
     }
 
     public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, Pane pane, AnimationManager animationManager) {
@@ -245,10 +267,6 @@ public class Player extends Entity implements PlayerComponent {
 
     public boolean isMarkedForRemoval() {
         return markedForRemoval;
-    }
-
-    public void setInvisible(boolean b) {
-        // TODO: Implement setInvisible logic
     }
 
     public List<PlayerComponent> divide() {
