@@ -1,14 +1,18 @@
-// GameController.java
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.App;
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.ParallelCamera;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -19,11 +23,14 @@ import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.stage.Stage;
 
 public class GameController {
 
     @FXML
     private Pane pane;
+
+    private Stage stage;
 
     private Point2D cameraCenterPoint;
     private ParallelCamera camera;
@@ -50,6 +57,10 @@ public class GameController {
     private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
     private AnimationManager animationManager;
 
+    public void setStage(Stage stage){
+        this.stage = stage;
+    }
+
     public void initializeGame(String nickname, ParallelCamera camera) {
 
         if (pane == null) {
@@ -64,9 +75,7 @@ public class GameController {
         camera.setLayoutY(cameraCenterPoint.getY());
         drawGrid();
 
-
         //update de la caméra si le pane change de taille
-
         ChangeListener<? super Number> sizeChange = (obs, oldWidth, newWidth)->{
             cameraCenterPoint = new Point2D(pane.getWidth() / 2,
                     pane.getHeight() / 2);
@@ -76,14 +85,16 @@ public class GameController {
         pane.heightProperty().addListener(sizeChange);
 
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
-        //root.drawBorders(pane);
+        if (root == null) {
+            throw new IllegalStateException("Root MapNode is not initialized.");
+        }
 
         Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
 
         player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
 
         NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
-        List<Ennemy> list = f.generate(2);
+        List<Ennemy> list = f.generate(10);
         for(int i = 0; i < list.size(); i++){
             addEnnemy(list.get(i));
         }
@@ -118,6 +129,20 @@ public class GameController {
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
+                        System.out.println(player.isAlive());
+
+                        if (!player.isAlive()) {
+                            Platform.runLater(() -> handlePlayerDeath());
+                            stop();
+                            return;
+                        }
+
+                        if (player.getCurrentMapNode() != null &&
+                                !player.getCurrentMapNode().positionInNode(player.getPosition().getX(), player.getPosition().getY())) {
+                            player.removeFromCurrentNode();
+                            root.addEntity(player);
+                        }
+
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX); //TODO changer
                         player.setSpeed(speed);
 
@@ -127,14 +152,12 @@ public class GameController {
                             list.get(i).setSpeed(speedE);
                         }
 
-
                         Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
 
                         // Check for collisions with the map boundaries
                         double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
                         double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
                         newPosition = new Point2D(newX, newY);
-
 
                         player.setPosition(newPosition);
 
@@ -146,12 +169,40 @@ public class GameController {
                         for (int i = 0; i < list.size(); i++) {
                             updateEnnemyPosition(list.get(i));
                             list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
+                            list.get(i).checkCollisionsWithEnemies(ennemyCircles, pane, animationManager);
+                            list.get(i).checkCollisionsWithPlayers(playerCircles, pane, animationManager);
+
                         }
                     }
                 }.start();
             }
         });
     }
+
+    private void handlePlayerDeath() {
+        try {
+            // Clear all game elements
+            pane.getChildren().clear();
+            playerCircles.clear();
+            pelletCircles.clear();
+            ennemyCircles.clear();
+
+            // Load welcome view
+            FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/iut/gon/agarioclient/welcome-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root, 800, 600);
+
+            WelcomeController welcomeController = fxmlLoader.getController();
+            welcomeController.setStage(stage);
+
+            stage.setTitle("Welcome to AgarIO");
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void drawGrid() {
         pane.getChildren().clear();
@@ -202,7 +253,6 @@ public class GameController {
         camera.setLayoutX(x);
         camera.setLayoutY(y);
 
-
         //mets à jour le chunk du joueur
         if(!player.getCurrentMapNode().positionInNode(newPoint.getX(), newPoint.getY())){
 
@@ -236,7 +286,6 @@ public class GameController {
                 (pane.getHeight() / 2) * camera.getScaleY()
         );
     }
-
 
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), e.calculateRadius());
@@ -272,7 +321,6 @@ public class GameController {
         }
     }
 
-
     public void updateEnnemyPosition(Ennemy e) {
         Circle ennemyCircle = ennemyCircles.get(e);
         if (ennemyCircle != null) {
@@ -280,7 +328,6 @@ public class GameController {
             ennemyCircle.setCenterY(e.getPosition().getY());
         }
     }
-
 
     public void createPellets(int count) {
         List<Pellet> pellets = pelletFactory.generatePellets(count);
@@ -303,7 +350,6 @@ public class GameController {
         pane.getChildren().add(pelletCircle);
         pelletCircle.toBack();
     }
-
 
     public void checkCollisions(Ennemy ennemy) {
         Circle ennemyCircle = ennemyCircles.get(ennemy);
@@ -368,6 +414,6 @@ public class GameController {
     }
 
     public void updateLoadedChunks(MapNode currentChunk){
-        System.out.println("update du chunk");
+//        System.out.println("update du chunk");
     }
 }

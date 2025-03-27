@@ -22,7 +22,6 @@ public class Ennemy extends Player {
         this.strat = strat;
         this.mass = new SimpleDoubleProperty(mass);
         this.speed = speed;
-        System.out.println("Ennemy created with mass: " + mass);
     }
 
     public IA getStrat() {
@@ -35,6 +34,11 @@ public class Ennemy extends Player {
 
     public void executeStrat() {
         strat.execute(this);
+    }
+
+    @Override
+    public boolean isAlive() {
+        return !isMarkedForRemoval();
     }
 
     @Override

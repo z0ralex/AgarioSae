@@ -4,7 +4,6 @@ package iut.gon.agarioclient.model;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
-import java.util.Random;
 import java.util.Set;
 
 public class IAStratEatPelletsOnly implements IA {
@@ -17,16 +16,23 @@ public class IAStratEatPelletsOnly implements IA {
 
     @Override
     public void execute(Ennemy ennemy) {
+        if (root == null) {
+            System.err.println("Root MapNode is null.");
+            return;
+        }
 
         Pellet nearestPellet = findNearestPellet(ennemy);
         if (nearestPellet != null) {
             moveToPellet(ennemy, nearestPellet);
-            checkCollisionAndConsume(ennemy, nearestPellet);
         }
     }
 
     private Pellet findNearestPellet(Ennemy ennemy) {
         Set<Entity> entities = root.getEntitySet();
+        if (entities == null) {
+            System.err.println("Entity set is null.");
+            return null;
+        }
 
         Pellet nearestPellet = null;
         double minDistance = Double.MAX_VALUE;
@@ -47,13 +53,5 @@ public class IAStratEatPelletsOnly implements IA {
         Point2D direction = pellet.getPosition().subtract(ennemy.getPosition()).normalize();
         Point2D newPosition = ennemy.getPosition().add(direction.multiply(ennemy.getSpeed()));
         ennemy.setPosition(newPosition);
-    }
-
-    private void checkCollisionAndConsume(Ennemy ennemy, Entity target) {
-        double distance = ennemy.getPosition().distance(target.getPosition());
-        if (distance <= ennemy.calculateRadius()) {
-            ennemy.setMass(ennemy.getMass() + target.getMass());
-            target.removeFromCurrentNode();
-        }
     }
 }

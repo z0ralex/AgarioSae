@@ -51,6 +51,7 @@ public class WelcomeController {
                 Parent newView = loader.load();
 
                 GameController gameController = loader.getController();
+                gameController.setStage(stage);
                 gameController.initializeGame(nickname, camera);
 
                 Scene gameScene = new Scene(newView);

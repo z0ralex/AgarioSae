@@ -16,7 +16,6 @@ public class IAStratEatPlayers implements IA{
         Player nearestPlayer = findNearestPlayer(e);
         if (nearestPlayer != null) {
             moveToPlayer(e, nearestPlayer);
-            checkCollisionAndConsume(e, nearestPlayer);
         }
     }
 
@@ -42,27 +41,4 @@ public class IAStratEatPlayers implements IA{
         Point2D newPosition = ennemy.getPosition().add(direction.multiply(ennemy.getSpeed()));
         ennemy.setPosition(newPosition);
     }
-
-    private void checkCollisionAndConsume(Ennemy ennemy, Player target) {
-        // Don't consume self
-        if (ennemy.getId().equals(target.getId())) return;
-
-        double distance = ennemy.getPosition().distance(target.getPosition());
-        if (distance <= ennemy.calculateRadius()) {
-            // Only consume if the enemy is larger
-            if (ennemy.getMass() > target.getMass() * 1.1) { // 10% size advantage
-                ennemy.setMass(ennemy.getMass() + target.getMass());
-                target.removeFromCurrentNode();
-
-                // If target is an enemy, notify controller
-                if (target instanceof Ennemy) {
-                    ((Ennemy)target).markForRemoval();
-                    if(target instanceof Ennemy) {
-                        System.out.println("Ennemy " + ennemy.getId() + " consumed " + target.getId());
-                    }
-                }
-            }
-        }
-    }
-
 }

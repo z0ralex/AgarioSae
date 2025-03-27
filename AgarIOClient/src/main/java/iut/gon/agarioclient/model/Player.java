@@ -18,6 +18,8 @@ public class Player extends Entity implements PlayerComponent {
     protected List<PlayerComponent> components = new ArrayList<>();
     private ObjectProperty<Point2D> position;
     private DoubleProperty mass;
+
+    private boolean alive = true;
     private boolean markedForRemoval = false;
 
     public Player(String id, Point2D position, double mass) {
@@ -108,13 +110,14 @@ public class Player extends Entity implements PlayerComponent {
 
     @Override
     public boolean isAlive() {
-        return components.stream().allMatch(PlayerComponent::isAlive);
+        return alive && !components.isEmpty();
     }
 
     @Override
     public void setAlive(boolean alive) {
-        for (PlayerComponent component : components) {
-            component.setAlive(alive);
+        this.alive = alive;
+        if (!alive) {
+            markForRemoval();
         }
     }
 
@@ -181,7 +184,7 @@ public class Player extends Entity implements PlayerComponent {
         });
     }
 
-    public void checkCollisionsWithPlayers(Map<Player, Circle> playerCircles, Pane pane) {
+    public void checkCollisionsWithPlayers(Map<Player, Circle> playerCircles, Pane pane, AnimationManager animationManager) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
 
@@ -192,11 +195,15 @@ public class Player extends Entity implements PlayerComponent {
             double overlap = Math.max(0, playerRadius + otherPlayer.calculateRadius() - distance);
 
             if (this != otherPlayer && getMass() >= otherPlayer.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
+                animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
+
                 setMass(getMass() + otherPlayer.getMass());
                 pane.getChildren().remove(otherPlayerCircle);
                 otherPlayer.markForRemoval();
                 return true;
             } else if (this == otherPlayer && overlap >= playerRadius * 0.33) {
+                animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
+
                 setMass(getMass() + otherPlayer.getMass());
                 pane.getChildren().remove(otherPlayerCircle);
                 otherPlayer.markForRemoval();
@@ -208,7 +215,8 @@ public class Player extends Entity implements PlayerComponent {
 
     public void markForRemoval() {
         this.markedForRemoval = true;
-        this.removeFromCurrentNode();
+        removeFromCurrentNode();
+        components.clear();
     }
 
     public boolean isMarkedForRemoval() {
