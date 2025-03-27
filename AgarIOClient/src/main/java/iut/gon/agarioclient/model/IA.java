@@ -1,5 +1,5 @@
 package iut.gon.agarioclient.model;
 
 public interface IA {
-    void execute();
+    void execute(Ennemy e);
 }
