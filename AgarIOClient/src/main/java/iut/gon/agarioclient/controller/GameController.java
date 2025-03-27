@@ -72,13 +72,13 @@ public class GameController {
 
         player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
 
-        NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
+        /*NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
 
         List<Ennemy> list = f.generate(3);
         for(int i = 0; i < list.size(); i++){
             addEnnemy(list.get(i)); //TODO render selon distance
             root.addEntity(list.get(i));
-        }
+        }*/
 
         root.addEntity(player);
 
@@ -114,12 +114,12 @@ public class GameController {
                     public void handle(long now) {
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX); //TODO changer
                         player.setSpeed(speed);
-
+                        /*
                         for(int i = 0; i < list.size(); i++){
                             list.get(i).executeStrat();
                             double speedE = list.get(i).calculateSpeed(list.get(i).getPosition().getX(), list.get(i).getPosition().getY(), X_MAX, Y_MAX);
                             list.get(i).setSpeed(speedE);
-                        }
+                        }*/
 
 
                         Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
@@ -134,11 +134,11 @@ public class GameController {
                         updatePlayerPosition(player);
                         player.checkCollisions(pelletCircles, pane);
                         spawnPellets();
-
+                        /*
                         for(int i = 0; i < list.size(); i++){
                             updateEnnemyPosition(list.get(i));
 
-                        }
+                        }*/
                     }
                 }.start();
             }
