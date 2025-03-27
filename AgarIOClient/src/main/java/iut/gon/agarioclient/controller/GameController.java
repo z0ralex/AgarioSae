@@ -130,8 +130,8 @@ public class GameController implements Initializable {
 
 
         addPlayer(player);
-        createPellets(INITIAL_PELLET_NB);
 
+        //partie controller
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 final Point2D[] mousePosition = {new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y)};
@@ -162,7 +162,7 @@ public class GameController implements Initializable {
                     @Override
                     public void handle(long now) {
                         if (!player.isAlive()) {
-                            Platform.runLater(() -> handlePlayerDeath());
+                            Platform.runLater(() -> handlePlayerDeath()); //purement client
                             stop();
                             return;
                         }
@@ -172,23 +172,13 @@ public class GameController implements Initializable {
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
 
-                        for (Ennemy ennemy : list) {
-                            ennemy.executeStrat();
-                            double speedE = ennemy.calculateSpeed(ennemy.getPosition().getX(), ennemy.getPosition().getY(), X_MAX, Y_MAX);
-                            ennemy.setSpeed(speedE);
-                        }
 
-                        Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
+                        game.moveEntity(player, mouseVector.getValue());
 
-                        // Check for collisions with the map boundaries
-                        double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
-                        double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
-                        newPosition = new Point2D(newX, newY);
-
-                        player.setPosition(newPosition);
-
+                        //graphique
                         redrawPlayer(player);
 
+                        //TODO serveur PUTAIN C'EST CHAUD CA
                         Set<Pellet> eatenPellets = player.checkCollisionsWithPellet(pelletCircles.keySet());
 
                         for (Pellet p: eatenPellets) {
@@ -196,12 +186,14 @@ public class GameController implements Initializable {
                             unrenderEntity(p);
                         }
 
+                        //client
                         if(!(player.isVisible())){
                             playerCircles.get(player).setOpacity(0.02);
                         } else{
                             playerCircles.get(player).setOpacity(1);
                         }
 
+                        //TODO la meme qu'en haut
                         Set<Ennemy> eatenEnemies = player.checkCollisionsWithEnemies(ennemyCircles.keySet());
 
                         for (Ennemy e: eatenEnemies) {
@@ -209,34 +201,9 @@ public class GameController implements Initializable {
                             unrenderEntity(e);
                         }
 
-                        spawnPellets();
 
-                        for (Ennemy ennemy : list) {
-                            Set<Entity> eaten = new HashSet<>();
 
-                            redrawEnemy(ennemy);
-                            eaten.addAll(ennemy.checkCollisions(pelletCircles.keySet()));
-                            eaten.addAll(ennemy.checkCollisionsWithEnemies(ennemyCircles.keySet()));
-                            eaten.addAll(ennemy.checkCollisionsWithPlayers(playerCircles.keySet()));
 
-                            for (Entity e: eaten) {
-                                Circle entityCircle;
-                                if(e instanceof Ennemy){
-                                    entityCircle = ennemyCircles.get(e);
-                                } else if(e instanceof Player){
-                                    entityCircle = playerCircles.get(e);
-                                } else {
-                                    entityCircle = pelletCircles.get(e);
-                                }
-
-                                animationManager.playPelletAbsorption(entityCircle, ennemy.getPosition());
-                                unrenderEntity(e);
-                            }
-
-                            //update le rayon du cercle de l'ennemi
-                            Circle circle = ennemyCircles.get(ennemy);
-                            if(circle != null) circle.setRadius(ennemy.calculateRadius());
-                        }
 
 
 
@@ -299,7 +266,6 @@ public class GameController implements Initializable {
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
 
-        game.getRoot().addEntity(player); //TODO jarter
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
@@ -356,7 +322,6 @@ public class GameController implements Initializable {
 
         game.getRoot().addEntity(e); //TODO modele
 
-        //TODO deplacer vers render
         if (e.getStrat() instanceof IAStratEatPlayers) {
             ennemyCircle.setFill(Color.RED);
         } else if (e.getStrat() instanceof IAStratRandomMoving){
@@ -392,21 +357,12 @@ public class GameController implements Initializable {
         if (ennemyCircle != null) {
             ennemyCircle.setCenterX(e.getPosition().getX());
             ennemyCircle.setCenterY(e.getPosition().getY());
-        }
-    }
-
-    public void createPellets(int count) {
-        //TODO separer vue/modele
-        List<Pellet> pellets = pelletFactory.generatePellets(count);
-        for (Pellet pellet : pellets) {
-            game.getRoot().addEntity(pellet); //TODO modele
-            addPellet(pellet);  //TODO render selon distance
+            ennemyCircle.setRadius(e.calculateRadius());
         }
     }
 
     public void addPellet(Pellet pellet) {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
-        game.getRoot().addEntity(pellet); //TODO MODELE
 
         Random color = new Random();
 
@@ -438,35 +394,7 @@ public class GameController implements Initializable {
         pelletCircle.toBack();
     }
 
-    //TODO separer
-    public void checkCollisions(Ennemy ennemy) {
-        Circle ennemyCircle = ennemyCircles.get(ennemy);
-        if (ennemyCircle != null) {
-            double enemyRadius = ennemyCircle.getRadius();
-            double eventHorizon = enemyRadius + 100;
 
-            pelletCircles.entrySet().removeIf(entry -> {
-                Pellet pellet = entry.getKey();
-                Circle pelletCircle = entry.getValue();
-                double distance = ennemy.getPosition().distance(pellet.getPosition());
-
-                if (distance <= eventHorizon) {
-                    ennemy.setMass(ennemy.getMass() + pellet.getMass());
-                    //pane.getChildren().remove(pelletCircle);
-                    unrenderEntity(pellet);
-                    pellet.removeFromCurrentNode();
-                    return true;
-                }
-                return false;
-            });
-        }
-    }
-
-    public void spawnPellets() {
-        if (pelletCircles.size() < MAX_PELLET) {
-            createPellets(100);
-        }
-    }
 
     /**
      * permet de générer le rendu d'une entité à l'écran
@@ -474,9 +402,14 @@ public class GameController implements Initializable {
     public void renderEntity(Entity entity) {
 
         if (entity instanceof Ennemy) {
-            addEnnemy((Ennemy) entity);
+            Ennemy e = (Ennemy) entity;
+            if(ennemyCircles.containsKey(e)) redrawEnemy(e);
+            else addEnnemy(e);
+
         } else if (entity instanceof Player) {
-            addPlayer((Player) entity);
+            Player p = (Player) entity;
+            if(playerCircles.containsKey(p)) redrawPlayer(p);
+            else addPlayer(p);
         } else {
             //pellet
             addPellet((Pellet) entity);

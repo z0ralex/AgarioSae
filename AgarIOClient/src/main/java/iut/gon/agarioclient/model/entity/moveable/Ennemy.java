@@ -9,6 +9,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +88,7 @@ public class Ennemy extends Player {
         return ((mass / Math.pow(mass, 1.1)) * 10);
     }
 
-    public Set<Pellet> checkCollisions(Set<Pellet> pellets) {
+    public Set<Pellet> checkCollisions(Collection<Pellet> pellets) {
         double ennemyRadius = calculateRadius();
         double eventHorizon = ennemyRadius + 10;
         Set<Pellet> eatenPellets = new HashSet<>();

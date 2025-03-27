@@ -168,7 +168,7 @@ public class Player extends Entity implements PlayerComponent {
         return new Point2D(newX, newY);
     }
 
-    public Set<Pellet> checkCollisionsWithPellet(Set<Pellet> pellets) {
+    public Set<Pellet> checkCollisionsWithPellet(Collection<Pellet> pellets) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius + 10;
         Set<Pellet> eatenPellets = new HashSet<>();
@@ -223,7 +223,7 @@ public class Player extends Entity implements PlayerComponent {
     }
 
 
-    public Set<Ennemy> checkCollisionsWithEnemies(Set<Ennemy> enemies) {
+    public Set<Ennemy> checkCollisionsWithEnemies(Collection<Ennemy> enemies) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
         Set<Ennemy> eaten = new HashSet<>();
@@ -244,7 +244,7 @@ public class Player extends Entity implements PlayerComponent {
         return eaten;
     }
 
-    public Set<Player> checkCollisionsWithPlayers(Set<Player> playerCircles) {
+    public Set<Player> checkCollisionsWithPlayers(Collection<Player> playerCircles) {
         double playerRadius = calculateRadius();
         double eventHorizon = playerRadius * 0.33;
         Set<Player> eaten = new HashSet<>();
