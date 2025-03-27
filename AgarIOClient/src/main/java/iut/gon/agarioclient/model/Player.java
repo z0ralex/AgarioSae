@@ -1,92 +1,191 @@
 // Player.java
 package iut.gon.agarioclient.model;
 
+import javafx.animation.TranslateTransition;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.geometry.Point2D;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 
-/**
- * The Player class represents a player in the game, extending the Entity class.
- * It includes additional attributes like speed and methods to calculate radius and speed.
- */
-public class Player extends Entity {
-    private double speed;
-    private boolean alive;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-    /**
-     * Constructs a new Player with the specified id, position, mass, and speed.
-     *
-     * @param id       the unique identifier of the player
-     * @param position the position of the player in the game space
-     * @param mass     the mass of the player
-     * @param speed    the speed of the player
-     */
-    public Player(String id, Point2D position, double mass, double speed) {
+public class Player extends Entity implements PlayerComponent {
+    protected List<PlayerComponent> components = new ArrayList<>();
+    private ObjectProperty<Point2D> position;
+    private DoubleProperty mass;
+
+    public Player(String id, Point2D position, double mass) {
         super(id, position, mass);
-        this.speed = speed;
-        this.alive = true; // Player is alive by default
+        this.position = new SimpleObjectProperty<>(position);
+        this.mass = new SimpleDoubleProperty(mass);
     }
 
-    /**
-     * Returns the speed of the player.
-     *
-     * @return the speed of the player
-     */
+    public void add(PlayerComponent component) {
+        components.add(component);
+    }
+
+    public void remove(PlayerComponent component) {
+        components.remove(component);
+    }
+
+    public List<PlayerComponent> getComponents() {
+        return components;
+    }
+
+    private Point2D lastPosition = getPosition();
+
+
+    @Override
+    public double getMass() {
+        return components.stream().mapToDouble(PlayerComponent::getMass).sum();
+    }
+
+    @Override
+    public void setMass(double mass) {
+        double totalMass = getMass();
+        for (PlayerComponent component : components) {
+            double proportion = component.getMass() / totalMass;
+            component.setMass(mass * proportion);
+        }
+        this.mass.set(mass);
+    }
+
+    public Point2D getDirection() {
+        Point2D currentPosition = getPosition();
+        Point2D direction = currentPosition.subtract(lastPosition);
+
+        if (direction.magnitude() == 0) {
+            return Point2D.ZERO;
+        }
+        return direction.normalize();
+    }
+
+
+    @Override
+    public Point2D getPosition() {
+        double x = components.stream().mapToDouble(c -> c.getPosition().getX()).average().orElse(0);
+        double y = components.stream().mapToDouble(c -> c.getPosition().getY()).average().orElse(0);
+        return new Point2D(x, y);
+    }
+
+    @Override
+    public void setPosition(Point2D position) {
+        this.lastPosition = getPosition();
+        this.position.set(position);
+        for (PlayerComponent component : components) {
+            component.setPosition(position);
+        }
+    }
+
+
+    @Override
     public double getSpeed() {
-        return speed;
+        return components.stream().mapToDouble(PlayerComponent::getSpeed).average().orElse(0);
     }
 
-    /**
-     * Sets the speed of the player.
-     *
-     * @param speed the new speed of the player
-     */
+    @Override
     public void setSpeed(double speed) {
-        this.speed = speed;
+        for (PlayerComponent component : components) {
+            component.setSpeed(speed);
+        }
     }
 
-    /**
-     * Calculates the radius of the player based on its mass.
-     *
-     * @return the radius of the player
-     */
+    @Override
     public double calculateRadius() {
-        return 10 * Math.sqrt(getMass());
+        return components.stream().mapToDouble(PlayerComponent::calculateRadius).average().orElse(0);
     }
 
-    /**
-     * Calculates the speed of the player based on the cursor position and panel dimensions.
-     *
-     * @param cursorX     the x-coordinate of the cursor
-     * @param cursorY     the y-coordinate of the cursor
-     * @param panelWidth  the width of the panel
-     * @param panelHeight the height of the panel
-     * @return the calculated speed of the player
-     */
-    public double calculateSpeed(double cursorX, double cursorY, double panelWidth, double panelHeight) {
-        double maxSpeed = 100 / getMass(); // Example max speed calculation
-        double centerX = panelWidth / 2;
-        double centerY = panelHeight / 2;
-        double distanceX = cursorX - centerX;
-        double distanceY = cursorY - centerY;
-        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-        double maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
-        return maxSpeed * (distance / maxDistance);
+    @Override
+    public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
+        return components.stream()
+                .mapToDouble(c -> c.calculateSpeed(cursorX, cursorY, mapWidth, mapHeight))
+                .average()
+                .orElse(0);
     }
 
-    /**
-     * Returns whether the player is alive.
-     *
-     * @return true if the player is alive, false otherwise
-     */
+    @Override
     public boolean isAlive() {
-        return alive;
+        return components.stream().allMatch(PlayerComponent::isAlive);
     }
 
-    /**
-     * Sets the alive status of the player.
-     *
-     * @param alive the new alive status of the player
-     */
+    @Override
     public void setAlive(boolean alive) {
-        this.alive = alive;
+        for (PlayerComponent component : components) {
+            component.setAlive(alive);
+        }
+    }
+
+    public SimpleObjectProperty<Point2D> positionProperty() {
+        return (SimpleObjectProperty<Point2D>) position;
+    }
+
+    public DoubleProperty massProperty() {
+        return mass;
+    }
+
+    public Point2D calculateNewPosition(Point2D targetPosition, double mapWidth, double mapHeight) {
+        double speed = calculateSpeed(targetPosition.getX(), targetPosition.getY(), mapWidth, mapHeight);
+        setSpeed(speed);
+
+        Point2D direction = targetPosition.subtract(getPosition()).normalize();
+        Point2D newPosition = getPosition().add(direction.multiply(getSpeed()));
+
+        // Check for collisions with the map boundaries
+        double newX = Math.max(0, Math.min(newPosition.getX(), mapWidth));
+        double newY = Math.max(0, Math.min(newPosition.getY(), mapHeight));
+        return new Point2D(newX, newY);
+    }
+
+    public void checkCollisions(Map<Pellet, Circle> pelletCircles, Pane pane) {
+        double playerRadius = calculateRadius();
+        double eventHorizon = playerRadius + 100;
+
+        pelletCircles.entrySet().removeIf(entry -> {
+            Pellet pellet = entry.getKey();
+            Circle pelletCircle = entry.getValue();
+            double distance = getPosition().distance(pellet.getPosition());
+
+            if (distance <= eventHorizon) {
+                Point2D direction = getPosition().subtract(pellet.getPosition()).normalize();
+                double speed = getSpeed();
+                double transitionDuration = Math.max(100, distance / speed);
+                Point2D predictedPosition = getPosition().add(direction.multiply(speed * (transitionDuration / 1000.0)));
+                double toX = predictedPosition.getX() - pellet.getPosition().getX();
+                double toY = predictedPosition.getY() - pellet.getPosition().getY();
+                TranslateTransition transition = new TranslateTransition(Duration.millis(transitionDuration), pelletCircle);
+                transition.setToX(toX);
+                transition.setToY(toY);
+                transition.setOnFinished(event ->{
+                    setMass(getMass() + pellet.getMass());
+                    pane.getChildren().remove(pelletCircle);
+                    pellet.removeFromCurrentNode();
+                });
+
+                transition.play();
+
+                return true;
+            }
+            return false;
+        });
+    }
+
+    public void setInvisible(boolean b) {
+        // TODO: Implement setInvisible logic
+    }
+
+    public List<PlayerComponent> divide() {
+        // TODO: Implement divide logic
+        return null;
+    }
+
+    public void merge() {
+        // TODO: Implement merge logic
+        // Implement merging logic based on the formula t = C + m/100
     }
 }

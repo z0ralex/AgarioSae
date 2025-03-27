@@ -3,13 +3,13 @@ package iut.gon.agarioclient.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.ParallelCamera;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -83,7 +83,6 @@ public class WelcomeController {
     }
 
 
-
     @FXML
     private void onLocalButtonClick(ActionEvent event) {
         String nickname = nicknameField.getText().trim();
@@ -91,15 +90,17 @@ public class WelcomeController {
             showAlert("Erreur", "Veuillez entrer un surnom !");
         } else {
             try {
+                ParallelCamera camera = new ParallelCamera();
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/game-view.fxml"));
                 Parent newView = loader.load();
 
                 GameController gameController = loader.getController();
-                gameController.initializeGame(nickname);
+                gameController.initializeGame(nickname, camera);
 
                 Scene gameScene = new Scene(newView);
                 stage.setScene(gameScene);
                 stage.setTitle("Jeu en local");
+                gameScene.setCamera(camera);
 
             } catch (Exception e) {
                 e.printStackTrace();
