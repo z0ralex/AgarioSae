@@ -3,6 +3,7 @@ package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
+import iut.gon.agarioclient.server.TestVecteur;
 import javafx.animation.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -149,6 +150,10 @@ public class GameController {
         });
     }
 
+    public void updateFromServer(TestVecteur t) {
+        System.out.println(t.toString());
+    }
+  
     private void drawGrid() {
         pane.getChildren().clear();
 
