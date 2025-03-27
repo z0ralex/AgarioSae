@@ -3,11 +3,13 @@ package iut.gon.agarioclient.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.ParallelCamera;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -21,12 +23,16 @@ public class ParametreController {
     private TextField portField;  // Zone de saisie pour le port
     private String nickname;
 
-    // Méthode pour définir le pseudo venant de la page précédente
+    private Stage stage;
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
 
-    // Méthode appelée lors du clic sur "Valider"
     @FXML
     private void onValiderButtonClick(ActionEvent event) {
         String ip = ipField.getText().trim();
@@ -41,17 +47,28 @@ public class ParametreController {
                 boolean connectionSuccessful = connectToServer(ip, Integer.parseInt(port));
 
                 if (connectionSuccessful) {
-                    // Charger la scène du jeu avec le pseudo, l'IP et le port
+                    ParallelCamera camera = new ParallelCamera();
+
                     FXMLLoader gameLoader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/game-view.fxml"));
                     Parent gameView = gameLoader.load();
 
-                    GameController gameController = gameLoader.getController();
-                    gameController.initializeGame(nickname, null);
+                    FXMLLoader chatLoader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/chat-view.fxml"));
+                    Parent chatView = chatLoader.load();
 
-                    Scene gameScene = new Scene(gameView);
-                    Stage stage = (Stage) ipField.getScene().getWindow();
+                    HBox hBox = new HBox();
+                    hBox.getChildren().addAll(gameView,chatView);
+                    hBox.setSpacing(10);
+
+                    GameController gameController = gameLoader.getController();
+                    gameController.initializeGame(nickname, camera);
+
+                    ChatController chatController = chatLoader.getController();
+                    chatController.initialize(nickname,ip, Integer.valueOf(port));
+
+                    Scene gameScene = new Scene(hBox);
                     stage.setScene(gameScene);
                     stage.setTitle("Jeu en ligne");
+                    gameScene.setCamera(camera);
                 } else {
                     showAlert("Erreur de connexion", "Impossible de se connecter au serveur.");
                 }
@@ -69,6 +86,8 @@ public class ParametreController {
         try {
             FXMLLoader welcomeLoader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/welcome-view.fxml"));
             Parent welcomeView = welcomeLoader.load();
+            WelcomeController welcomeController = welcomeLoader.getController();
+            welcomeController.setNickname(nickname);
 
             Scene welcomeScene = new Scene(welcomeView);
             Stage stage = (Stage) ipField.getScene().getWindow();

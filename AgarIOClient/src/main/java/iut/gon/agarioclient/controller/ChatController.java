@@ -27,11 +27,15 @@ public class ChatController {
     private Socket socket;
     private String clientId;
     private String nickname;
+    private String host;
+    private Integer port;
 
-    public void initialize(String nickname) {
+    public void initialize(String nickname, String host, Integer port) {
         this.nickname = nickname;
+        this.host=host;
+        this.port=port;
         try {
-            socket = new Socket("10.42.17.86", 12345); // Connexion au serveur
+            socket = new Socket(this.host, this.port); // Connexion au serveur
             in = new ObjectInputStream(socket.getInputStream()); // Pour recevoir des objets
             out = new ObjectOutputStream(socket.getOutputStream()); // Pour envoyer des objets
 

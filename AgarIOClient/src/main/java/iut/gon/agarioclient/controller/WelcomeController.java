@@ -28,6 +28,13 @@ public class WelcomeController {
     @FXML
     private Button localButton;
 
+    private String nickname;
+
+    public void setNickname(String nickname){
+        this.nickname=nickname;
+        nicknameField.setText(nickname);
+    }
+
     private Stage stage;
 
     public void setStage(Stage stage) {
@@ -49,6 +56,7 @@ public class WelcomeController {
                 // Passer le pseudo au contrôleur de la page Parametre
                 ParametreController paramController = paramLoader.getController();
                 paramController.setNickname(nickname);
+                paramController.setStage(stage);
                 // Créer une nouvelle scène avec la page Parametre
                 Scene paramScene = new Scene(paramView);
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
