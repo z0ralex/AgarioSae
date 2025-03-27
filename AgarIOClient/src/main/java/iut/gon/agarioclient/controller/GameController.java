@@ -3,7 +3,7 @@ package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
-import javafx.animation.AnimationTimer;
+import javafx.animation.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -12,7 +12,10 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-
+import javafx.scene.shape.Line;
+import javafx.util.Duration;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +51,7 @@ public class GameController {
     private AnimationManager animationManager;
 
     public void initializeGame(String nickname, ParallelCamera camera) {
+
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
@@ -58,19 +62,24 @@ public class GameController {
         this.camera = camera;
         camera.setLayoutX(cameraCenterPoint.getX());
         camera.setLayoutY(cameraCenterPoint.getY());
+        drawGrid();
 
-        ChangeListener sizeChange = (obs, oldWidth, newWidth) -> {
-            cameraCenterPoint = new Point2D(pane.getWidth() / 2, pane.getHeight() / 2);
+        //update de la caméra si le pane change de taille
+
+        ChangeListener<? super Number> sizeChange = (obs, oldWidth, newWidth)->{
+            cameraCenterPoint = new Point2D(pane.getWidth() / 2,
+                    pane.getHeight() / 2);
         };
 
         pane.widthProperty().addListener(sizeChange);
         pane.heightProperty().addListener(sizeChange);
 
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
-        root.drawBorders(pane);
+        //root.drawBorders(pane);
 
-        Player player = new Player(nickname, new Point2D(400, 300), 10);
-        player.add(new PlayerLeaf(nickname, new Point2D(400, 300), 10, 5));
+        Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
+
+        player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
 
         NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
         List<Ennemy> list = f.generate(2);
@@ -83,8 +92,10 @@ public class GameController {
 
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
-                final Point2D[] mousePosition = {new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y)};
-                final SimpleObjectProperty<Point2D> mouseVector = new SimpleObjectProperty<>(Point2D.ZERO);
+                final Point2D[] mousePosition = {new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y)}; //TODO retirer
+
+                final SimpleObjectProperty<Point2D> mouseVector = new SimpleObjectProperty<>(Point2D.ZERO); // représente un vecteur, pas une position
+                // property parce que j'ai besoin que ça soit final, peut etre des legers coûts en perf
 
                 newScene.setOnMouseMoved(event -> {
                     double xPosition = event.getX();
@@ -93,26 +104,28 @@ public class GameController {
                     double xVect = (xPosition - player.getPosition().getX());
                     double yVect = (yPosition - player.getPosition().getY());
 
-                    if (Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE) {
+                    if(Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE){
+                        //zone morte : reset du vecteur
                         mouseVector.setValue(Point2D.ZERO);
                     } else {
-                        mousePosition[0] = new Point2D(xPosition, yPosition);
-                        mouseVector.setValue(new Point2D(xVect, yVect).normalize());
+                        // mouvement
+                        mousePosition[0] = new Point2D(xPosition, yPosition); //TODO retirer
+                        mouseVector.setValue(new Point2D(xVect, yVect).normalize()); //TODO pas forcément normaliser : selon l'emplacement de la souris la vitesse change
                     }
                 });
 
-// GameController.java
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
-                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
+                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX); //TODO changer
                         player.setSpeed(speed);
 
-                        for (int i = 0; i < list.size(); i++) {
+                        for(int i = 0; i < list.size(); i++){
                             list.get(i).executeStrat();
                             double speedE = list.get(i).calculateSpeed(list.get(i).getPosition().getX(), list.get(i).getPosition().getY(), X_MAX, Y_MAX);
                             list.get(i).setSpeed(speedE);
                         }
+
 
                         Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
 
@@ -120,6 +133,7 @@ public class GameController {
                         double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
                         double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
                         newPosition = new Point2D(newX, newY);
+
 
                         player.setPosition(newPosition);
 
@@ -138,6 +152,24 @@ public class GameController {
         });
     }
 
+    private void drawGrid() {
+        pane.getChildren().clear();
+
+        for (int x = 0; x <= X_MAX; x += 200) {
+            Line verticalLine = new Line(x, 0, x, Y_MAX);
+            verticalLine.setStroke(Color.LIGHTGRAY);
+            verticalLine.setOpacity(0.5);
+            pane.getChildren().add(verticalLine);
+        }
+
+        for (int y = 0; y <= Y_MAX; y += 200) {
+            Line horizontalLine = new Line(0, y, X_MAX, y);
+            horizontalLine.setStroke(Color.LIGHTGRAY);
+            horizontalLine.setOpacity(0.5);
+            pane.getChildren().add(horizontalLine);
+        }
+    }
+
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
         System.out.println("playerCircle: " + playerCircle + " player: " + player.getMass());
@@ -146,19 +178,65 @@ public class GameController {
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
-
+        playerCircle.toFront();
+        player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)->{
+            if(newChunk != null){
+                updateLoadedChunks(newChunk);
+            }
+        });
+        // change la position de la camera en fonction de la position du joueur
         player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
-            double x = newPoint.getX() - cameraCenterPoint.getX();
-            double y = newPoint.getY() - cameraCenterPoint.getY();
-            camera.setLayoutX(x);
-            camera.setLayoutY(y);
+            onPlayerPositionChanged(player, newPoint);
         });
 
         player.massProperty().addListener((obs, oldMass, newMass) -> {
-            playerCircle.setRadius(player.calculateRadius());
-            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue());
+            playerCircle.setRadius(player.calculateRadius()); // update du radius du joueur
+            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue()); // update du zoom de la camera
         });
     }
+
+    private void onPlayerPositionChanged(Player player, Point2D newPoint){
+        double x = newPoint.getX() - cameraCenterPoint.getX();
+        double y = newPoint.getY() - cameraCenterPoint.getY();
+
+        camera.setLayoutX(x);
+        camera.setLayoutY(y);
+
+
+        //mets à jour le chunk du joueur
+        if(!player.getCurrentMapNode().positionInNode(newPoint.getX(), newPoint.getY())){
+
+            player.removeFromCurrentNode();
+            root.addEntity(player);
+        }
+    }
+
+    private void setZoomFromMass(double deltaMass) {
+        double targetScale = camera.getScaleX() + 1. / (deltaMass * 400.);
+
+        // Assurer que le facteur de zoom reste dans des limites raisonnables
+        targetScale = Math.max(0.5, Math.min(targetScale, 3.0));
+
+        // Animation fluide avec une transition sur 300ms
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(camera.scaleXProperty(), targetScale, Interpolator.EASE_BOTH),
+                        new KeyValue(camera.scaleYProperty(), targetScale, Interpolator.EASE_BOTH)
+                )
+        );
+        timeline.play();
+
+        // Mise à jour du centre de la caméra après l'animation
+        timeline.setOnFinished(e -> updateCameraCenter());
+    }
+
+    private void updateCameraCenter() {
+        cameraCenterPoint = new Point2D(
+                (pane.getWidth() / 2) * camera.getScaleX(),
+                (pane.getHeight() / 2) * camera.getScaleY()
+        );
+    }
+
 
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), e.calculateRadius());
@@ -187,17 +265,6 @@ public class GameController {
         });
     }
 
-    private void setZoomFromMass(double deltaMass) {
-        double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);
-        camera.setScaleX(newScale);
-        camera.setScaleY(newScale);
-
-        cameraCenterPoint = new Point2D(
-                (pane.getWidth() / 2) * camera.getScaleX(),
-                (pane.getHeight() / 2) * camera.getScaleY()
-        );
-    }
-
     public void updatePlayerPosition(Player player) {
         Circle playerCircle = playerCircles.get(player);
         if (playerCircle != null) {
@@ -219,7 +286,8 @@ public class GameController {
     public void createPellets(int count) {
         List<Pellet> pellets = pelletFactory.generatePellets(count);
         for (Pellet pellet : pellets) {
-            addPellet(pellet);
+            root.addEntity(pellet);
+            addPellet(pellet);  //TODO render selon distance
         }
     }
 
@@ -229,11 +297,75 @@ public class GameController {
         pelletCircle.setFill(Color.GREEN);
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
+        pelletCircle.toBack();
+    }
+
+
+    public void checkCollisions(Ennemy ennemy) {
+        Circle ennemyCircle = ennemyCircles.get(ennemy);
+        System.out.println("la");
+        if (ennemyCircle != null) {
+            double enemyRadius = ennemyCircle.getRadius();
+            double eventHorizon = enemyRadius + 100;
+
+            pelletCircles.entrySet().removeIf(entry -> {
+                Pellet pellet = entry.getKey();
+                Circle pelletCircle = entry.getValue();
+                double distance = ennemy.getPosition().distance(pellet.getPosition());
+
+                if (distance <= eventHorizon) {
+                    ennemy.setMass(ennemy.getMass() + pellet.getMass());
+                    //pane.getChildren().remove(pelletCircle);
+                    unrenderEntity(pellet);
+                    pellet.removeFromCurrentNode();
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 
     public void spawnPellets() {
         if (pelletCircles.size() < MAX_PELLET) {
             createPellets(1);
         }
+    }
+
+    /**
+     * permet de générer le rendu d'une entité à l'écran
+     */
+    public void renderEntity(Entity entity){
+        //TODO délèguer la méthode à l'entité ? (pas sûr que ca respecte le MVC)
+
+        if(entity instanceof Ennemy){
+            addEnnemy((Ennemy) entity);
+        } else if(entity instanceof Player){
+            addPlayer((Player) entity);
+        } else {
+            //pellet
+            addPellet((Pellet) entity);
+        }
+    }
+
+    public void unrenderEntity(Entity entity){
+        Circle entityCircle;
+        System.out.println("ici");
+        if(entity instanceof Ennemy){
+            entityCircle = ennemyCircles.get(entity);
+            ennemyCircles.remove(entity, entityCircle);
+        } else if (entity instanceof Player) {
+            entityCircle = playerCircles.get(entity);
+            playerCircles.remove(entity, entityCircle);
+        } else {
+            //Pellet
+            entityCircle = pelletCircles.get(entity);
+            pelletCircles.remove(entity, entityCircle);
+        }
+
+        pane.getChildren().remove(entityCircle);
+    }
+
+    public void updateLoadedChunks(MapNode currentChunk){
+        System.out.println("update du chunk");
     }
 }

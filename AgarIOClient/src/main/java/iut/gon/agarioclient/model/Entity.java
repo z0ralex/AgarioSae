@@ -17,7 +17,7 @@ public class Entity {
     private SimpleObjectProperty<Point2D> position;
     private SimpleDoubleProperty mass;
 
-    private MapNode currentMapNode;
+    private SimpleObjectProperty<MapNode> currentMapNode;
 
     /**
      * Constructs a new Entity with the specified id, position, and mass.
@@ -30,6 +30,7 @@ public class Entity {
         this.id = id;
         this.position = new SimpleObjectProperty<>(position);
         this.mass = new SimpleDoubleProperty(mass);
+        this.currentMapNode = new SimpleObjectProperty<>();
     }
 
     /**
@@ -87,18 +88,20 @@ public class Entity {
     }
 
     public MapNode getCurrentMapNode() {
-        return currentMapNode;
+        return currentMapNode.getValue();
     }
 
     public void setCurrentMapNode(MapNode currentMapNode) {
-        this.currentMapNode = currentMapNode;
+        this.currentMapNode.setValue(currentMapNode);
     }
 
-    public void removeFromCurrentNode() {
-        if (currentMapNode != null) {
-            currentMapNode.getEntitySet().remove(this);
-            currentMapNode = null;
-        }
+    public void removeFromCurrentNode(){
+        currentMapNode.getValue().getEntitySet().remove(this);
+        currentMapNode.setValue(null);
+    }
+
+    public SimpleObjectProperty<MapNode> currentMapNodeProperty(){
+        return currentMapNode;
     }
 
 }

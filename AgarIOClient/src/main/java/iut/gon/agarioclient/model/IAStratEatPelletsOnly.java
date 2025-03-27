@@ -4,6 +4,7 @@ package iut.gon.agarioclient.model;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
+import java.util.Random;
 import java.util.Set;
 
 public class IAStratEatPelletsOnly implements IA {
@@ -16,15 +17,12 @@ public class IAStratEatPelletsOnly implements IA {
 
     @Override
     public void execute(Ennemy ennemy) {
+
         Pellet nearestPellet = findNearestPellet(ennemy);
+        System.out.println("execute: nearestPellet = " + nearestPellet);
         if (nearestPellet != null) {
             moveToPellet(ennemy, nearestPellet);
             checkCollisionAndConsume(ennemy, nearestPellet);
-        }
-
-        Player nearestPlayer = findNearestPlayer(ennemy);
-        if (nearestPlayer != null) {
-            checkCollisionAndConsume(ennemy, nearestPlayer);
         }
     }
 
@@ -46,27 +44,15 @@ public class IAStratEatPelletsOnly implements IA {
         return nearestPellet;
     }
 
-    private Player findNearestPlayer(Ennemy ennemy) {
-        Set<Entity> entities = root.getEntitySet();
-        Player nearestPlayer = null;
-        double minDistance = Double.MAX_VALUE;
-
-        for (Entity entity : entities) {
-            if (entity instanceof Player && !entity.getId().equals(ennemy.getId())) {
-                double distance = ennemy.getPosition().distance(entity.getPosition());
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearestPlayer = (Player) entity;
-                }
-            }
-        }
-        return nearestPlayer;
-    }
-
     private void moveToPellet(Ennemy ennemy, Pellet pellet) {
         Point2D direction = pellet.getPosition().subtract(ennemy.getPosition()).normalize();
+        //System.out.println(ennemy.getSpeed());
         Point2D newPosition = ennemy.getPosition().add(direction.multiply(10));
+        //System.out.println("Current Position: " + ennemy.getPosition());
+        //System.out.println("Direction: " + direction);
+        //System.out.println("New Position: " + newPosition);
         ennemy.setPosition(newPosition);
+        //System.out.println("Updated Position: " + ennemy.getPosition());
     }
 
     private void checkCollisionAndConsume(Ennemy ennemy, Entity target) {
