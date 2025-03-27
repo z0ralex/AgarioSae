@@ -137,6 +137,8 @@ public class GameController {
 
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
+        System.out.println("playerCircle: " + playerCircle + " player: " + player.getMass());
+
         root.addEntity(player);
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
@@ -156,7 +158,8 @@ public class GameController {
     }
 
     public void addEnnemy(Ennemy e) {
-        Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 25);//Attention Valeur en DUR
+        Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), e.calculateRadius());
+
         root.addEntity(e);
         if (e.getStrat() instanceof IAStratEatPlayers) {
             ennemyCircle.setFill(Color.RED);
