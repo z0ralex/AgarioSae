@@ -13,11 +13,15 @@ import iut.gon.agarioclient.server.TestVecteur;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.*;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.ParallelCamera;
 import javafx.scene.Parent;
@@ -36,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import javafx.stage.Stage;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class GameController implements Initializable {
 
@@ -49,6 +54,9 @@ public class GameController implements Initializable {
 
     @FXML
     private  Pane minimap;
+
+    @FXML
+    private Pane classement ;
 
     private Point2D cameraOffsetPoint;
     private Stage stage;
@@ -146,7 +154,7 @@ public class GameController implements Initializable {
 
         addPlayerToMinimap(player);
 
-
+        afficherClassement();
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 final Point2D[] mousePosition = {new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y)}; //TODO retirer
@@ -205,7 +213,7 @@ public class GameController implements Initializable {
                         newPosition = new Point2D(newX, newY);
 
                         player.setPosition(newPosition);
-
+                        afficherClassement();
                         updatePlayerPosition(player);
                         player.checkCollisionsWithPellet(pelletCircles, pane, animationManager);
                         if(!(player.isVisible())){
@@ -231,6 +239,51 @@ public class GameController implements Initializable {
             }
         });
     }
+
+    public void afficherClassement() {
+        // Créer une liste de paires (entité, masse) pour les joueurs et ennemis
+        ObservableList<Map.Entry<String, Double>> classement = FXCollections.observableArrayList();
+
+        // Ajouter les joueurs
+        for (Map.Entry<Player, Circle> entry : playerCircles.entrySet()) {
+            Player player = entry.getKey();
+            classement.add(new AbstractMap.SimpleEntry<>(player.getId(), player.getMass()));
+        }
+
+        // Ajouter les ennemis
+        for (Map.Entry<Ennemy, Circle> entry : ennemyCircles.entrySet()) {
+            Ennemy ennemy = entry.getKey();
+            classement.add(new AbstractMap.SimpleEntry<>(ennemy.getId(), ennemy.getMass()));
+        }
+
+        // Trier par masse, du plus grand au plus petit
+        classement.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue()));
+
+        // Limiter aux 10 premiers
+        List<Map.Entry<String, Double>> top10 = classement.stream().limit(10).collect(Collectors.toList());
+
+        // Afficher dans le Pane de classement
+        afficherTop10(top10);
+    }
+
+    public void afficherTop10(List<Map.Entry<String, Double>> top10) {
+        classement.getChildren().clear(); // Vider le Pane avant de remplir
+
+        int position = 1;
+        String str="Classement : \n";
+        for (Map.Entry<String, Double> entry : top10) {
+            String nom = entry.getKey();
+            Double masse = entry.getValue();
+
+            str+=(position + ". Score : " + nom + " : " + String.format("%.2f", masse) + "\n");
+            position++;
+        }
+        Label label = new Label(str);
+        label.setStyle("-fx-font-size: 14px; -fx-text-fill: black; ");
+        label.setPadding(new Insets(10, 10, 10, 10));
+        classement.getChildren().add(label);
+    }
+
 
     private void handlePlayerDeath() {
         try {
