@@ -10,6 +10,8 @@ public class PartialInvisibilityPellet extends EffectPellet {
 
     @Override
     public void applyEffect(Player player) {
-        player.setInvisible(true);
+
     }
+
+
 }

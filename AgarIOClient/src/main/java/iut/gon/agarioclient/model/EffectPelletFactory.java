@@ -15,7 +15,7 @@ public class EffectPelletFactory implements PelletFactory {
         Random r = new Random();
         for (int i = 0; i < quantity; i++) {
             Point2D p = new Point2D(r.nextDouble() * 1600, r.nextDouble() * 1200); // Use pane dimensions
-            int effectType = r.nextInt(4); // Assuming 4 types of effect pellets
+            int effectType = r.nextInt(3); // Assuming 4 types of effect pellets
             switch (effectType) {
                 case 0:
                     list.add(new SpeedBoostPellet(UUID.randomUUID().toString(), p, 1));
