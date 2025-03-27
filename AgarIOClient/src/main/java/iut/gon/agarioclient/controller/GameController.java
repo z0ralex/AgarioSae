@@ -4,11 +4,13 @@ package iut.gon.agarioclient.controller;
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.animation.AnimationTimer;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.ParallelCamera;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -18,6 +20,10 @@ import java.util.Map;
 
 public class GameController {
 
+    @FXML
+    private AnchorPane container;
+    @FXML
+    private Pane minimap;
     @FXML
     private Pane pane;
 
@@ -54,6 +60,25 @@ public class GameController {
         camera.setLayoutX(cameraCenterPoint.getX());
         camera.setLayoutY(cameraCenterPoint.getY());
 
+        camera.layoutXProperty().addListener((obs, oldX, newX)->{
+            double xVect = newX.doubleValue() - oldX.doubleValue();
+            System.out.println("xVect = " + xVect);
+
+//            container.setLayoutY(container.getLayoutX() + xVect);
+//            minimap.setLayoutX(minimap.getLayoutX() + xVect);
+            minimap.setTranslateX(xVect);
+            container.setTranslateX(xVect);
+        });
+
+        camera.layoutYProperty().addListener((obs, oldY, newY)->{
+            double yVect = newY.doubleValue() - oldY.doubleValue();
+            System.out.println("yVect = " + yVect);
+
+//            container.setLayoutY(container.getLayoutY() + yVect);
+//            minimap.setLayoutY(minimap.getLayoutY() + yVect);
+            minimap.setTranslateY(yVect);
+            container.setTranslateX(yVect);
+        });
 
         //update de la caméra si le pane change de taille
 
@@ -143,6 +168,9 @@ public class GameController {
                 }.start();
             }
         });
+
+
+
     }
 
     public void addPlayer(Player player) {
