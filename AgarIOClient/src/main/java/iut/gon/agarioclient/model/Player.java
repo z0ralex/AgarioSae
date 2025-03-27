@@ -208,6 +208,7 @@ public class Player extends Entity implements PlayerComponent {
         });
     }
 
+
     public boolean isVisible() {
         return isVisible;
     }
