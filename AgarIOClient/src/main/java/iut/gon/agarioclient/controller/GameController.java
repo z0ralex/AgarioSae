@@ -146,12 +146,19 @@ public class GameController {
                         for (int i = 0; i < list.size(); i++) {
                             updateEnnemyPosition(list.get(i));
                             list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
+                            if(!(list.get(i).isVisible())){
+                                ennemyCircles.get(list.get(i)).setOpacity(0.02);
+                            } else{
+                                ennemyCircles.get(list.get(i)).setOpacity(1);
+                            }
                         }
                         if(!(player.isVisible())){
                             playerCircles.get(player).setOpacity(0.02);
                         } else{
                             playerCircles.get(player).setOpacity(1);
                         }
+
+
                     }
                 }.start();
             }

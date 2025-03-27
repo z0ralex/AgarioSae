@@ -64,7 +64,7 @@ public class Ennemy extends Player {
     @Override
     public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
         double mass = getMass();
-        return (mass / Math.pow(mass, 1.1)) * 10;
+        return ((mass / Math.pow(mass, 1.1)) * 10);
     }
 
     public void checkCollisions(Map<Pellet, Circle> pelletCircles, Map<Ennemy, Circle> ennemyCircles, Pane pane) {
@@ -78,7 +78,6 @@ public class Ennemy extends Player {
 
             if (distance <= eventHorizon) {
                 setMass(getMass() + pellet.getMass());
-                System.out.println("Radius after eating pellet: " + calculateRadius());
                 pane.getChildren().remove(pelletCircle);
                 pellet.removeFromCurrentNode();
 
