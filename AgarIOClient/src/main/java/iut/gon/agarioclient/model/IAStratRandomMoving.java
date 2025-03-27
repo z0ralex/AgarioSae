@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.model;
 
+import iut.gon.agarioclient.controller.GameController;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
@@ -19,56 +20,43 @@ public class IAStratRandomMoving implements IA{
 
         if (this.tookDecisionAt + 1000 < System.currentTimeMillis()) {
             this.tookDecisionAt = System.currentTimeMillis();
-            dirSelector = r.nextInt(1,9);
+            dirSelector = r.nextInt(1, 9);
         }
 
-            switch (dirSelector) {
-                case 1://N
-                    if (tookDecisionAt + 1000 > System.currentTimeMillis()) {
-                        e.setPosition(new Point2D(e.getPosition().getX(), e.getPosition().getY() + 2));
-                    }
-                    break;
-                case 2://S
-                    if (tookDecisionAt + 1000 > System.currentTimeMillis()) {
-                        e.setPosition(new Point2D(e.getPosition().getX(), e.getPosition().getY() - 2));
-                    }
-                    break;
-                case 3://W
-                    if (tookDecisionAt + 1000 > System.currentTimeMillis()) {
-                        e.setPosition(new Point2D(e.getPosition().getX() - 2, e.getPosition().getY()));
-                    }
-                    break;
-                case 4://E
-                    if (tookDecisionAt + 1000 > System.currentTimeMillis()) {
-                        e.setPosition(new Point2D(e.getPosition().getX() + 2, e.getPosition().getY() ));
-                    }
-                    break;
+        Point2D newPosition = e.getPosition();
+        switch (dirSelector) {
+            case 1: // N
+                newPosition = new Point2D(e.getPosition().getX(), e.getPosition().getY() + 2);
+                break;
+            case 2: // S
+                newPosition = new Point2D(e.getPosition().getX(), e.getPosition().getY() - 2);
+                break;
+            case 3: // W
+                newPosition = new Point2D(e.getPosition().getX() - 2, e.getPosition().getY());
+                break;
+            case 4: // E
+                newPosition = new Point2D(e.getPosition().getX() + 2, e.getPosition().getY());
+                break;
+            case 5: // NW
+                newPosition = new Point2D(e.getPosition().getX() - 2, e.getPosition().getY() + 2);
+                break;
+            case 6: // NE
+                newPosition = new Point2D(e.getPosition().getX() + 2, e.getPosition().getY() + 2);
+                break;
+            case 7: // SE
+                newPosition = new Point2D(e.getPosition().getX() + 2, e.getPosition().getY() - 2);
+                break;
+            case 8: // SW
+                newPosition = new Point2D(e.getPosition().getX() - 2, e.getPosition().getY() - 2);
+                break;
+        }
 
-                case 5://NW
-                    if (tookDecisionAt + 1000 > System.currentTimeMillis()) {
-                        e.setPosition(new Point2D(e.getPosition().getX() - 2, e.getPosition().getY() + 2));
-                    }
-                    break;
+        // Check for collisions with the map boundaries
+        double newX = Math.max(0, Math.min(newPosition.getX(), GameController.X_MAX));
+        double newY = Math.max(0, Math.min(newPosition.getY(), GameController.Y_MAX));
+        newPosition = new Point2D(newX, newY);
 
-                case 6://NE
-                    if (tookDecisionAt + 1000 > System.currentTimeMillis()) {
-                        e.setPosition(new Point2D(e.getPosition().getX() + 2, e.getPosition().getY() + 2 ));
-                    }
-                    break;
-
-                case 7://SE
-                    if (tookDecisionAt + 1000 > System.currentTimeMillis()) {
-                        e.setPosition(new Point2D(e.getPosition().getX() + 2, e.getPosition().getY() - 2 ));
-                    }
-                    break;
-
-                case 8://SW
-                    if (tookDecisionAt + 1000 > System.currentTimeMillis()) {
-                        e.setPosition(new Point2D(e.getPosition().getX() - 2, e.getPosition().getY() - 2));
-                    }
-                    break;
-            }
+        e.setPosition(newPosition);
         e.calculateRadius();
     }
-
 }

@@ -70,7 +70,7 @@ public class GameController {
         player.add(new PlayerLeaf(nickname, new Point2D(400, 300), 10, 5));
 
         NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
-        List<Ennemy> list = f.generate(10);
+        List<Ennemy> list = f.generate(1);
         for(int i = 0; i < list.size(); i++){
             addEnnemy(list.get(i));
         }
@@ -98,20 +98,18 @@ public class GameController {
                     }
                 });
 
+// GameController.java
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
-                        cleanupMarkedEnemies();
-
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
 
-                        for(int i = 0; i < list.size(); i++){
+                        for (int i = 0; i < list.size(); i++) {
                             list.get(i).executeStrat();
                             double speedE = list.get(i).calculateSpeed(list.get(i).getPosition().getX(), list.get(i).getPosition().getY(), X_MAX, Y_MAX);
                             list.get(i).setSpeed(speedE);
                         }
-
 
                         Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
 
@@ -120,31 +118,20 @@ public class GameController {
                         double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
                         newPosition = new Point2D(newX, newY);
 
-
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
                         player.checkCollisions(pelletCircles, pane);
+                        player.checkCollisionsWithEnemies(ennemyCircles, pane); // Add this line
                         spawnPellets();
 
-                        for(int i = 0; i < list.size(); i++){
+                        for (int i = 0; i < list.size(); i++) {
                             updateEnnemyPosition(list.get(i));
-                            list.get(i).checkCollisions(pelletCircles, pane);
-
+                            list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
                         }
                     }
                 }.start();
             }
-        });
-    }
-    private void cleanupMarkedEnemies() {
-        ennemyCircles.entrySet().removeIf(entry -> {
-            if (entry.getKey().isMarkedForRemoval()) {
-                pane.getChildren().remove(entry.getValue());
-                entry.getKey().removeFromCurrentNode();
-                return true;
-            }
-            return false;
         });
     }
 
@@ -172,14 +159,15 @@ public class GameController {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 25);//Attention Valeur en DUR
         root.addEntity(e);
         if (e.getStrat() instanceof IAStratEatPlayers) {
-            ennemyCircle.setFill(Color.ORANGE);
-        } else if (e.getStrat() instanceof IAStratRandomMoving){
             ennemyCircle.setFill(Color.RED);
+        } else if (e.getStrat() instanceof IAStratRandomMoving){
+            ennemyCircle.setFill(Color.GREEN);
         } else {
-            ennemyCircle.setFill(Color.PURPLE);
+            ennemyCircle.setFill(Color.BLUE);
         }
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
+        System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
@@ -238,7 +226,7 @@ public class GameController {
     }
 
     public void spawnPellets() {
-        if (pelletCircles.size() < MAX_PELLET) { // Maintain at least 100 pellets on the map
+        if (pelletCircles.size() < MAX_PELLET) {
             createPellets(1);
         }
     }

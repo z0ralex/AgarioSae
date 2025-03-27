@@ -144,6 +144,25 @@ public class Player extends Entity implements PlayerComponent {
         });
     }
 
+    public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, Pane pane) {
+        double playerRadius = calculateRadius();
+        double eventHorizon = playerRadius / 2;
+
+        ennemyCircles.entrySet().removeIf(entry -> {
+            Ennemy ennemy = entry.getKey();
+            Circle ennemyCircle = entry.getValue();
+            double distance = getPosition().distance(ennemy.getPosition());
+
+            if (distance <= eventHorizon && getMass() > ennemy.getMass() * 1.1) { // 10% size advantage
+                setMass(getMass() + ennemy.getMass());
+                pane.getChildren().remove(ennemyCircle);
+                ennemy.markForRemoval();
+                return true;
+            }
+            return false;
+        });
+    }
+
     public void setInvisible(boolean b) {
         // TODO: Implement setInvisible logic
     }

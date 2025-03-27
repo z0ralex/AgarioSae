@@ -20,16 +20,16 @@ public class NoEffectLocalEnnemyFactory implements LocalEnnemyFactory{
 
         for (int i = 0; i < quantity; i++) {
             Point2D position = new Point2D(random.nextInt(786, 986), random.nextInt(375, 575));
-            double mass = 10 + random.nextDouble() * 20;
+            double mass = 10;
             double speed = 1 + random.nextDouble() * 2;
             IA strategy;
 
             switch (i % 3) {
                 case 0:
-                    strategy = new IAStratEatPelletsOnly(root);
+                    strategy = new IAStratRandomMoving(root);
                     break;
                 case 1:
-                    strategy = new IAStratEatPlayers(root);
+                    strategy = new IAStratRandomMoving(root);
                     break;
                 case 2:
                     strategy = new IAStratRandomMoving(root);
