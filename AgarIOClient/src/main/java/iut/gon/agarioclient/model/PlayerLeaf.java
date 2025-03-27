@@ -67,9 +67,17 @@ public class PlayerLeaf implements PlayerComponent {
 
     @Override
     public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
-        double mass = getMass();
-        return (mass / Math.pow(mass, 1.44)) * 10;
+        double maxSpeed = (getMass() / Math.pow(getMass(), 1.44)) * 10;
+        System.out.println("Masse : " + getMass() + "Speed : " + getSpeed());
+        double centerX = mapWidth / 2;
+        double centerY = mapHeight / 2;
+        double distanceX = cursorX - centerX;
+        double distanceY = cursorY - centerY;
+        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        double maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
+        return maxSpeed * (distance / maxDistance);
     }
+
     @Override
     public boolean isAlive() {
         return alive;
