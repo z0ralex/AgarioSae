@@ -5,6 +5,8 @@ import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleDoubleProperty;
+import iut.gon.agarioclient.server.TestVecteur;
+import javafx.animation.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -16,8 +18,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Window;
-
 import java.net.URL;
+import javafx.scene.shape.Line;
+import javafx.util.Duration;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +82,7 @@ public class GameController implements Initializable {
         camera.setLayoutY(cameraOffsetPoint.getY());
 
         scale.bind(camera.scaleXProperty());
+        drawGrid();
 
         gameSubscene.setCamera(camera);
         //update de la caméra si le pane change de taille
@@ -90,19 +96,19 @@ public class GameController implements Initializable {
 
 
         root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
-        root.drawBorders(pane);
+        //root.drawBorders(pane);
 
         Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
 
         player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
 
-        NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
+        /*NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
 
         List<Ennemy> list = f.generate(3);
         for (int i = 0; i < list.size(); i++) {
             addEnnemy(list.get(i)); //TODO render selon distance
             root.addEntity(list.get(i));
-        }
+        }*/
 
         root.addEntity(player);
 
@@ -120,7 +126,7 @@ public class GameController implements Initializable {
                     double xPosition = event.getX();
                     double yPosition = event.getY();
 
-                    //TODO scaling
+
                     double xVect = xPosition - (player.getPosition().getX() - camera.getLayoutX()) / scale.doubleValue();
                     double yVect = yPosition - (player.getPosition().getY() - camera.getLayoutY()) / scale.doubleValue();
 
@@ -141,12 +147,12 @@ public class GameController implements Initializable {
                     public void handle(long now) {
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX); //TODO changer
                         player.setSpeed(speed);
-
-                        for (int i = 0; i < list.size(); i++) {
+                        /*
+                        for(int i = 0; i < list.size(); i++){
                             list.get(i).executeStrat();
                             double speedE = list.get(i).calculateSpeed(list.get(i).getPosition().getX(), list.get(i).getPosition().getY(), X_MAX, Y_MAX);
                             list.get(i).setSpeed(speedE);
-                        }
+                        }*/
 
 
                         Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed())/*.multiply(scale.doubleValue())*/); //TODO scaling
@@ -162,14 +168,37 @@ public class GameController implements Initializable {
                         player.checkCollisions(pelletCircles, pane);
                         spawnPellets();
 
-                        for (int i = 0; i < list.size(); i++) {
+                        /*
+                        for(int i = 0; i < list.size(); i++){
                             updateEnnemyPosition(list.get(i));
 
-                        }
+                        }*/
                     }
                 }.start();
             }
         });
+    }
+
+    public void updateFromServer(TestVecteur t) {
+        System.out.println(t.toString());
+    }
+  
+    private void drawGrid() {
+        pane.getChildren().clear();
+
+        for (int x = 0; x <= X_MAX; x += 200) {
+            Line verticalLine = new Line(x, 0, x, Y_MAX);
+            verticalLine.setStroke(Color.LIGHTGRAY);
+            verticalLine.setOpacity(0.5);
+            pane.getChildren().add(verticalLine);
+        }
+
+        for (int y = 0; y <= Y_MAX; y += 200) {
+            Line horizontalLine = new Line(0, y, X_MAX, y);
+            horizontalLine.setStroke(Color.LIGHTGRAY);
+            horizontalLine.setOpacity(0.5);
+            pane.getChildren().add(horizontalLine);
+        }
     }
 
     public void addPlayer(Player player) {
@@ -177,13 +206,12 @@ public class GameController implements Initializable {
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
-
-        player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk) -> {
-            if (newChunk != null) {
+        playerCircle.toFront();
+        player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)-> {
+            if (newChunk != null){
                 updateLoadedChunks(newChunk);
             }
         });
-
         // change la position de la camera en fonction de la position du joueur
         player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             onPlayerPositionChanged(player, newPoint);
@@ -213,7 +241,7 @@ public class GameController implements Initializable {
     }
 
     private void setZoomFromMass(double deltaMass) {
-        System.out.println("scale : " + scale.doubleValue());
+        //System.out.println("scale : " + scale.doubleValue());
         // formule de calcul de la taille de la camera
         // peut être ajustee
         double newScale = camera.getScaleX() + 1. / (deltaMass * 100.);
@@ -225,8 +253,10 @@ public class GameController implements Initializable {
         cameraOffsetPoint = new Point2D(
                 (container.getWidth() / 2) * camera.getScaleX(),
                 (container.getHeight() / 2) * camera.getScaleY()
+
         );
     }
+
 
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 25);//Attention Valeur en DUR
@@ -274,38 +304,13 @@ public class GameController implements Initializable {
         pelletCircle.setFill(Color.GREEN);
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
+        pelletCircle.toBack();
     }
 
-    public void checkCollisions(Player player) {
-        Circle playerCircle = playerCircles.get(player);
-
-        if (playerCircle != null) {
-            double playerRadius = playerCircle.getRadius();
-            double eventHorizon = playerRadius + 100;
-
-            pelletCircles.entrySet().removeIf(entry -> { //retire les pellets qui sont trop proches du joueur
-
-                Pellet pellet = entry.getKey();
-                Circle pelletCircle = entry.getValue();
-                double distance = player.getPosition().distance(pellet.getPosition());
-
-                if (distance <= eventHorizon) {
-                    // pellet mangé
-
-                    player.setMass(player.getMass() + pellet.getMass());
-                    pane.getChildren().remove(pelletCircle);
-                    pellet.removeFromCurrentNode();
-
-                    return true;
-                }
-
-                return false;
-            });
-        }
-    }
 
     public void checkCollisions(Ennemy ennemy) {
         Circle ennemyCircle = ennemyCircles.get(ennemy);
+        System.out.println("la");
         if (ennemyCircle != null) {
             double enemyRadius = ennemyCircle.getRadius();
             double eventHorizon = enemyRadius + 100;
@@ -351,8 +356,8 @@ public class GameController implements Initializable {
 
     public void unrenderEntity(Entity entity) {
         Circle entityCircle;
-
         if (entity instanceof Ennemy) {
+
             entityCircle = ennemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);
         } else if (entity instanceof Player) {
