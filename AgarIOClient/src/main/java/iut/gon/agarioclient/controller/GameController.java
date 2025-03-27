@@ -31,7 +31,7 @@ public class GameController {
     public static final int X_MAX = 8000;
     public static final int Y_MAX = 6000;
     private static final int INITIAL_PELLET_NB = 20;
-    private static final int MAX_PELLET = 5000;
+    private static final int MAX_PELLET = 1500;
 
     private static final int INITIAL_PLAYER_MASS = 10;
 
@@ -147,6 +147,7 @@ public class GameController {
                             updateEnnemyPosition(list.get(i));
                             list.get(i).checkCollisions(pelletCircles, ennemyCircles, pane);
                         }
+                        System.out.println(player.getGotEffectedAt());
                     }
                 }.start();
             }
@@ -173,7 +174,7 @@ public class GameController {
 
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
-        System.out.println("playerCircle: " + playerCircle + " player: " + player.getMass());
+        //System.out.println("playerCircle: " + playerCircle + " player: " + player.getMass());
 
         root.addEntity(player);
         playerCircle.setFill(Color.BLUE);
@@ -252,7 +253,7 @@ public class GameController {
         }
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
-        System.out.println(ennemyCircle);
+        //System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
@@ -296,10 +297,30 @@ public class GameController {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
         root.addEntity(pellet);
 
-        List<Color> listColor = new ArrayList<>();
-        Random random = new Random();
-        Color randomColor = Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        pelletCircle.setFill(randomColor);
+        Random couleur = new Random();
+
+        if(pellet instanceof PartialInvisibilityPellet ){
+            pelletCircle.setFill(Color.CYAN);
+            pelletCircle.setRadius(15.0);
+        } else if(pellet instanceof SpeedReductionPellet ){
+            pelletCircle.setFill(Color.YELLOW);
+            pelletCircle.setRadius(15.0);
+        }else if(pellet instanceof SpeedBoostPellet){
+            pelletCircle.setFill(Color.MAGENTA);
+            pelletCircle.setRadius(15.0);
+        }else {
+            int selector = couleur.nextInt(6);
+            switch (selector){
+                case 0: pelletCircle.setFill(Color.DARKVIOLET); break;
+                case 1: pelletCircle.setFill(Color.BLUE); break;
+                case 2: pelletCircle.setFill(Color.GREEN); break;
+                case 3: pelletCircle.setFill(Color.RED); break;
+                case 4: pelletCircle.setFill(Color.BROWN); break;
+                default: pelletCircle.setFill(Color.GREY);
+
+            }
+
+        }
 
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
@@ -355,7 +376,6 @@ public class GameController {
 
     public void unrenderEntity(Entity entity){
         Circle entityCircle;
-        System.out.println("ici");
         if(entity instanceof Ennemy){
             entityCircle = ennemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);

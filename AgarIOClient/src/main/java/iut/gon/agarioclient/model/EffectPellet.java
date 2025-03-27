@@ -9,4 +9,5 @@ public abstract class EffectPellet extends Pellet {
     }
 
     public abstract void applyEffect(Player player);
+
 }

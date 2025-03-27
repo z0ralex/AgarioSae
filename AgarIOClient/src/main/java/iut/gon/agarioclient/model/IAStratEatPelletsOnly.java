@@ -76,7 +76,7 @@ public class IAStratEatPelletsOnly implements IA {
                 // If target is an enemy, notify controller
                 if (target instanceof Ennemy) {
                     ((Ennemy)target).markForRemoval();
-                        System.out.println("Ennemy " + ennemy.getId() + " consumed " + target.getId());
+                        //System.out.println("Ennemy " + ennemy.getId() + " consumed " + target.getId());
                 }
             }
         }

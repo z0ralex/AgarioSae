@@ -12,4 +12,6 @@ public class PartialInvisibilityPellet extends EffectPellet {
     public void applyEffect(Player player) {
         player.setInvisible(true);
     }
+
+
 }

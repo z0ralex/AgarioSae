@@ -58,7 +58,7 @@ public class IAStratEatPlayers implements IA{
                 if (target instanceof Ennemy) {
                     ((Ennemy)target).markForRemoval();
                     if(target instanceof Ennemy) {
-                        System.out.println("Ennemy " + ennemy.getId() + " consumed " + target.getId());
+                        //System.out.println("Ennemy " + ennemy.getId() + " consumed " + target.getId());
                     }
                 }
             }

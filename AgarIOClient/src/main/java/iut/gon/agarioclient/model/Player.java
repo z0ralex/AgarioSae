@@ -20,6 +20,10 @@ public class Player extends Entity implements PlayerComponent {
     private DoubleProperty mass;
     private boolean markedForRemoval = false;
 
+    private long affectedUntil = -1;
+    private double specialEffect = 1;
+    private long gotEffectedAt;
+
     public Player(String id, Point2D position, double mass) {
         super(id, position, mass);
         this.position = new SimpleObjectProperty<>(position);
@@ -100,10 +104,14 @@ public class Player extends Entity implements PlayerComponent {
         return components.stream().mapToDouble(PlayerComponent::calculateRadius).average().orElse(0);
     }
 
+    public void setSpecialEffect(double specialEffect){
+        this.specialEffect = specialEffect;
+    }
+
     @Override
     public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
         double mass = getMass();
-        return (mass / Math.pow(mass, 1.1)) * 10;
+        return ((mass / Math.pow(mass, 1.1)) * 10) * specialEffect;
     }
 
     @Override
@@ -116,6 +124,14 @@ public class Player extends Entity implements PlayerComponent {
         for (PlayerComponent component : components) {
             component.setAlive(alive);
         }
+    }
+
+    public void setGotEffectedAt(long gotEffectedAt) {
+        this.gotEffectedAt = gotEffectedAt;
+    }
+
+    public long getGotEffectedAt() {
+        return gotEffectedAt;
     }
 
     public SimpleObjectProperty<Point2D> positionProperty() {
@@ -151,13 +167,29 @@ public class Player extends Entity implements PlayerComponent {
             if (distance <= eventHorizon) {
                 animationManager.playPelletAbsorption(pelletCircle, getPosition());
 
+                if(pellet instanceof  SpeedReductionPellet){
+                    this.gotEffectedAt = System.currentTimeMillis();
+                    this.affectedUntil = System.currentTimeMillis() + 5000;
+                    this.setSpecialEffect(0.5);
+                }
+
+                if(pellet instanceof  SpeedBoostPellet){
+                    this.gotEffectedAt = System.currentTimeMillis();
+                    this.affectedUntil = System.currentTimeMillis() + 5000;
+                    this.setSpecialEffect(2);
+                }
                 setMass(getMass() + pellet.getMass());
                 pane.getChildren().remove(pelletCircle);
                 pellet.removeFromCurrentNode();
                 return true;
             }
+            if(System.currentTimeMillis() > affectedUntil){
+                this.setSpecialEffect(1.0);
+            }
             return false;
         });
+
+
     }
 
     public void checkCollisionsWithEnemies(Map<Ennemy, Circle> ennemyCircles, Pane pane, AnimationManager animationManager) {
