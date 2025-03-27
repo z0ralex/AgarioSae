@@ -1,0 +1,102 @@
+package iut.gon.agarioclient.controller;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.net.Socket;
+
+public class ParametreController {
+
+    @FXML
+    private TextField ipField;  // Zone de saisie pour l'adresse IP
+    @FXML
+    private TextField portField;  // Zone de saisie pour le port
+    private String nickname;
+
+    // Méthode pour définir le pseudo venant de la page précédente
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    // Méthode appelée lors du clic sur "Valider"
+    @FXML
+    private void onValiderButtonClick(ActionEvent event) {
+        String ip = ipField.getText().trim();
+        String port = portField.getText().trim();
+
+        // Validation simple
+        if (ip.isEmpty() || port.isEmpty()) {
+            showAlert("Erreur", "Veuillez remplir tous les champs.");
+        } else {
+            try {
+                // Connexion au serveur avec l'IP et le port
+                boolean connectionSuccessful = connectToServer(ip, Integer.parseInt(port));
+
+                if (connectionSuccessful) {
+                    // Charger la scène du jeu avec le pseudo, l'IP et le port
+                    FXMLLoader gameLoader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/game-view.fxml"));
+                    Parent gameView = gameLoader.load();
+
+                    GameController gameController = gameLoader.getController();
+                    gameController.initializeGame(nickname, null);
+
+                    Scene gameScene = new Scene(gameView);
+                    Stage stage = (Stage) ipField.getScene().getWindow();
+                    stage.setScene(gameScene);
+                    stage.setTitle("Jeu en ligne");
+                } else {
+                    showAlert("Erreur de connexion", "Impossible de se connecter au serveur.");
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Erreur", "Le port doit être un nombre.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Méthode appelée lors du clic sur "Annuler"
+    @FXML
+    private void onAnnulerButtonClick(ActionEvent event) {
+        try {
+            FXMLLoader welcomeLoader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/welcome-view.fxml"));
+            Parent welcomeView = welcomeLoader.load();
+
+            Scene welcomeScene = new Scene(welcomeView);
+            Stage stage = (Stage) ipField.getScene().getWindow();
+            stage.setScene(welcomeScene);
+            stage.setTitle("Welcome to AgarIO");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // Méthode pour afficher une alerte
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // Méthode pour tester la connexion au serveur
+    private boolean connectToServer(String ip, int port) {
+        try {
+            Socket socket = new Socket(ip, port);
+            socket.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+}
