@@ -19,7 +19,6 @@ public class IAStratEatPelletsOnly implements IA {
     public void execute(Ennemy ennemy) {
 
         Pellet nearestPellet = findNearestPellet(ennemy);
-        System.out.println("execute: nearestPellet = " + nearestPellet);
         if (nearestPellet != null) {
             moveToPellet(ennemy, nearestPellet);
             checkCollisionAndConsume(ennemy, nearestPellet);

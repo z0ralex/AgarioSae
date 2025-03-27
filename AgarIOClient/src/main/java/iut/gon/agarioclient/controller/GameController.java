@@ -31,7 +31,7 @@ public class GameController {
     public static final int X_MAX = 8000;
     public static final int Y_MAX = 6000;
     private static final int INITIAL_PELLET_NB = 20;
-    private static final int MAX_PELLET = 1500;
+    private static final int MAX_PELLET = 5000;
 
     private static final int INITIAL_PLAYER_MASS = 10;
 
@@ -63,6 +63,7 @@ public class GameController {
         camera.setLayoutX(cameraCenterPoint.getX());
         camera.setLayoutY(cameraCenterPoint.getY());
         drawGrid();
+
 
         //update de la caméra si le pane change de taille
 
@@ -294,7 +295,12 @@ public class GameController {
     public void addPellet(Pellet pellet) {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
         root.addEntity(pellet);
-        pelletCircle.setFill(Color.GREEN);
+
+        List<Color> listColor = new ArrayList<>();
+        Random random = new Random();
+        Color randomColor = Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+        pelletCircle.setFill(randomColor);
+
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
         pelletCircle.toBack();
@@ -327,7 +333,7 @@ public class GameController {
 
     public void spawnPellets() {
         if (pelletCircles.size() < MAX_PELLET) {
-            createPellets(1);
+            createPellets(100);
         }
     }
 
