@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.model.Game;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -83,7 +84,7 @@ public class WelcomeController {
 
                 GameController gameController = loader.getController();
                 gameController.setStage(stage);
-                gameController.initializeGame(nickname, camera);
+                gameController.initializeGame(nickname, camera, new Game());
 
                 Scene gameScene = new Scene(newView);
                 stage.setScene(gameScene);

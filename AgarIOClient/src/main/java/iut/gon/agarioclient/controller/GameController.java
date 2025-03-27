@@ -2,6 +2,7 @@
 package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.App;
+import iut.gon.agarioclient.model.Game;
 import iut.gon.agarioclient.model.entity.ia.IAStratEatPlayers;
 import iut.gon.agarioclient.model.entity.ia.IAStratRandomMoving;
 import iut.gon.agarioclient.model.entity.moveable.*;
@@ -53,29 +54,33 @@ public class GameController implements Initializable {
     private Point2D cameraOffsetPoint;
     private Stage stage;
 
-    private Point2D cameraCenterPoint;
     private ParallelCamera camera;
 
+
+
+
+    //TODO SUPPRIMER APRES SEPARATION CONTROLEUR/MODELE
     public static final int X_MAX = 8000;
     public static final int Y_MAX = 6000;
+    private static final int INITIAL_PLAYER_MASS = 10;
     private static final int INITIAL_PELLET_NB = 20;
     private static final int MAX_PELLET = 1500;
-
-    private static final int INITIAL_PLAYER_MASS = 10;
-
     private static final int INITIAL_PLAYER_SPEED = 5;
-
     private static final double PLAYER_SPAWNPOINT_X = 400;
     private static final double PLAYER_SPAWNPOINT_Y = 300;
+
+
+    private Game game;
+
+    //FIN VARIABLES COTE MODELE
+
     private static final double NO_MOVE_DISTANCE = 10;
 
-    private double xScale;
-    private double yScale;
-    private MapNode root;
-    private Map<Player, Circle> playerCircles = new HashMap<>();
-    private Map<Pellet, Circle> pelletCircles = new HashMap<>();
-    private Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
-    private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
+
+    private final Map<Player, Circle> playerCircles = new HashMap<>();
+    private final Map<Pellet, Circle> pelletCircles = new HashMap<>();
+    private final Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
+    private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
     private AnimationManager animationManager;
 
     public void setStage(Stage stage){
@@ -92,15 +97,14 @@ public class GameController implements Initializable {
 
     }
 
-    public void initializeGame(String nickname, ParallelCamera camera) {
+    public void initializeGame(String nickname, ParallelCamera camera, Game game) {
+        this.game = game;
 
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
 
         animationManager = new AnimationManager(pane);
-
-        cameraCenterPoint = new Point2D(pane.getWidth() / 2., pane.getHeight() / 2.);
 
         cameraOffsetPoint = new Point2D(container.getWidth() / 2., container.getHeight() / 2.);
         this.camera = camera;
@@ -120,28 +124,17 @@ public class GameController implements Initializable {
         pane.widthProperty().addListener(sizeChange);
         pane.heightProperty().addListener(sizeChange);
 
+        Player player = game.addPlayer(nickname);
 
-        root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
-        if (root == null) {
-            throw new IllegalStateException("Root MapNode is not initialized.");
-        }
+        //TODO retirer
 
-        Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
-
-        player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
-
-        NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
-        List<Ennemy> list = f.generate(10);
-        for(int i = 0; i < list.size(); i++){
-            addEnnemy(list.get(i));
-        }
 
         addPlayer(player);
         createPellets(INITIAL_PELLET_NB);
 
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
-                final Point2D[] mousePosition = {new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y)}; //TODO retirer
+                final Point2D[] mousePosition = {new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y)};
 
                 final SimpleObjectProperty<Point2D> mouseVector = new SimpleObjectProperty<>(Point2D.ZERO); // représente un vecteur, pas une position
                 // property parce que j'ai besoin que ça soit final, peut etre des legers coûts en perf
@@ -160,7 +153,7 @@ public class GameController implements Initializable {
                         mouseVector.setValue(Point2D.ZERO);
                     } else {
                         // mouvement
-                        mousePosition[0] = new Point2D(xPosition, yPosition); //TODO retirer
+                        mousePosition[0] = new Point2D(xPosition, yPosition);
                         mouseVector.setValue(new Point2D(xVect, yVect).normalize()); //TODO pas forcément normaliser : selon l'emplacement de la souris la vitesse change
                     }
                 });
@@ -174,15 +167,15 @@ public class GameController implements Initializable {
                             return;
                         }
 
-                        checkEntityChunck(player);
+                        game.checkEntityChunck(player); //va falloir changer ça
 
-                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX); //TODO changer
+                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
 
-                        for(int i = 0; i < list.size(); i++){
-                            list.get(i).executeStrat();
-                            double speedE = list.get(i).calculateSpeed(list.get(i).getPosition().getX(), list.get(i).getPosition().getY(), X_MAX, Y_MAX);
-                            list.get(i).setSpeed(speedE);
+                        for (Ennemy ennemy : list) {
+                            ennemy.executeStrat();
+                            double speedE = ennemy.calculateSpeed(ennemy.getPosition().getX(), ennemy.getPosition().getY(), X_MAX, Y_MAX);
+                            ennemy.setSpeed(speedE);
                         }
 
                         Point2D newPosition = player.getPosition().add(mouseVector.get().multiply(player.getSpeed()));
@@ -194,7 +187,7 @@ public class GameController implements Initializable {
 
                         player.setPosition(newPosition);
 
-                        updatePlayerPosition(player);
+                        redrawPlayer(player);
 
                         Set<Pellet> eatenPellets = player.checkCollisionsWithPellet(pelletCircles.keySet());
 
@@ -221,7 +214,7 @@ public class GameController implements Initializable {
                         for (Ennemy ennemy : list) {
                             Set<Entity> eaten = new HashSet<>();
 
-                            updateEnemyPosition(ennemy);
+                            redrawEnemy(ennemy);
                             eaten.addAll(ennemy.checkCollisions(pelletCircles.keySet()));
                             eaten.addAll(ennemy.checkCollisionsWithEnemies(ennemyCircles.keySet()));
                             eaten.addAll(ennemy.checkCollisionsWithPlayers(playerCircles.keySet()));
@@ -253,18 +246,8 @@ public class GameController implements Initializable {
         });
     }
 
-    /**
-     * vérifie si l'entité s'est déplacée hors de son chunck, si oui on la déplace sur la map aussi
-     * @param entity
-     */
-    private void checkEntityChunck(Entity entity){
-        if (entity.getCurrentMapNode() != null &&
-                !entity.getCurrentMapNode().positionInNode(entity.getPosition().getX(), entity.getPosition().getY())) {
 
-            entity.removeFromCurrentNode();
-            root.addEntity(entity);
-        }
-    }
+
 
     private void handlePlayerDeath() {
         try {
@@ -316,7 +299,7 @@ public class GameController implements Initializable {
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
 
-        root.addEntity(player);
+        game.getRoot().addEntity(player); //TODO jarter
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
@@ -348,11 +331,7 @@ public class GameController implements Initializable {
         camera.setLayoutY(y);
 
         //mets à jour le chunk du joueur
-        if (!player.getCurrentMapNode().positionInNode(newPos.getX(), newPos.getY())) {
-
-            player.removeFromCurrentNode();
-            root.addEntity(player);
-        }
+        game.checkEntityChunck(player); //TODO modele
     }
 
     private void setZoomFromMass(double deltaMass) {
@@ -375,7 +354,9 @@ public class GameController implements Initializable {
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), e.calculateRadius());
 
-        root.addEntity(e);
+        game.getRoot().addEntity(e); //TODO modele
+
+        //TODO deplacer vers render
         if (e.getStrat() instanceof IAStratEatPlayers) {
             ennemyCircle.setFill(Color.RED);
         } else if (e.getStrat() instanceof IAStratRandomMoving){
@@ -398,7 +379,7 @@ public class GameController implements Initializable {
         });
     }
 
-    public void updatePlayerPosition(Player player) {
+    public void redrawPlayer(Player player) {
         Circle playerCircle = playerCircles.get(player);
         if (playerCircle != null) {
             playerCircle.setCenterX(player.getPosition().getX());
@@ -406,7 +387,7 @@ public class GameController implements Initializable {
         }
     }
 
-    public void updateEnemyPosition(Ennemy e) {
+    public void redrawEnemy(Ennemy e) {
         Circle ennemyCircle = ennemyCircles.get(e);
         if (ennemyCircle != null) {
             ennemyCircle.setCenterX(e.getPosition().getX());
@@ -415,16 +396,17 @@ public class GameController implements Initializable {
     }
 
     public void createPellets(int count) {
+        //TODO separer vue/modele
         List<Pellet> pellets = pelletFactory.generatePellets(count);
         for (Pellet pellet : pellets) {
-            root.addEntity(pellet);
+            game.getRoot().addEntity(pellet); //TODO modele
             addPellet(pellet);  //TODO render selon distance
         }
     }
 
     public void addPellet(Pellet pellet) {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
-        root.addEntity(pellet);
+        game.getRoot().addEntity(pellet); //TODO MODELE
 
         Random color = new Random();
 
@@ -456,6 +438,7 @@ public class GameController implements Initializable {
         pelletCircle.toBack();
     }
 
+    //TODO separer
     public void checkCollisions(Ennemy ennemy) {
         Circle ennemyCircle = ennemyCircles.get(ennemy);
         if (ennemyCircle != null) {
@@ -489,7 +472,6 @@ public class GameController implements Initializable {
      * permet de générer le rendu d'une entité à l'écran
      */
     public void renderEntity(Entity entity) {
-        //TODO délèguer la méthode à l'entité ? (pas sûr que ca respecte le MVC)
 
         if (entity instanceof Ennemy) {
             addEnnemy((Ennemy) entity);

@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.model.Game;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -67,7 +68,7 @@ public class ParametreController {
                     AnchorPane.setRightAnchor(gameView, 0.0);
 
                     GameController gameController = gameLoader.getController();
-                    gameController.initializeGame(nickname, camera);
+                    gameController.initializeGame(nickname, camera, new Game());
 
                     ChatController chatController = chatLoader.getController();
                     chatController.initialize(nickname,ip, Integer.valueOf(port));
