@@ -164,6 +164,11 @@ public class GameController {
 
                         updatePlayerPosition(player);
                         player.checkCollisionsWithPellet(pelletCircles, pane, animationManager);
+                        if(!(player.isVisible())){
+                            playerCircles.get(player).setOpacity(0.02);
+                        } else{
+                            playerCircles.get(player).setOpacity(1);
+                        }
                         player.checkCollisionsWithEnemies(ennemyCircles, pane, animationManager);
                         spawnPellets();
 
@@ -174,11 +179,7 @@ public class GameController {
                             list.get(i).checkCollisionsWithPlayers(playerCircles, pane, animationManager);
 
                         }
-                        if(!(player.isVisible())){
-                            playerCircles.get(player).setOpacity(0.02);
-                        } else{
-                            playerCircles.get(player).setOpacity(1);
-                        }
+
 
 
                     }

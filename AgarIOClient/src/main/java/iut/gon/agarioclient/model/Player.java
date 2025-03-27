@@ -167,7 +167,7 @@ public class Player extends Entity implements PlayerComponent {
 
     public void checkCollisionsWithPellet(Map<Pellet, Circle> pelletCircles, Pane pane, AnimationManager animationManager) {
         double playerRadius = calculateRadius();
-        double eventHorizon = playerRadius + 100;
+        double eventHorizon = playerRadius + 10;
 
         pelletCircles.entrySet().removeIf(entry -> {
             Pellet pellet = entry.getKey();

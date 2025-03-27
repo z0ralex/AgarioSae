@@ -85,7 +85,7 @@ public class Ennemy extends Player {
 
     public void checkCollisions(Map<Pellet, Circle> pelletCircles, Map<Ennemy, Circle> ennemyCircles, Pane pane) {
         double ennemyRadius = calculateRadius();
-        double eventHorizon = ennemyRadius + 100;
+        double eventHorizon = ennemyRadius + 10;
 
         pelletCircles.entrySet().removeIf(entry -> {
             Pellet pellet = entry.getKey();
