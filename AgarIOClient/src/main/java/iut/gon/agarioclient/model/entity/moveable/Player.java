@@ -255,20 +255,20 @@ public class Player extends Entity implements PlayerComponent {
             double overlap = Math.max(0, playerRadius + otherPlayer.calculateRadius() - distance);
 
 
-            if ((this != otherPlayer && getMass() >= otherPlayer.getMass() * 1.33 && overlap >= playerRadius * 0.33) ||
-                    (this == otherPlayer && overlap >= playerRadius * 0.33)) {
+            if (this != otherPlayer && getMass() >= otherPlayer.getMass() * 1.33 && overlap >= playerRadius * 0.33) {
+
                 //animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
                 eaten.add(otherPlayer);
                 setMass(getMass() + otherPlayer.getMass());
                 //pane.getChildren().remove(otherPlayerCircle); //TODO: Remove pane
                 otherPlayer.markForRemoval();
-            } /*else if  {
+            } /*else if  (this == otherPlayer && overlap >= playerRadius * 0.33){
+                System.out.println("ah bah qui est le plus con dans l'histoire ?");
                 //animationManager.playPelletAbsorption(otherPlayerCircle, getPosition());
 
                 setMass(getMass() + otherPlayer.getMass());
                 //pane.getChildren().remove(otherPlayerCircle); //TODO: Remove pane
                 otherPlayer.markForRemoval();
-                return true;
             }*/
         });
         return eaten;

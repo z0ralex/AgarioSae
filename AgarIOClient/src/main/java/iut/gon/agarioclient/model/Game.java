@@ -5,7 +5,6 @@ import iut.gon.agarioclient.model.entity.pellet.NoEffectPelletFactory;
 import iut.gon.agarioclient.model.entity.pellet.Pellet;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Circle;
 
 import java.util.*;
 
@@ -20,7 +19,7 @@ public class Game {
     public static final int X_MAX = 8000;
     public static final int Y_MAX = 6000;
 
-    private MapNode root;
+    private final MapNode root;
     private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
     //TODO changer ça
@@ -55,7 +54,7 @@ public class Game {
     public synchronized HashMap<Entity, Set<Entity>> nextTick(){
         HashMap<Entity, Set<Entity>> map = new HashMap<>();
         for(Player p: players){
-            checkEntityChunck(p);
+            checkEntityChunk(p);
         }
 
         for (Ennemy ennemy : enemyList) {
@@ -76,7 +75,7 @@ public class Game {
     /**
      *
      * @param entity Player ou Ennemy
-     * @param vector
+     * @param vector vecteur
      */
     public void moveEntity(Player entity, Point2D vector){
         Point2D newPosition = entity.getPosition().add(vector.multiply(entity.getSpeed()));
@@ -95,7 +94,7 @@ public class Game {
 
     public List<Pellet> spawnPellets() {
         if (pellets.size() < MAX_PELLET) {
-            return createPellets(100);
+            return createPellets(Math.min(100, MAX_PELLET - pellets.size()));
         }
 
         return new ArrayList<>();
@@ -115,6 +114,9 @@ public class Game {
     public Player addPlayer(String nickname){
         Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
         player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
+        players.add(player);
+
+        root.addEntity(player);
 
         return player;
     }
@@ -124,7 +126,7 @@ public class Game {
      * vérifie si l'entité s'est déplacée hors de son chunck, si oui on la déplace sur la map aussi
      * @param entity
      */
-    public void checkEntityChunck(Entity entity){
+    public void checkEntityChunk(Entity entity){
         if (entity.getCurrentMapNode() != null &&
                 !entity.getCurrentMapNode().positionInNode(entity.getPosition().getX(), entity.getPosition().getY())) {
 
@@ -158,6 +160,27 @@ public class Game {
             eatenMap.put(player, eaten);
         }
 
+        HashSet<Entity> allEaten = new HashSet<>();
+        eatenMap.values().forEach(allEaten::addAll);
+
+        //suppression des entités mangées
+        for(Entity e : allEaten){
+            removeEntity(e);
+        }
+
         return eatenMap;
+    }
+
+    public void removeEntity(Entity entity){
+        if(entity instanceof Ennemy){
+            enemyList.remove(entity);
+
+        } else if (entity instanceof Player) {
+            players.remove(entity);
+        } else {
+            pellets.remove((Pellet) entity);
+        }
+
+        entity.removeFromCurrentNode();
     }
 }

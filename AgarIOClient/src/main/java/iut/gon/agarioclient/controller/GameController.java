@@ -62,17 +62,14 @@ public class GameController implements Initializable {
     //TODO SUPPRIMER APRES SEPARATION CONTROLEUR/MODELE
     public static final int X_MAX = 8000;
     public static final int Y_MAX = 6000;
-    private static final int INITIAL_PLAYER_MASS = 10;
-    private static final int INITIAL_PELLET_NB = 20;
-    private static final int MAX_PELLET = 1500;
-    private static final int INITIAL_PLAYER_SPEED = 5;
     private static final double PLAYER_SPAWNPOINT_X = 400;
     private static final double PLAYER_SPAWNPOINT_Y = 300;
-
+//FIN VARIABLES COTE MODELE
 
     private Game game;
 
-    //FIN VARIABLES COTE MODELE
+    private AnimationTimer timer;
+
 
     private static final double NO_MOVE_DISTANCE = 10;
 
@@ -125,10 +122,6 @@ public class GameController implements Initializable {
         pane.heightProperty().addListener(sizeChange);
 
         Player player = game.addPlayer(nickname);
-
-        //TODO retirer
-
-
         addPlayer(player);
 
         //partie controller
@@ -158,7 +151,7 @@ public class GameController implements Initializable {
                     }
                 });
 
-                new AnimationTimer() {
+                timer = new AnimationTimer() {
                     @Override
                     public void handle(long now) {
                         HashMap<Entity, Set<Entity>> eatenMap = game.nextTick();
@@ -169,7 +162,7 @@ public class GameController implements Initializable {
                             return;
                         }
 
-                        
+
 
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
@@ -195,12 +188,17 @@ public class GameController implements Initializable {
                                     animationManager.playPelletAbsorption(getEntityCircle(eatenEntity),
                                             eatingEntity.getPosition());
 
-                                    unrenderEntity(eatenEntity);
+
+                                        unrenderEntity(eatenEntity);
+
+
                                 }
                             }
                         }
                     }
-                }.start();
+                };
+
+                timer.start();
             }
         });
     }
@@ -298,7 +296,7 @@ public class GameController implements Initializable {
         camera.setLayoutY(y);
 
         //mets à jour le chunk du joueur
-        game.checkEntityChunck(player); //TODO modele
+
     }
 
     private void setZoomFromMass(double deltaMass) {
@@ -321,7 +319,7 @@ public class GameController implements Initializable {
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), e.calculateRadius());
 
-        game.getRoot().addEntity(e); //TODO modele
+
 
         if (e.getStrat() instanceof IAStratEatPlayers) {
             ennemyCircle.setFill(Color.RED);
