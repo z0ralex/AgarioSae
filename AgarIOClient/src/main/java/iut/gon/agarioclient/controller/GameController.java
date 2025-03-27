@@ -78,6 +78,8 @@ public class GameController implements Initializable {
     private NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
     private AnimationManager animationManager;
 
+    private String nickname;
+
     public void setStage(Stage stage){
         this.stage = stage;
     }
@@ -97,7 +99,7 @@ public class GameController implements Initializable {
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
-
+        this.nickname = nickname;
         animationManager = new AnimationManager(pane);
 
         cameraCenterPoint = new Point2D(pane.getWidth() / 2., pane.getHeight() / 2.);
@@ -239,6 +241,7 @@ public class GameController implements Initializable {
 
             WelcomeController welcomeController = fxmlLoader.getController();
             welcomeController.setStage(stage);
+            welcomeController.setNickname(nickname);
 
             stage.setTitle("Welcome to AgarIO");
             stage.setScene(scene);
