@@ -53,7 +53,6 @@ public class IAStratEatPlayers implements IA{
             if (ennemy.getMass() > target.getMass() * 1.1) { // 10% size advantage
                 ennemy.setMass(ennemy.getMass() + target.getMass());
                 target.removeFromCurrentNode();
-
                 // If target is an enemy, notify controller
                 if (target instanceof Ennemy) {
                     ((Ennemy)target).markForRemoval();

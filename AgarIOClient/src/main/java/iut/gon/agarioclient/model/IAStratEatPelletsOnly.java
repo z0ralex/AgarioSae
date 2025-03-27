@@ -65,6 +65,7 @@ public class IAStratEatPelletsOnly implements IA {
 
     private void moveToPellet(Ennemy ennemy, Pellet pellet) {
         Point2D direction = pellet.getPosition().subtract(ennemy.getPosition()).normalize();
+        //System.out.println(ennemy.getSpeed());
         Point2D newPosition = ennemy.getPosition().add(direction.multiply(10));
         ennemy.setPosition(newPosition);
     }

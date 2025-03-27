@@ -17,12 +17,14 @@ public class Player extends Entity implements PlayerComponent {
     protected List<PlayerComponent> components = new ArrayList<>();
     private ObjectProperty<Point2D> position;
     private DoubleProperty mass;
+    @SuppressWarnings("Utilisé pour tester le IsAlive")
+    private long  createdAt;
 
     public Player(String id, Point2D position, double mass) {
         super(id, position, mass);
         this.position = new SimpleObjectProperty<>(position);
         this.mass = new SimpleDoubleProperty(mass);
-
+        createdAt = System.currentTimeMillis();
     }
 
     public void add(PlayerComponent component) {
@@ -90,6 +92,16 @@ public class Player extends Entity implements PlayerComponent {
                 .mapToDouble(c -> c.calculateSpeed(cursorX, cursorY, mapWidth, mapHeight))
                 .average()
                 .orElse(0);
+    }
+
+    @SuppressWarnings("Utilisé pour tester le IsAlive")
+    public void checkTimer(int timeMs){
+        this.setAlive(true);
+        if(createdAt + timeMs < System.currentTimeMillis()){
+            this.setAlive(false);
+        }
+
+
     }
 
     @Override

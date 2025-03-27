@@ -1,9 +1,11 @@
 // GameController.java
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.App;
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -103,6 +105,9 @@ public class GameController {
                     public void handle(long now) {
                         cleanupMarkedEnemies();
 
+
+                        player.checkTimer(3000);// A supprimer sinon, mort 3 secondes après le début du jeu
+
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
 
@@ -120,7 +125,9 @@ public class GameController {
                         double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
                         newPosition = new Point2D(newX, newY);
 
-
+                        if(!(player.isAlive())){
+                            Platform.exit();
+                        }
                         player.setPosition(newPosition);
 
                         updatePlayerPosition(player);
@@ -172,14 +179,15 @@ public class GameController {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), 25);//Attention Valeur en DUR
         root.addEntity(e);
         if (e.getStrat() instanceof IAStratEatPlayers) {
-            ennemyCircle.setFill(Color.ORANGE);
-        } else if (e.getStrat() instanceof IAStratRandomMoving){
             ennemyCircle.setFill(Color.RED);
+        } else if (e.getStrat() instanceof IAStratRandomMoving){
+            ennemyCircle.setFill(Color.GREEN);
         } else {
-            ennemyCircle.setFill(Color.PURPLE);
+            ennemyCircle.setFill(Color.BLUE);
         }
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
+        System.out.println(ennemyCircle);
 
         e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
