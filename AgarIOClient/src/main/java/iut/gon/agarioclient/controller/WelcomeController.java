@@ -10,6 +10,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class WelcomeController {
                 boolean connectionSuccessful = connectToServer();
 
                 if (connectionSuccessful) {
+                    ParallelCamera camera = new ParallelCamera();
                     FXMLLoader gameLoader = new FXMLLoader(getClass().getResource("/iut/gon/agarioclient/game-view.fxml"));
                     Parent gameView = gameLoader.load();
 
@@ -54,7 +56,7 @@ public class WelcomeController {
                     hbox.setSpacing(10);
 
                     GameController gameController = gameLoader.getController();
-                    gameController.initializeGame(nickname);
+                    gameController.initializeGame(nickname, camera);
 
                     ChatController chatController = rightPanelLoader.getController();
                     chatController.initialize(nickname);
@@ -62,6 +64,7 @@ public class WelcomeController {
                     Scene gameScene = new Scene(hbox);
                     stage.setScene(gameScene);
                     stage.setTitle("Jeu en ligne");
+                    gameScene.setCamera(camera);
 
                 } else {
                     showAlert("Erreur de connexion", "Impossible de se connecter au serveur.");

@@ -7,6 +7,7 @@ public class Serializer {
     public static <T extends Serializable> void sendObject(T object, ObjectOutputStream oos) throws IOException {
         oos.writeObject(object);
         oos.flush();
+        oos.reset();
     }
 
     // Réception d'un objet depuis un flux d'entrée
