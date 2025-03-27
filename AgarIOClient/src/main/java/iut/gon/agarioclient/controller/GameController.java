@@ -210,8 +210,8 @@ public class GameController implements Initializable {
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
         playerCircle.toFront();
-        player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)->{
-            if(newChunk != null)
+        player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)-> {
+            if (newChunk != null){
                 updateLoadedChunks(newChunk);
             }
         });
