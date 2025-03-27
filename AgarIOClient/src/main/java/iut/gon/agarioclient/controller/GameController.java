@@ -3,7 +3,6 @@ package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.model.*;
 import iut.gon.agarioclient.model.map.MapNode;
-import javafx.animation.TranslateTransition;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -13,7 +12,6 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.util.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +156,6 @@ public class GameController {
                 updateLoadedChunks(newChunk);
             }
         });
-
         // change la position de la camera en fonction de la position du joueur
         player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             onPlayerPositionChanged(player, newPoint);
@@ -249,56 +246,13 @@ public class GameController {
         pelletCircle.setFill(Color.GREEN);
         pelletCircles.put(pellet, pelletCircle);
         pane.getChildren().add(pelletCircle);
+        pelletCircle.toBack();
     }
 
-    public void checkCollisions(Player player) {
-        Circle playerCircle = playerCircles.get(player);
-
-        if (playerCircle != null) {
-            double playerRadius = playerCircle.getRadius();
-            double eventHorizon = playerRadius + 100;
-
-            pelletCircles.entrySet().removeIf(entry -> { //retirer les pellets qui sont trop proches du joueur
-
-                Pellet pellet = entry.getKey();
-                Circle pelletCircle = entry.getValue();
-                double distance = player.getPosition().distance(pellet.getPosition());
-
-                if (distance <= eventHorizon) {
-
-                    Point2D direction = player.getDirection();
-                    double speed = player.getSpeed();
-
-                    double transitionDuration = Math.max(100, distance / speed);
-
-                    Point2D predictedPosition = player.getPosition().add(direction.multiply(speed * (transitionDuration / 1000.0)));
-
-                    double toX = predictedPosition.getX() - pellet.getPosition().getX();
-                    double toY = predictedPosition.getY() - pellet.getPosition().getY();
-
-                    TranslateTransition transition = new TranslateTransition(Duration.millis(transitionDuration), pelletCircle);
-                    transition.setToX(toX);
-                    transition.setToY(toY);
-
-                    transition.setOnFinished(event -> {
-                        player.setMass(player.getMass() + pellet.getMass());
-                        pane.getChildren().remove(pelletCircle);
-                        pellet.removeFromCurrentNode();
-                        playerCircles.get(player).toFront();
-                    });
-
-                    transition.play();
-
-                    return true;
-                }
-
-                return false;
-            });
-        }
-    }
 
     public void checkCollisions(Ennemy ennemy) {
         Circle ennemyCircle = ennemyCircles.get(ennemy);
+        System.out.println("la");
         if (ennemyCircle != null) {
             double enemyRadius = ennemyCircle.getRadius();
             double eventHorizon = enemyRadius + 100;
@@ -344,7 +298,7 @@ public class GameController {
 
     public void unrenderEntity(Entity entity){
         Circle entityCircle;
-
+        System.out.println("ici");
         if(entity instanceof Ennemy){
             entityCircle = ennemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);
