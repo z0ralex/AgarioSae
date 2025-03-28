@@ -8,13 +8,14 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * The Entity class represents a basic game entity with a unique identifier, position, and mass.
  * This class serves as a base class for other specific entities like players and pellets.
  */
-public class Entity {
+public class Entity implements Serializable {
     private final String id;
 
     private Point2DSerial position;
