@@ -133,7 +133,7 @@ public class GameController implements Initializable {
         pane.widthProperty().addListener(sizeChange);
         pane.heightProperty().addListener(sizeChange);
 
-        Player player = game.addPlayer(nickname);
+        Player player = game.addPlayer(nickname); //TODO serv
         addPlayer(player);
 
         addPlayerToMinimap(player);
@@ -198,18 +198,22 @@ public class GameController implements Initializable {
                         /*player.checkCollisionsWithEnemies(ennemyCircles, minimapEnnemyCircles, pane, minimap, animationManager);
                         spawnPellets();*/
 
+                        Set<Entity> unrendered = new HashSet<Entity>();
+
                         //updateEnnemyPosition
                         //pour toutes les entités existantes actuellement
                         for (Entity eatingEntity : eatenMap.keySet()){
-                            renderEntity(eatingEntity);
+                            if(!unrendered.contains(eatingEntity)){
+                                renderEntity(eatingEntity);
+                            }
 
 
                             if(eatenMap.get(eatingEntity) != null){
                                 for (Entity eatenEntity : eatenMap.get(eatingEntity)) {
                                     animationManager.playPelletAbsorption(getEntityCircle(eatenEntity),
                                             eatingEntity.getPosition());
-
-                                        unrenderEntity(eatenEntity);
+                                        unrendered.add(eatenEntity);
+                                        unrenderEntity(eatenEntity);//TODO
 
 
                                 }
