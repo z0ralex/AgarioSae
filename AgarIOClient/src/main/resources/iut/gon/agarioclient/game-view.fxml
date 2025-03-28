@@ -14,7 +14,7 @@
        </SubScene>
        <Pane fx:id="minimap" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2;" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0">
        </Pane>
-      <Pane fx:id="classement" prefHeight="240.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2;" AnchorPane.bottomAnchor="220.0" AnchorPane.rightAnchor="10.0" />
+      <Pane fx:id="leaderboard" prefHeight="240.0" prefWidth="200.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2;" AnchorPane.bottomAnchor="220.0" AnchorPane.rightAnchor="10.0" />
 
    </children>
 </AnchorPane>

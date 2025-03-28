@@ -27,7 +27,6 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -49,24 +48,24 @@ import java.util.stream.Collectors;
 public class GameController implements Initializable {
 
     @FXML
-    private AnchorPane container; // Main container for the game
+    private AnchorPane container;
 
     @FXML
-    private Pane pane; // Pane for rendering game elements
+    private Pane pane;
 
     @FXML
-    private SubScene gameSubscene; // Subscene for the game view
+    private SubScene gameSubscene;
 
     @FXML
-    private Pane minimap; // Pane for the minimap
+    private Pane minimap;
 
     @FXML
-    private Pane classement; // Pane for displaying the leaderboard
+    private Pane leaderboard;
 
-    private Point2D cameraOffsetPoint; // Offset point for the camera
-    private Stage stage; // Stage for the game window
+    private Point2D cameraOffsetPoint;
+    private Stage stage;
 
-    private ParallelCamera camera; // Camera for the game view
+    private ParallelCamera camera;
 
     private int debug_cmpt = 0; // Debug counter
 
@@ -144,7 +143,7 @@ public class GameController implements Initializable {
         Player player = game.addPlayer(nickname); // Add the player to the game
         addPlayer(player);
         addPlayerToMinimap(player);
-        afficherClassement();
+        displayLeaderboard();
 
         // Handle mouse movement and game updates
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -184,7 +183,7 @@ public class GameController implements Initializable {
                         game.moveEntity(player, mouseVector.getValue());
 
                         redrawPlayer(player);
-                        afficherClassement();
+                        displayLeaderboard();
 
                         if(!(player.isVisible())){
                             playerCircles.get(player).setOpacity(0.02);
@@ -234,22 +233,22 @@ public class GameController implements Initializable {
     /**
      * Displays the leaderboard.
      */
-    public void afficherClassement() {
-        ObservableList<Map.Entry<String, Double>> classement = FXCollections.observableArrayList();
+    public void displayLeaderboard() {
+        ObservableList<Map.Entry<String, Double>> leaderboard = FXCollections.observableArrayList();
 
         for (Map.Entry<Player, Circle> entry : playerCircles.entrySet()) {
             Player player = entry.getKey();
-            classement.add(new AbstractMap.SimpleEntry<>(player.getId(), player.getMass()));
+            leaderboard.add(new AbstractMap.SimpleEntry<>(player.getId(), player.getMass()));
         }
 
         for (Map.Entry<Ennemy, Circle> entry : ennemyCircles.entrySet()) {
             Ennemy ennemy = entry.getKey();
-            classement.add(new AbstractMap.SimpleEntry<>(ennemy.getId(), ennemy.getMass()));
+            leaderboard.add(new AbstractMap.SimpleEntry<>(ennemy.getId(), ennemy.getMass()));
         }
 
-        classement.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue()));
-        List<Map.Entry<String, Double>> top10 = classement.stream().limit(10).collect(Collectors.toList());
-        afficherTop10(top10);
+        leaderboard.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue()));
+        List<Map.Entry<String, Double>> top10 = leaderboard.stream().limit(10).collect(Collectors.toList());
+        displayTopTen(top10);
     }
 
     /**
@@ -257,22 +256,22 @@ public class GameController implements Initializable {
      *
      * @param top10 the top 10 entries
      */
-    public void afficherTop10(List<Map.Entry<String, Double>> top10) {
-        classement.getChildren().clear();
+    public void displayTopTen(List<Map.Entry<String, Double>> top10) {
+        leaderboard.getChildren().clear();
 
         int position = 1;
         String str="Classement : \n";
         for (Map.Entry<String, Double> entry : top10) {
-            String nom = entry.getKey();
-            Double masse = entry.getValue();
+            String name = entry.getKey();
+            Double mass = entry.getValue();
 
-            str+=(position + ". Score : " + nom + " : " + String.format("%.2f", masse) + "\n");
+            str+=(position + ". Score : " + name + " : " + String.format("%.2f", mass) + "\n");
             position++;
         }
         Label label = new Label(str);
         label.setStyle("-fx-font-size: 14px; -fx-text-fill: black; ");
         label.setPadding(new Insets(10, 10, 10, 10));
-        classement.getChildren().add(label);
+        leaderboard.getChildren().add(label);
     }
 
     /**
