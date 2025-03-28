@@ -107,8 +107,7 @@ AgarioSae/
 │       │   │   └── server/               # Implémentation du serveur
 │       └── resources/                    # Ressources graphiques, fichiers fxml, etc.
 ├── uml/                                  # Diagramme de Classes
-│   ├── DiagrammeClasses.png
-│   └── MLD.pdf
+│   └── DiagrammeClasses.png
 └── README.md                             # Ce fichier 😊
 ```
 
