@@ -42,7 +42,7 @@ public class PlayerLeaf implements PlayerComponent {
     }
 
     @Override
-    public void setPosition(Point2D position) {
+    public void setPosition(Point2DSerial position) {
         this.position.set(position);
     }
 

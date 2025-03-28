@@ -17,7 +17,7 @@ import java.util.Objects;
 public class Entity {
     private final String id;
 
-    private Point2D position;
+    private Point2DSerial position;
     private double mass;
 
     private MapNode currentMapNode;
@@ -29,7 +29,7 @@ public class Entity {
      * @param position the position of the entity in the game space
      * @param mass     the mass of the entity
      */
-    public Entity(String id, Point2D position, double mass) {
+    public Entity(String id, Point2DSerial position, double mass) {
         this.id = id;
         this.position = position;
         this.mass = mass;
@@ -50,7 +50,7 @@ public class Entity {
      *
      * @return the position of the entity
      */
-    public Point2D getPosition() {
+    public Point2DSerial getPosition() {
         return position;
     }
 
@@ -61,7 +61,7 @@ public class Entity {
      */
     public void setPosition(Point2D position) {
         if(Game.isValidPosition(position)){
-            this.position = position;
+            this.position = new Point2DSerial(position.getX(), position.getY());
         }
     }
 

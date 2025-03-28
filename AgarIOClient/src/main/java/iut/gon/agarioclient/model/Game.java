@@ -84,7 +84,7 @@ public class Game implements Serializable {
         // Check for collisions with the map boundaries
         double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
         double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
-        newPosition = new Point2D(newX, newY);
+        newPosition = new Point2DSerial(newX, newY);
 
         entity.setPosition(newPosition);
     }
@@ -113,8 +113,8 @@ public class Game implements Serializable {
         return pelletsList;
     }
     public Player addPlayer(String nickname){
-        Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
-        player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
+        Player player = new Player(nickname, new Point2DSerial(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
+        player.add(new PlayerLeaf(nickname, new Point2DSerial(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
         players.add(player);
 
         root.addEntity(player);

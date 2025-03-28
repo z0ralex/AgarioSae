@@ -6,7 +6,7 @@ public interface PlayerComponent {
     double getMass();
     void setMass(double mass);
     Point2D getPosition();
-    void setPosition(Point2D position);
+    void setPosition(Point2DSerial position);
     double getSpeed();
     void setSpeed(double speed);
     double calculateRadius();
