@@ -384,11 +384,11 @@ public class GameController implements Initializable {
      *
      * @param deltaMass the change in mass
      */
-    private void setZoomFromMass(double deltaMass) {
+    private void setZoomFromMass(double mass) {
         //System.out.println("scale : " );
         // formule de calcul de la taille de la camera
         // peut être ajustee
-        double newScale = 1 + 2. / (deltaMass);
+        double newScale = 1 + mass/1000 ;
 
         camera.setScaleX(newScale);
         camera.setScaleY(newScale);
