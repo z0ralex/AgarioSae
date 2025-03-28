@@ -85,10 +85,10 @@ public class Player extends Entity implements PlayerComponent, Serializable {
 
 
     @Override
-    public Point2D getPosition() {
+    public Point2DSerial getPosition() {
         double x = components.stream().mapToDouble(c -> c.getPosition().getX()).average().orElse(0);
         double y = components.stream().mapToDouble(c -> c.getPosition().getY()).average().orElse(0);
-        return new Point2D(x, y);
+        return new Point2DSerial(x, y);
     }
 
     @Override
