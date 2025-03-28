@@ -18,6 +18,8 @@ public class Game {
     public static final int INITIAL_PLAYER_MASS = 10;
     public static final int INITIAL_PELLET_NB = 20;
     public static final int MAX_PELLET = 1500;
+    public static final int MAX_ENEMY = 15;
+
     public static final int INITIAL_PLAYER_SPEED = 5;
     public static final double PLAYER_SPAWNPOINT_X = 400;
     public static final double PLAYER_SPAWNPOINT_Y = 300;
@@ -25,11 +27,12 @@ public class Game {
     public static final int Y_MAX = 6000;
 
     private final MapNode root; // Root node of the game map
-    private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory(); // Factory for generating pellets
+    private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
+    private final NoEffectLocalEnnemyFactory ennemyFactory;
 
-    private final List<Ennemy> enemyList; // List of enemies in the game
-    private final Set<Pellet> pellets; // Set of pellets in the game
-    private final Set<Player> players; // Set of players in the game
+    private final List<Ennemy> enemyList;
+    private final Set<Pellet> pellets;
+    private final Set<Player> players;
 
     /**
      * Checks if the specified position is within the valid game boundaries.
@@ -51,8 +54,9 @@ public class Game {
             throw new IllegalStateException("Root MapNode is not initialized.");
         }
 
-        NoEffectLocalEnnemyFactory f = new NoEffectLocalEnnemyFactory(root);
-        enemyList = f.generate(10);
+
+        ennemyFactory = new NoEffectLocalEnnemyFactory(root);
+        enemyList = ennemyFactory.generate(MAX_ENEMY);
         pellets = new HashSet<>();
         players = new HashSet<>();
     }
@@ -73,6 +77,10 @@ public class Game {
      * @return a map of entities and the entities they have eaten
      */
     public synchronized HashMap<Entity, Set<Entity>> nextTick() {
+        if (enemyList.size() < MAX_ENEMY) {
+            enemyList.addAll(ennemyFactory.generate(MAX_ENEMY - enemyList.size()));
+        }
+
         HashMap<Entity, Set<Entity>> map = new HashMap<>();
         for (Player p : players) {
             checkEntityChunk(p);
