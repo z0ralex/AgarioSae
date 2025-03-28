@@ -13,6 +13,7 @@ public class PlayerLeaf implements PlayerComponent {
     private DoubleProperty mass;
     private double speed;
     private boolean alive;
+    private double baseSpeed;
 
     public PlayerLeaf(String id, Point2D position, double mass, double speed) {
         this.id = id;
@@ -20,6 +21,7 @@ public class PlayerLeaf implements PlayerComponent {
         this.mass = new SimpleDoubleProperty(mass);
         this.speed = speed;
         this.alive = true;
+        this.baseSpeed = speed;
     }
 
     @Override
@@ -67,8 +69,9 @@ public class PlayerLeaf implements PlayerComponent {
 
     @Override
     public double calculateSpeed(double cursorX, double cursorY, double mapWidth, double mapHeight) {
-        double mass = getMass();
-        return (mass / Math.pow(mass, 1.1)) * 10;
+        // Cap minimum mass to avoid division by zero
+        double actualMass = Math.max(mass.get(), 0.1);
+        return baseSpeed * (10 / Math.sqrt(actualMass));
     }
 
     @Override

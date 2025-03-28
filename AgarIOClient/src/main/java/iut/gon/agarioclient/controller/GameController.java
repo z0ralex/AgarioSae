@@ -18,6 +18,7 @@ import javafx.fxml.Initializable;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.ParallelCamera;
 import javafx.scene.Parent;
@@ -91,14 +92,42 @@ public class GameController implements Initializable {
         gameSubscene.widthProperty().bind(container.widthProperty());
         gameSubscene.heightProperty().bind(container.heightProperty());
 
+        gameSubscene.setFocusTraversable(true);
+        gameSubscene.setOnMouseClicked(event -> gameSubscene.requestFocus());
 
+        // Ajout du gestionnaire d'événements pour la touche espace
+        gameSubscene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.SPACE) {
+                System.out.println("Space pressed");
+                Player player = playerCircles.keySet().iterator().next();
+                player.divide();
+                updatePlayerVisual(player);
+            }
+        });
     }
+
+    private void updatePlayerVisual(Player player) {
+        Circle mainCircle = playerCircles.get(player);
+        if (mainCircle != null) {
+            pane.getChildren().remove(mainCircle);
+            playerCircles.remove(player);
+        }
+
+        // Crée un nouveau cercle pour le joueur
+        Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
+        playerCircle.setFill(Color.BLUE);
+        playerCircles.put(player, playerCircle);
+        pane.getChildren().add(playerCircle);
+        playerCircle.toFront();
+    }
+
 
     public void initializeGame(String nickname, ParallelCamera camera) {
 
         if (pane == null) {
             throw new IllegalStateException("Pane is not initialized. Ensure the FXML file is correctly configured.");
         }
+
         this.nickname = nickname;
         animationManager = new AnimationManager(pane);
 
@@ -170,6 +199,8 @@ public class GameController implements Initializable {
                 new AnimationTimer() {
                     @Override
                     public void handle(long now) {
+                        playerCircles.keySet().forEach(Player::update);
+
                         if (!player.isAlive()) {
                             Platform.runLater(() -> handlePlayerDeath());
                             stop();
@@ -181,6 +212,18 @@ public class GameController implements Initializable {
                             player.removeFromCurrentNode();
                             root.addEntity(player);
                         }
+
+                        player.getComponents().forEach(component -> {
+                            if(component instanceof PlayerLeaf) {
+                                PlayerLeaf leaf = (PlayerLeaf) component;
+                                Circle circle = playerCircles.get(leaf);
+                                if(circle != null) {
+                                    circle.setCenterX(leaf.getPosition().getX());
+                                    circle.setCenterY(leaf.getPosition().getY());
+                                    circle.setRadius(leaf.calculateRadius());
+                                }
+                            }
+                        });
 
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX); //TODO changer
                         player.setSpeed(speed);
@@ -217,9 +260,6 @@ public class GameController implements Initializable {
                             list.get(i).checkCollisionsWithPlayers(playerCircles, pane, animationManager);
 
                         }
-
-
-
                     }
                 }.start();
             }

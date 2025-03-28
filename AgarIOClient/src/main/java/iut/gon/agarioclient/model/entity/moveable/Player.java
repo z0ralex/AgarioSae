@@ -36,6 +36,10 @@ public class Player extends Entity implements PlayerComponent {
 
     private long InvisbileUntil = -1;
 
+    private static final double MERGE_COOLDOWN_BASE = 10.0; // 10 secondes
+    private List<Long> divisionTimes = new ArrayList<>();
+
+
 
     public Player(String id, Point2D position, double mass) {
         super(id, position, mass);
@@ -280,13 +284,81 @@ public class Player extends Entity implements PlayerComponent {
         return markedForRemoval;
     }
 
-    public List<PlayerComponent> divide() {
-        // TODO: Implement divide logic
-        return null;
+    // In Player.java
+    public void divide() {
+        if(components.isEmpty()) return;
+
+        List<PlayerComponent> newComponents = new ArrayList<>();
+        for(PlayerComponent component : components) {
+            double halfMass = component.getMass() / 2;
+
+            // Create two new cells with offset positions
+            Point2D originalPos = component.getPosition();
+            PlayerLeaf cell1 = new PlayerLeaf(
+                    getId() + "-" + System.nanoTime(), // Unique ID
+                    originalPos.add(new Point2D(20, 0)), // Offset position
+                    halfMass,
+                    component.getSpeed() * 3
+            );
+
+            PlayerLeaf cell2 = new PlayerLeaf(
+                    getId() + "-" + System.nanoTime(),
+                    originalPos.add(new Point2D(-20, 0)), // Offset position
+                    halfMass,
+                    component.getSpeed()
+            );
+
+            newComponents.add(cell1);
+            newComponents.add(cell2);
+        }
+
+        components.clear();
+        components.addAll(newComponents);
+        // Reset division times for all new components
+        divisionTimes.clear();
+        components.forEach(c -> divisionTimes.add(System.currentTimeMillis()));
     }
 
     public void merge() {
-        // TODO: Implement merge logic
-        // Implement merging logic based on the formula t = C + m/100
+        if(canMerge()) {
+            double totalMass = components.stream().mapToDouble(PlayerComponent::getMass).sum();
+            PlayerLeaf mergedCell = new PlayerLeaf(
+                    getId(),
+                    getPosition(),
+                    totalMass,
+                    components.get(0).getSpeed() // Use existing component's speed
+            );
+
+            components.clear();
+            components.add(mergedCell);
+            divisionTimes.clear();
+            divisionTimes.add(System.currentTimeMillis());
+        }
     }
+
+    private boolean canMerge() {
+        if(components.size() <= 1) return false;
+        if(divisionTimes.size() != components.size()) return false;
+
+        long currentTime = System.currentTimeMillis();
+        for(int i = 0; i < components.size(); i++) {
+            double mass = components.get(i).getMass();
+            double requiredTime = (MERGE_COOLDOWN_BASE + mass/100) * 1000;
+            if(currentTime - divisionTimes.get(i) < requiredTime) return false;
+        }
+        return true;
+    }
+
+    // Ajouter dans handle() ou une méthode similaire
+    public void update() {
+        if(canMerge()) merge();
+
+        // Ralentissement progressif des cellules boostées
+        components.forEach(component -> {
+            if(component.getSpeed() > component.calculateSpeed(0, 0, 0, 0)) {
+                component.setSpeed(component.getSpeed() * 0.99);
+            }
+        });
+    }
+
 }
