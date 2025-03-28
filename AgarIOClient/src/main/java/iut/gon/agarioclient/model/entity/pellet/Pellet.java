@@ -9,11 +9,11 @@ import javafx.geometry.Point2D;
  */
 public class Pellet extends Entity {
     /**
-     * Constructs a new Entity with the specified id, position, and mass.
+     * Constructs a new Pellet with the specified id, position, and mass.
      *
-     * @param id       the unique identifier of the entity
-     * @param position the position of the entity in the game space
-     * @param mass     the mass of the entity
+     * @param id       the unique identifier of the pellet
+     * @param position the position of the pellet in the game space
+     * @param mass     the mass of the pellet
      */
     public Pellet(String id, Point2D position, double mass) {
         super(id, position, mass);
@@ -21,6 +21,7 @@ public class Pellet extends Entity {
 
     /**
      * Calculates the radius of the pellet based on its mass.
+     * This method provides a fixed radius for simplicity.
      *
      * @return the radius of the pellet
      */

@@ -1,4 +1,3 @@
-// GameController.java
 package iut.gon.agarioclient.controller;
 
 import iut.gon.agarioclient.App;
@@ -43,68 +42,77 @@ import javafx.stage.Stage;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+/**
+ * Controller class for managing the game.
+ * Handles game initialization, player and enemy management, and rendering.
+ */
 public class GameController implements Initializable {
 
     @FXML
-    private AnchorPane container;
+    private AnchorPane container; // Main container for the game
 
     @FXML
-    private Pane pane;
-    @FXML
-    private SubScene gameSubscene;
+    private Pane pane; // Pane for rendering game elements
 
     @FXML
-    private  Pane minimap;
+    private SubScene gameSubscene; // Subscene for the game view
 
     @FXML
-    private Pane classement ;
+    private Pane minimap; // Pane for the minimap
 
-    private Point2D cameraOffsetPoint;
-    private Stage stage;
+    @FXML
+    private Pane classement; // Pane for displaying the leaderboard
 
-    private ParallelCamera camera;
+    private Point2D cameraOffsetPoint; // Offset point for the camera
+    private Stage stage; // Stage for the game window
 
-    private int debug_cmpt = 0;
+    private ParallelCamera camera; // Camera for the game view
 
-    //TODO SUPPRIMER APRES SEPARATION CONTROLEUR/MODELE
+    private int debug_cmpt = 0; // Debug counter
+
+    // Constants for game dimensions and player spawn point
     public static final int X_MAX = 8000;
     public static final int Y_MAX = 6000;
     private static final double PLAYER_SPAWNPOINT_X = 400;
     private static final double PLAYER_SPAWNPOINT_Y = 300;
-//FIN VARIABLES COTE MODELE
 
-    private Game game;
+    private Game game; // Game model
 
-    private AnimationTimer timer;
+    private AnimationTimer timer; // Timer for game updates
 
+    private static final double NO_MOVE_DISTANCE = 10; // Dead zone for player movement
 
-    private static final double NO_MOVE_DISTANCE = 10;
-
-
+    // Maps for storing game entities and their corresponding graphical representations
     private final Map<Player, Circle> playerCircles = new HashMap<>();
     private final Map<Pellet, Circle> pelletCircles = new HashMap<>();
     private final Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
 
     private final Map<Player, Circle> minimapPlayerCircles = new HashMap<>();
     private final Map<Ennemy, Circle> minimapEnnemyCircles = new HashMap<>();
-    private AnimationManager animationManager;
+    private AnimationManager animationManager; // Manager for game animations
 
-    private String nickname;
+    private String nickname; // Player's nickname
 
     public void setStage(Stage stage){
         this.stage = stage;
     }
 
-    private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1.0);
+    private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1.0); // Scale property for zooming
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // Bind the subscene dimensions to the container dimensions
         gameSubscene.widthProperty().bind(container.widthProperty());
         gameSubscene.heightProperty().bind(container.heightProperty());
-
-
     }
 
+    /**
+     * Initializes the game with the specified nickname, camera, and game model.
+     *
+     * @param nickname the player's nickname
+     * @param camera   the camera for the game view
+     * @param game     the game model
+     */
     public void initializeGame(String nickname, ParallelCamera camera, Game game) {
         this.game = game;
 
@@ -113,7 +121,6 @@ public class GameController implements Initializable {
         }
         this.nickname = nickname;
         animationManager = new AnimationManager(pane);
-
 
         cameraOffsetPoint = new Point2D(container.getWidth() / 2., container.getHeight() / 2.);
         this.camera = camera;
@@ -124,7 +131,8 @@ public class GameController implements Initializable {
         drawGrid();
 
         gameSubscene.setCamera(camera);
-        //update de la caméra si le pane change de taille
+
+        // Update the camera position if the pane size changes
         ChangeListener<? super Number> sizeChange = (obs, oldWidth, newWidth) -> {
             cameraOffsetPoint = new Point2D((container.getWidth() / 2) * camera.getScaleX(),
                     (container.getHeight() / 2) * camera.getScaleX());
@@ -133,37 +141,29 @@ public class GameController implements Initializable {
         pane.widthProperty().addListener(sizeChange);
         pane.heightProperty().addListener(sizeChange);
 
-        Player player = game.addPlayer(nickname); //TODO serv
+        Player player = game.addPlayer(nickname); // Add the player to the game
         addPlayer(player);
-
         addPlayerToMinimap(player);
-
         afficherClassement();
 
-        //partie controller
+        // Handle mouse movement and game updates
         pane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 final Point2D[] mousePosition = {new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y)};
-
-                final SimpleObjectProperty<Point2D> mouseVector = new SimpleObjectProperty<>(Point2D.ZERO); // représente un vecteur, pas une position
-                // property parce que j'ai besoin que ça soit final, peut etre des legers coûts en perf
+                final SimpleObjectProperty<Point2D> mouseVector = new SimpleObjectProperty<>(Point2D.ZERO);
 
                 newScene.setOnMouseMoved(event -> {
                     double xPosition = event.getX();
                     double yPosition = event.getY();
 
-
                     double xVect = xPosition - (player.getPosition().getX() - camera.getLayoutX()) / scale.doubleValue();
                     double yVect = yPosition - (player.getPosition().getY() - camera.getLayoutY()) / scale.doubleValue();
 
-
                     if (Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE) {
-                        //zone morte : reset du vecteur
                         mouseVector.setValue(Point2D.ZERO);
                     } else {
-                        // mouvement
                         mousePosition[0] = new Point2D(xPosition, yPosition);
-                        mouseVector.setValue(new Point2D(xVect, yVect).normalize()); //TODO pas forcément normaliser : selon l'emplacement de la souris la vitesse change
+                        mouseVector.setValue(new Point2D(xVect, yVect).normalize());
                     }
                 });
 
@@ -173,21 +173,17 @@ public class GameController implements Initializable {
                         HashMap<Entity, Set<Entity>> eatenMap = game.nextTick();
 
                         if (!player.isAlive()) {
-                            Platform.runLater(() -> handlePlayerDeath()); //purement client
+                            Platform.runLater(() -> handlePlayerDeath());
                             stop();
                             return;
                         }
-
 
                         double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         player.setSpeed(speed);
 
                         game.moveEntity(player, mouseVector.getValue());
 
-                        //graphique
                         redrawPlayer(player);
-
-
                         afficherClassement();
 
                         if(!(player.isVisible())){
@@ -195,27 +191,20 @@ public class GameController implements Initializable {
                         } else{
                             playerCircles.get(player).setOpacity(1);
                         }
-                        /*player.checkCollisionsWithEnemies(ennemyCircles, minimapEnnemyCircles, pane, minimap, animationManager);
-                        spawnPellets();*/
 
-                        Set<Entity> unrendered = new HashSet<Entity>();
+                        Set<Entity> unrendered = new HashSet<>();
 
-                        //updateEnnemyPosition
-                        //pour toutes les entités existantes actuellement
                         for (Entity eatingEntity : eatenMap.keySet()){
                             if(!unrendered.contains(eatingEntity)){
                                 renderEntity(eatingEntity);
                             }
 
-
                             if(eatenMap.get(eatingEntity) != null){
                                 for (Entity eatenEntity : eatenMap.get(eatingEntity)) {
                                     animationManager.playPelletAbsorption(getEntityCircle(eatenEntity),
                                             eatingEntity.getPosition());
-                                        unrendered.add(eatenEntity);
-                                        unrenderEntity(eatenEntity);//TODO
-
-
+                                    unrendered.add(eatenEntity);
+                                    unrenderEntity(eatenEntity);
                                 }
                             }
                         }
@@ -227,46 +216,49 @@ public class GameController implements Initializable {
         });
     }
 
+    /**
+     * Gets the graphical representation of an entity.
+     *
+     * @param e the entity
+     * @return the corresponding circle
+     */
     private Circle getEntityCircle(Entity e){
         if(e instanceof Ennemy){
             return ennemyCircles.get(e);
         } else if (e instanceof Player) {
             return playerCircles.get(e);
         }
-
         return pelletCircles.get(e);
     }
 
-
-
+    /**
+     * Displays the leaderboard.
+     */
     public void afficherClassement() {
-        // Créer une liste de paires (entité, masse) pour les joueurs et ennemis
         ObservableList<Map.Entry<String, Double>> classement = FXCollections.observableArrayList();
 
-        // Ajouter les joueurs
         for (Map.Entry<Player, Circle> entry : playerCircles.entrySet()) {
             Player player = entry.getKey();
             classement.add(new AbstractMap.SimpleEntry<>(player.getId(), player.getMass()));
         }
 
-        // Ajouter les ennemis
         for (Map.Entry<Ennemy, Circle> entry : ennemyCircles.entrySet()) {
             Ennemy ennemy = entry.getKey();
             classement.add(new AbstractMap.SimpleEntry<>(ennemy.getId(), ennemy.getMass()));
         }
 
-        // Trier par masse, du plus grand au plus petit
         classement.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue()));
-
-        // Limiter aux 10 premiers
         List<Map.Entry<String, Double>> top10 = classement.stream().limit(10).collect(Collectors.toList());
-
-        // Afficher dans le Pane de classement
         afficherTop10(top10);
     }
 
+    /**
+     * Displays the top 10 players and enemies in the leaderboard.
+     *
+     * @param top10 the top 10 entries
+     */
     public void afficherTop10(List<Map.Entry<String, Double>> top10) {
-        classement.getChildren().clear(); // Vider le Pane avant de remplir
+        classement.getChildren().clear();
 
         int position = 1;
         String str="Classement : \n";
@@ -283,10 +275,11 @@ public class GameController implements Initializable {
         classement.getChildren().add(label);
     }
 
-
+    /**
+     * Handles the player's death by clearing the game elements and loading the welcome view.
+     */
     private void handlePlayerDeath() {
         try {
-            // Clear all game elements
             pane.getChildren().clear();
             playerCircles.clear();
             minimapPlayerCircles.clear();
@@ -294,7 +287,6 @@ public class GameController implements Initializable {
             ennemyCircles.clear();
             minimapEnnemyCircles.clear();
 
-            // Load welcome view
             FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/iut/gon/agarioclient/welcome-view.fxml"));
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root, 800, 600);
@@ -311,11 +303,18 @@ public class GameController implements Initializable {
         }
     }
 
-
+    /**
+     * Updates the game state from the server.
+     *
+     * @param t the vector received from the server
+     */
     public void updateFromServer(TestVecteur t) {
         System.out.println(t.toString());
     }
 
+    /**
+     * Draws the grid on the game pane.
+     */
     private void drawGrid() {
         pane.getChildren().clear();
 
@@ -334,9 +333,13 @@ public class GameController implements Initializable {
         }
     }
 
+    /**
+     * Adds a player to the game and sets up listeners for position and mass changes.
+     *
+     * @param player the player to add
+     */
     public void addPlayer(Player player) {
         Circle playerCircle = new Circle(player.getPosition().getX(), player.getPosition().getY(), player.calculateRadius());
-
         playerCircle.setFill(Color.BLUE);
         playerCircles.put(player, playerCircle);
         pane.getChildren().add(playerCircle);
@@ -348,17 +351,21 @@ public class GameController implements Initializable {
             }
         });
 
-        // change la position de la camera en fonction de la position du joueur
         player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             onPlayerPositionChanged(player, newPoint);
         });
 
         player.massProperty().addListener((obs, oldMass, newMass) -> {
-            playerCircle.setRadius(player.calculateRadius()); // update du radius du joueur
-            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue()); // update du zoom de la camera
+            playerCircle.setRadius(player.calculateRadius());
+            setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue());
         });
     }
 
+    /**
+     * Adds a player to the minimap.
+     *
+     * @param player the player to add
+     */
     private void addPlayerToMinimap(Player player) {
         double minimapScaleX = minimap.getWidth() / X_MAX;
         double minimapScaleY = minimap.getHeight() / Y_MAX;
@@ -368,49 +375,52 @@ public class GameController implements Initializable {
         Circle miniPlayer = new Circle(
                 player.getPosition().getX() * minimapScaleX,
                 player.getPosition().getY() * minimapScaleY,
-                player.calculateRadius() * 0.1,  // Réduction de la taille du joueur
+                player.calculateRadius() * 0.1,
                 Color.BLUE
         );
 
         minimapPlayerCircles.put(player, miniPlayer);
         minimap.getChildren().add(miniPlayer);
-
     }
 
-
+    /**
+     * Updates the camera position when the player's position changes.
+     *
+     * @param player the player
+     * @param newPos the new position of the player
+     */
     private void onPlayerPositionChanged(Player player, Point2D newPos) {
-        double x = (newPos.getX() - cameraOffsetPoint.getX()) ;
-        double y = (newPos.getY() - cameraOffsetPoint.getY()) ;
-
+        double x = (newPos.getX() - cameraOffsetPoint.getX());
+        double y = (newPos.getY() - cameraOffsetPoint.getY());
 
         camera.setLayoutX(x);
         camera.setLayoutY(y);
-
-        //mets à jour le chunk du joueur
-
     }
 
+    /**
+     * Sets the zoom level based on the player's mass.
+     *
+     * @param deltaMass the change in mass
+     */
     private void setZoomFromMass(double deltaMass) {
-        //System.out.println("scale : " + scale.doubleValue());
-        // formule de calcul de la taille de la camera
-        // peut être ajustee
         double newScale = camera.getScaleX() + 1. / (deltaMass * 200.);
 
         camera.setScaleX(newScale);
         camera.setScaleY(newScale);
 
-        // le zoom change : on doit recalculer le centre de la caméra
         cameraOffsetPoint = new Point2D(
                 (container.getWidth() / 2) * camera.getScaleX(),
                 (container.getHeight() / 2) * camera.getScaleY()
-
         );
     }
 
+    /**
+     * Adds an enemy to the game and sets up listeners for position and mass changes.
+     *
+     * @param e the enemy to add
+     */
     public void addEnnemy(Ennemy e) {
         Circle ennemyCircle = new Circle(e.getPosition().getX(), e.getPosition().getY(), e.calculateRadius());
-
-
 
         if (e.getStrat() instanceof IAStratEatPlayers) {
             ennemyCircle.setFill(Color.RED);
@@ -430,11 +440,16 @@ public class GameController implements Initializable {
         });
 
         e.massProperty().addListener((obs, oldMass, newMass) -> {
-            ennemyCircle.setRadius(e.calculateRadius()); // update du radius du joueur
+            ennemyCircle.setRadius(e.calculateRadius());
         });
         addEnnemyToMinimap(e);
     }
 
+    /**
+     * Adds an enemy to the minimap.
+     *
+     * @param ennemy the enemy to add
+     */
     private void addEnnemyToMinimap(Ennemy ennemy) {
         double minimapScaleX = minimap.getWidth() / X_MAX;
         double minimapScaleY = minimap.getHeight() / Y_MAX;
@@ -446,21 +461,24 @@ public class GameController implements Initializable {
         Circle miniEnnemy = new Circle(
                 ennemy.getPosition().getX() * minimapScaleX,
                 ennemy.getPosition().getY() * minimapScaleY,
-                ennemy.calculateRadius() * 0.1,  // Taille réduite
+                ennemy.calculateRadius() * 0.1,
                 color
         );
 
         minimapEnnemyCircles.put(ennemy, miniEnnemy);
         minimap.getChildren().add(miniEnnemy);
 
-        // Suivi des mouvements de l'ennemi
         ennemy.positionProperty().addListener((obs, oldPos, newPos) -> {
             miniEnnemy.setCenterX(newPos.getX() * minimapScaleX);
             miniEnnemy.setCenterY(newPos.getY() * minimapScaleY);
         });
     }
 
-
+    /**
+     * Redraws the player's graphical representation.
+     *
+     * @param player the player to redraw
+     */
     public void redrawPlayer(Player player) {
         Circle playerCircle = playerCircles.get(player);
         if (playerCircle != null) {
@@ -479,6 +497,11 @@ public class GameController implements Initializable {
     }
 
 
+    /**
+     * Redraws the enemy's graphical representation.
+     *
+     * @param e the enemy to redraw
+     */
     public void redrawEnemy(Ennemy e) {
         Circle ennemyCircle = ennemyCircles.get(e);
         if (ennemyCircle != null) {
@@ -487,17 +510,22 @@ public class GameController implements Initializable {
             ennemyCircle.setRadius(e.calculateRadius());
         }
         Circle miniEnnemyCircle = minimapEnnemyCircles.get(e);
-        if(miniEnnemyCircle!=null){
+        if(miniEnnemyCircle != null){
             double minimapScaleX = minimap.getWidth() / X_MAX;
             double minimapScaleY = minimap.getHeight() / Y_MAX;
             miniEnnemyCircle.setCenterX(e.getPosition().getX() * minimapScaleX);
             miniEnnemyCircle.setCenterY(e.getPosition().getY() * minimapScaleY);
 
-            double minimapEnnemyRadius = Math.min(Math.max(3,e.calculateRadius()*0.03),20);
+            double minimapEnnemyRadius = Math.min(Math.max(3, e.calculateRadius() * 0.03), 20);
             miniEnnemyCircle.setRadius(minimapEnnemyRadius);
         }
     }
 
+    /**
+     * Adds a pellet to the game and sets its graphical representation.
+     *
+     * @param pellet the pellet to add
+     */
     public void addPellet(Pellet pellet) {
         Circle pelletCircle = new Circle(pellet.getPosition().getX(), pellet.getPosition().getY(), pellet.calculateRadius());
 
@@ -509,10 +537,10 @@ public class GameController implements Initializable {
         } else if(pellet instanceof SpeedReductionPellet){
             pelletCircle.setFill(Color.YELLOW);
             pelletCircle.setRadius(15.0);
-        }else if(pellet instanceof SpeedBoostPellet){
+        } else if(pellet instanceof SpeedBoostPellet){
             pelletCircle.setFill(Color.MAGENTA);
             pelletCircle.setRadius(15.0);
-        }else {
+        } else {
             int selector = color.nextInt(6);
             switch (selector){
                 case 0: pelletCircle.setFill(Color.DARKVIOLET); break;
@@ -521,9 +549,7 @@ public class GameController implements Initializable {
                 case 3: pelletCircle.setFill(Color.RED); break;
                 case 4: pelletCircle.setFill(Color.BROWN); break;
                 default: pelletCircle.setFill(Color.GREY);
-
             }
-
         }
 
         pelletCircles.put(pellet, pelletCircle);
@@ -531,47 +557,46 @@ public class GameController implements Initializable {
         pelletCircle.toBack();
     }
 
-
-
     /**
-     * permet de générer le rendu d'une entité à l'écran
+     * Renders the graphical representation of an entity.
+     *
+     * @param entity the entity to render
      */
     public void renderEntity(Entity entity) {
-
         if (entity instanceof Ennemy) {
             Ennemy e = (Ennemy) entity;
             if(ennemyCircles.containsKey(e)) redrawEnemy(e);
             else addEnnemy(e);
-
         } else if (entity instanceof Player) {
             Player p = (Player) entity;
             if(playerCircles.containsKey(p)) redrawPlayer(p);
             else addPlayer(p);
         } else {
-            //pellet
+            // Pellet
             addPellet((Pellet) entity);
         }
     }
 
+    /**
+     * Removes the graphical representation of an entity from the game.
+     *
+     * @param entity the entity to unrender
+     */
     public void unrenderEntity(Entity entity) {
         Circle entityCircle;
         Circle miniEntityCircle = null;
         if (entity instanceof Ennemy) {
-            System.out.println("yoricked" + (debug_cmpt ++));
             entityCircle = ennemyCircles.get(entity);
             miniEntityCircle = minimapEnnemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);
-            minimapEnnemyCircles.remove(entity,miniEntityCircle);
-
-
+            minimapEnnemyCircles.remove(entity, miniEntityCircle);
         } else if (entity instanceof Player) {
             entityCircle = playerCircles.get(entity);
             playerCircles.remove(entity, entityCircle);
             miniEntityCircle = minimapPlayerCircles.get(entity);
-            minimapPlayerCircles.remove(entity,miniEntityCircle);
-
+            minimapPlayerCircles.remove(entity, miniEntityCircle);
         } else {
-            //Pellet
+            // Pellet
             entityCircle = pelletCircles.get(entity);
             pelletCircles.remove(entity, entityCircle);
         }
@@ -580,9 +605,14 @@ public class GameController implements Initializable {
         minimap.getChildren().remove(miniEntityCircle);
     }
 
+    /**
+     * Updates the loaded chunks based on the current chunk.
+     *
+     * @param currentChunk the current chunk
+     */
     public void updateLoadedChunks(MapNode currentChunk) {
+        // TODO: Implement logic to update loaded chunks based on the current chunk
         //System.out.println("update du chunk");
+
     }
-
-
 }

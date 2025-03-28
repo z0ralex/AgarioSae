@@ -11,63 +11,71 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 
+/**
+ * Controller class for managing the chat functionality in the game.
+ * Handles sending and receiving messages between the client and the server.
+ */
 public class ChatController {
 
     @FXML
-    private TextArea chatArea;
+    private TextArea chatArea; // Text area for displaying chat messages
 
     @FXML
-    private Button sendButton;
+    private Button sendButton; // Button for sending chat messages
 
     @FXML
-    private TextField messageField; // Champ de texte pour saisir le message
+    private TextField messageField; // Text field for entering chat messages
 
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
-    private Socket socket;
-    private String clientId;
-    private String nickname;
-    private String host;
-    private Integer port;
+    private ObjectOutputStream out; // Output stream for sending objects to the server
+    private ObjectInputStream in; // Input stream for receiving objects from the server
+    private Socket socket; // Socket for connecting to the server
+    private String clientId; // Unique identifier for the client
+    private String nickname; // Nickname of the client
+    private String host; // Host address of the server
+    private Integer port; // Port number of the server
 
-
+    /**
+     * Initializes the chat controller with the specified nickname, host, and port.
+     * Establishes a connection to the server and starts a thread to receive messages.
+     *
+     * @param nickname the nickname of the client
+     * @param host     the host address of the server
+     * @param port     the port number of the server
+     */
     public void initialize(String nickname, String host, Integer port) {
-
         this.nickname = nickname;
-        this.host=host;
-        this.port=port;
-
+        this.host = host;
+        this.port = port;
 
         try {
-            socket = new Socket(this.host, this.port); // Connexion au serveur
-            in = new ObjectInputStream(socket.getInputStream()); // Pour recevoir des objets
-            out = new ObjectOutputStream(socket.getOutputStream()); // Pour envoyer des objets
+            socket = new Socket(this.host, this.port); // Connect to the server
+            in = new ObjectInputStream(socket.getInputStream()); // For receiving objects
+            out = new ObjectOutputStream(socket.getOutputStream()); // For sending objects
 
-            // Thread pour recevoir les messages du serveur (texte ou objets)
+            // Thread for receiving messages from the server (text or objects)
             Thread receiveMessagesThread = new Thread(() -> {
                 Object message = null;
                 try {
                     while (true) {
-                        //Object message = in.readObject();
                         message = Serializer.receiveObject(in);
                         if (message instanceof String) {
                             final String msg = (String) message;
 
-                            // Si le message de bienvenue est reçu, on peut l'interpréter pour extraire l'ID si besoin
+                            // If the welcome message is received, extract the client ID
                             if (msg.startsWith("Bienvenue! Votre ID est : ")) {
                                 System.out.println(msg);
                                 clientId = msg.substring("Bienvenue! Votre ID est : ".length());
-                                // On envoie le message "pret" au serveur pour indiquer que le client est prêt
+                                // Send "ready" message to the server to indicate the client is ready
                                 out.writeObject("pret");
                                 System.out.println("pret");
                                 out.flush();
                             }
                             if (msg.startsWith("CHAT: ")) {
-                                // Affichage dans la zone de chat (en enlevant le préfixe "CHAT: " s'il y en a un)
+                                // Display the chat message in the chat area
                                 String messageToDisplay = msg.replaceFirst("^CHAT: ", "");
                                 Platform.runLater(() -> chatArea.appendText(messageToDisplay + "\n"));
                             }
-                        }else if(message instanceof ArrayList<?>) {
+                        } else if (message instanceof ArrayList<?>) {
                             ArrayList<?> ar = (ArrayList<?>) message;
                         } else if (message instanceof TestVecteur) {
                             final TestVecteur vecteur = (TestVecteur) message;
@@ -84,27 +92,32 @@ public class ChatController {
                 }
             });
             receiveMessagesThread.start();
-        } catch (IOException  e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-
+    /**
+     * Handles the action of sending a chat message.
+     * Sends the message to the server with a "CHAT: " prefix.
+     */
     @FXML
     public void handleSendMessage() {
         String message = messageField.getText();
         if (!message.isEmpty() && clientId != null) {
-            // Envoi du message au serveur avec un préfixe "CHAT: "
             try {
-                out.writeObject("CHAT: " + nickname + " : " + message);  // Envoi du message sous forme de String
+                out.writeObject("CHAT: " + nickname + " : " + message); // Send the message as a String
                 out.flush();
-                messageField.clear(); // Effacer le champ de texte après envoi
+                messageField.clear(); // Clear the text field after sending
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    /**
+     * Closes the socket connection to the server.
+     */
     public void close() {
         try {
             socket.close();
