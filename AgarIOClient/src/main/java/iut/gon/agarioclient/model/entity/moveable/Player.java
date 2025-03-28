@@ -10,17 +10,17 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Represents a player in the game, which can be controlled by the user or AI.
  * Inherits from Entity and implements PlayerComponent.
  */
-public class Player extends Entity implements PlayerComponent {
-    // List of components that make up the player
+public class Player extends Entity implements PlayerComponent, Serializable {
     protected List<PlayerComponent> components = new ArrayList<>();
-    private ObjectProperty<Point2D> position;
-    private DoubleProperty mass;
+    private Point2DSerial position;
+    private double mass;
 
     private boolean alive = true;
     private boolean markedForRemoval = false;
@@ -42,10 +42,10 @@ public class Player extends Entity implements PlayerComponent {
      * @param position the initial position of the player
      * @param mass     the initial mass of the player
      */
-    public Player(String id, Point2D position, double mass) {
+    public Player(String id, Point2DSerial position, double mass) {
         super(id, position, mass);
-        this.position = new SimpleObjectProperty<>(position);
-        this.mass = new SimpleDoubleProperty(mass);
+        this.position = position;
+        this.mass = mass;
     }
 
     /**
@@ -75,7 +75,7 @@ public class Player extends Entity implements PlayerComponent {
         return components;
     }
 
-    private Point2D lastPosition = getPosition();
+    private Point2DSerial lastPosition = getPosition();
 
     /**
      * Gets the total mass of the player by summing the mass of all components.
@@ -99,7 +99,7 @@ public class Player extends Entity implements PlayerComponent {
             double proportion = component.getMass() / totalMass;
             component.setMass(mass * proportion);
         }
-        this.mass.set(mass);
+        this.mass=mass;
     }
 
     /**
@@ -107,12 +107,12 @@ public class Player extends Entity implements PlayerComponent {
      *
      * @return the direction as a normalized Point2D vector
      */
-    public Point2D getDirection() {
-        Point2D currentPosition = getPosition();
-        Point2D direction = currentPosition.subtract(lastPosition);
+    public Point2DSerial getDirection() {
+        Point2DSerial currentPosition = getPosition();
+        Point2DSerial direction = currentPosition.subtract(lastPosition);
 
         if (direction.magnitude() == 0) {
-            return Point2D.ZERO;
+            return Point2DSerial.ZERO;
         }
         return direction.normalize();
     }
@@ -123,10 +123,10 @@ public class Player extends Entity implements PlayerComponent {
      * @return the average position as a Point2D object
      */
     @Override
-    public Point2D getPosition() {
+    public Point2DSerial getPosition() {
         double x = components.stream().mapToDouble(c -> c.getPosition().getX()).average().orElse(0);
         double y = components.stream().mapToDouble(c -> c.getPosition().getY()).average().orElse(0);
-        return new Point2D(x, y);
+        return new Point2DSerial(x, y);
     }
 
     /**
@@ -135,9 +135,9 @@ public class Player extends Entity implements PlayerComponent {
      * @param position the new position to set
      */
     @Override
-    public void setPosition(Point2D position) {
+    public void setPosition(Point2DSerial position) {
         this.lastPosition = getPosition();
-        this.position.set(position);
+        this.position = position;
         for (PlayerComponent component : components) {
             component.setPosition(position);
         }
@@ -240,21 +240,13 @@ public class Player extends Entity implements PlayerComponent {
         return gotEffectedAt;
     }
 
-    /**
-     * Gets the position property of the player for binding and change listeners.
-     *
-     * @return the position property
-     */
-    public SimpleObjectProperty<Point2D> positionProperty() {
-        return (SimpleObjectProperty<Point2D>) position;
-    }
 
     /**
      * Gets the mass property of the player for binding and change listeners.
      *
      * @return the mass property
      */
-    public DoubleProperty massProperty() {
+    public double massProperty() {
         return mass;
     }
 
@@ -268,17 +260,17 @@ public class Player extends Entity implements PlayerComponent {
      * @param mapHeight      The height of the game map.
      * @return The new position of the player as a Point2D object.
      */
-    public Point2D calculateNewPosition(Point2D targetPosition, double mapWidth, double mapHeight) {
+    public Point2DSerial calculateNewPosition(Point2DSerial targetPosition, double mapWidth, double mapHeight) {
         double speed = calculateSpeed(targetPosition.getX(), targetPosition.getY(), mapWidth, mapHeight);
         setSpeed(speed);
 
-        Point2D direction = targetPosition.subtract(getPosition()).normalize();
-        Point2D newPosition = getPosition().add(direction.multiply(getSpeed()));
+        Point2DSerial direction = targetPosition.subtract(getPosition()).normalize();
+        Point2DSerial newPosition = getPosition().add(direction.multiply(getSpeed()));
 
         // Check for collisions with the map boundaries
         double newX = Math.max(0, Math.min(newPosition.getX(), mapWidth));
         double newY = Math.max(0, Math.min(newPosition.getY(), mapHeight));
-        return new Point2D(newX, newY);
+        return new Point2DSerial(newX, newY);
     }
 
     /**
@@ -427,4 +419,14 @@ public class Player extends Entity implements PlayerComponent {
         // TODO: Implement merge logic
         // Implement merging logic based on the formula t = C + m/100
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Player player = (Player) o;
+        return Double.compare(player.mass, mass) == 0 && alive == player.alive && markedForRemoval == player.markedForRemoval && isVisible == player.isVisible && affectedUntil == player.affectedUntil && Double.compare(player.specialEffect, specialEffect) == 0 && gotEffectedAt == player.gotEffectedAt && gotInvisbileAt == player.gotInvisbileAt && InvisbileUntil == player.InvisbileUntil && Objects.equals(components, player.components) && position.equals(player.position) && lastPosition.equals(player.lastPosition);
+    }
+
 }

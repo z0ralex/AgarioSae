@@ -9,6 +9,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,10 +19,10 @@ import java.util.Set;
  * Represents an enemy entity in the game, which is a type of Player controlled by AI.
  * Inherits from Player class and implements specific enemy behaviors.
  */
-public class Ennemy extends Player {
+public class Ennemy extends Player implements Serializable {
     private IA strat;
-    private Point2D posE;
-    private DoubleProperty mass;
+    private Point2DSerial posE;
+    private double mass;
     private double speed;
     private boolean markedForRemoval = false;
 
@@ -34,11 +35,11 @@ public class Ennemy extends Player {
      * @param strat    AI strategy controlling this enemy
      * @param speed    Initial speed of the enemy
      */
-    public Ennemy(String id, Point2D position, double mass, IA strat, double speed) {
+    public Ennemy(String id, Point2DSerial position, double mass, IA strat, double speed) {
         super(id, position, mass);
         this.posE = position;
         this.strat = strat;
-        this.mass = new SimpleDoubleProperty(mass);
+        this.mass = mass;
         this.speed = speed;
     }
 
@@ -83,7 +84,7 @@ public class Ennemy extends Player {
      * @param newPos The new position to set
      */
     @Override
-    public void setPosition(Point2D newPos) {
+    public void setPosition(Point2DSerial newPos) {
         if(Game.isValidPosition(newPos)) {
             this.posE = newPos;
         }
@@ -95,7 +96,7 @@ public class Ennemy extends Player {
      * @return The current position as Point2D
      */
     @Override
-    public Point2D getPosition() {
+    public Point2DSerial getPosition() {
         return posE;
     }
 
@@ -106,7 +107,7 @@ public class Ennemy extends Player {
      */
     @Override
     public double getMass() {
-        return mass.get();
+        return mass;
     }
 
     /**
@@ -116,7 +117,7 @@ public class Ennemy extends Player {
      */
     @Override
     public void setMass(double mass) {
-        this.mass.set(mass);
+        this.mass = mass;
     }
 
     /**

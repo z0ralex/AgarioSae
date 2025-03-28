@@ -1,4 +1,3 @@
-// Game.java
 package iut.gon.agarioclient.model;
 
 import iut.gon.agarioclient.model.entity.moveable.*;
@@ -7,14 +6,15 @@ import iut.gon.agarioclient.model.entity.pellet.Pellet;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Represents the game model, managing players, enemies, pellets, and the game map.
  * Handles game initialization, entity movement, collision detection, and game updates.
  */
-public class Game {
-    // Constants for game configuration
+public class Game implements Serializable {
+    //Constantes
     public static final int INITIAL_PLAYER_MASS = 10;
     public static final int INITIAL_PELLET_NB = 20;
     public static final int MAX_PELLET = 1500;
@@ -26,10 +26,12 @@ public class Game {
     public static final int X_MAX = 8000;
     public static final int Y_MAX = 6000;
 
-    private final MapNode root; // Root node of the game map
+    private final MapNode root;
     private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
     private final NoEffectLocalEnnemyFactory ennemyFactory;
+    private HashMap<Entity, Set<Entity>> eatenMap = new HashMap<>();
 
+    //TODO changer ça
     private final List<Ennemy> enemyList;
     private final Set<Pellet> pellets;
     private final Set<Player> players;
@@ -40,7 +42,7 @@ public class Game {
      * @param pos the position to check
      * @return true if the position is valid, false otherwise
      */
-    public static boolean isValidPosition(Point2D pos) {
+    public static boolean isValidPosition(Point2DSerial pos){
         return (pos.getX() >= 0 && pos.getX() <= X_MAX) &&
                 (pos.getY() >= 0 && pos.getY() <= Y_MAX);
     }
@@ -48,8 +50,8 @@ public class Game {
     /**
      * Constructs a new Game instance and initializes the game map, enemies, and collections.
      */
-    public Game() {
-        root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
+    public Game(){
+        root = new MapNode(4, new Point2DSerial(0, 0), new Point2DSerial(X_MAX, Y_MAX));
         if (root == null) {
             throw new IllegalStateException("Root MapNode is not initialized.");
         }
@@ -96,8 +98,9 @@ public class Game {
             map.put(pellet, null);
         }));
 
-        map.putAll(getEatenEntities(map.keySet()));
-        return map;
+
+        updateEatenEntites(map.keySet());
+        return getEatenEntities();
     }
 
     /**
@@ -107,13 +110,13 @@ public class Game {
      * @param entity the player entity to move
      * @param vector the movement vector
      */
-    public void moveEntity(Player entity, Point2D vector) {
-        Point2D newPosition = entity.getPosition().add(vector.multiply(entity.getSpeed()));
+    public synchronized void moveEntity(Player entity, Point2DSerial vector){
+        Point2DSerial newPosition = entity.getPosition().add(vector.multiply(entity.getSpeed()));
 
         // Check for collisions with the map boundaries
         double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));
         double newY = Math.max(0, Math.min(newPosition.getY(), Y_MAX));
-        newPosition = new Point2D(newX, newY);
+        newPosition = new Point2DSerial(newX, newY);
 
         entity.setPosition(newPosition);
     }
@@ -132,7 +135,7 @@ public class Game {
      *
      * @return a list of newly spawned pellets
      */
-    public List<Pellet> spawnPellets() {
+    public synchronized List<Pellet> spawnPellets() {
         if (pellets.size() < MAX_PELLET) {
             return createPellets(Math.min(100, MAX_PELLET - pellets.size()));
         }
@@ -146,7 +149,8 @@ public class Game {
      * @param count the number of pellets to create
      * @return a list of created pellets
      */
-    public List<Pellet> createPellets(int count) {
+    public synchronized List<Pellet> createPellets(int count) {
+
         List<Pellet> pelletsList = pelletFactory.generatePellets(count);
         for (Pellet pellet : pelletsList) {
             getRoot().addEntity(pellet);
@@ -163,9 +167,9 @@ public class Game {
      * @param nickname the nickname of the player
      * @return the created player
      */
-    public Player addPlayer(String nickname) {
-        Player player = new Player(nickname, new Point2D(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
-        player.add(new PlayerLeaf(nickname, new Point2D(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
+    public synchronized Player addPlayer(String nickname){
+        Player player = new Player(nickname, new Point2DSerial(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
+        player.add(new PlayerLeaf(nickname, new Point2DSerial(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
         players.add(player);
 
         root.addEntity(player);
@@ -187,14 +191,7 @@ public class Game {
         }
     }
 
-    /**
-     * Gets the entities that have been eaten by other entities.
-     * Removes the eaten entities from the game.
-     *
-     * @param newEntity the set of new entities to check
-     * @return a map of entities and the entities they have eaten
-     */
-    public HashMap<Entity, Set<Entity>> getEatenEntities(Set<Entity> newEntity) {
+    public synchronized void updateEatenEntites(Set<Entity> set){
         HashMap<Entity, Set<Entity>> eatenMap = new HashMap<>();
 
         for (Ennemy ennemy : enemyList) {
@@ -225,6 +222,15 @@ public class Game {
             removeEntity(e);
         }
 
+        set.forEach((e)->{
+            eatenMap.put(e, null);
+        });
+
+        this.eatenMap = eatenMap;
+    }
+
+    //TODO a refactor si on fait l'optimisation
+    public synchronized HashMap<Entity, Set<Entity>> getEatenEntities(){
         return eatenMap;
     }
 
@@ -233,8 +239,8 @@ public class Game {
      *
      * @param entity the entity to remove
      */
-    public void removeEntity(Entity entity) {
-        if (entity instanceof Ennemy) {
+    public synchronized void removeEntity(Entity entity){
+        if(entity instanceof Ennemy){
             enemyList.remove(entity);
         } else if (entity instanceof Player) {
             players.remove(entity);

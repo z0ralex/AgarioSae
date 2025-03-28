@@ -1,6 +1,7 @@
 // AnimationManager.java
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.model.entity.moveable.Point2DSerial;
 import javafx.animation.*;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -13,7 +14,7 @@ import javafx.util.Duration;
  * Manages animations for the game, including pellet absorption and cell division effects.
  */
 public class AnimationManager {
-    private Pane gamePane; // The pane where the animations will be displayed
+    private Pane gamePane;
 
     /**
      * Constructs an AnimationManager with the specified game pane.
@@ -31,8 +32,8 @@ public class AnimationManager {
      * @param pellet         the pellet node to animate
      * @param targetPosition the target position where the pellet will move
      */
-    public void playPelletAbsorption(Node pellet, Point2D targetPosition) {
-        if (pellet != null) {
+    public void playPelletAbsorption(Node pellet, Point2DSerial targetPosition) {
+        if(pellet != null){
             // Create a copy for the animation so the original can be removed immediately
             Circle animatedPellet = new Circle(
                     ((Circle) pellet).getRadius(),
@@ -68,7 +69,7 @@ public class AnimationManager {
      * @param position      the position where the cell division occurs
      * @param initialRadius the initial radius of the cell being divided
      */
-    public void playCellDivision(Point2D position, double initialRadius) {
+    public void playCellDivision(Point2DSerial position, double initialRadius) {
         // Create visual effect for division
         for (int i = 0; i < 8; i++) {
             Circle particle = new Circle(initialRadius / 4, Color.WHITE);

@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.model.Game;
 import iut.gon.agarioclient.server.Serializer;
 import iut.gon.agarioclient.server.TestVecteur;
 import javafx.application.Platform;
@@ -18,21 +19,21 @@ import java.util.ArrayList;
 public class ChatController {
 
     @FXML
-    private TextArea chatArea; // Text area for displaying chat messages
+    private TextArea chatArea;
 
     @FXML
-    private Button sendButton; // Button for sending chat messages
+    private Button sendButton;
 
     @FXML
-    private TextField messageField; // Text field for entering chat messages
+    private TextField messageField; // Champ de texte pour saisir le message
 
-    private ObjectOutputStream out; // Output stream for sending objects to the server
-    private ObjectInputStream in; // Input stream for receiving objects from the server
-    private Socket socket; // Socket for connecting to the server
-    private String clientId; // Unique identifier for the client
-    private String nickname; // Nickname of the client
-    private String host; // Host address of the server
-    private Integer port; // Port number of the server
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
+    private Socket socket;
+    private String clientId;
+    private String nickname;
+    private String host;
+    private Integer port;
 
     /**
      * Initializes the chat controller with the specified nickname, host, and port.
@@ -44,8 +45,8 @@ public class ChatController {
      */
     public void initialize(String nickname, String host, Integer port) {
         this.nickname = nickname;
-        this.host = host;
-        this.port = port;
+        this.host=host;
+        this.port=port;
 
         try {
             socket = new Socket(this.host, this.port); // Connect to the server
@@ -75,13 +76,9 @@ public class ChatController {
                                 String messageToDisplay = msg.replaceFirst("^CHAT: ", "");
                                 Platform.runLater(() -> chatArea.appendText(messageToDisplay + "\n"));
                             }
-                        } else if (message instanceof ArrayList<?>) {
-                            ArrayList<?> ar = (ArrayList<?>) message;
-                        } else if (message instanceof TestVecteur) {
-                            final TestVecteur vecteur = (TestVecteur) message;
-                            Platform.runLater(() -> {
-                                System.out.println("Vecteur reçu : " + vecteur);
-                            });
+                        }else if(message instanceof Game) {
+                            Game g = (Game) message;
+                            g.getRoot().getEntitySet().toArray().toString();
                         } else {
                             System.err.println("Type inconnu reçu : " + message.getClass());
                         }

@@ -12,7 +12,7 @@ import javafx.geometry.Point2D;
  */
 public class PlayerLeaf implements PlayerComponent {
     private String id;
-    private ObjectProperty<Point2D> position;
+    private Point2DSerial position;
     private DoubleProperty mass;
     private double speed;
     private boolean alive;
@@ -25,9 +25,9 @@ public class PlayerLeaf implements PlayerComponent {
      * @param mass     the initial mass of the player leaf
      * @param speed    the initial speed of the player leaf
      */
-    public PlayerLeaf(String id, Point2D position, double mass, double speed) {
+    public PlayerLeaf(String id, Point2DSerial position, double mass, double speed) {
         this.id = id;
-        this.position = new SimpleObjectProperty<>(position);
+        this.position = position;
         this.mass = new SimpleDoubleProperty(mass);
         this.speed = speed;
         this.alive = true;
@@ -68,8 +68,8 @@ public class PlayerLeaf implements PlayerComponent {
      * @return the position as a Point2D object
      */
     @Override
-    public Point2D getPosition() {
-        return position.get();
+    public Point2DSerial getPosition() {
+        return position;
     }
 
     /**
@@ -78,8 +78,8 @@ public class PlayerLeaf implements PlayerComponent {
      * @param position the new position to set
      */
     @Override
-    public void setPosition(Point2D position) {
-        this.position.set(position);
+    public void setPosition(Point2DSerial position) {
+        this.position = position;
     }
 
     /**
@@ -87,7 +87,7 @@ public class PlayerLeaf implements PlayerComponent {
      *
      * @return the position property
      */
-    public ObjectProperty<Point2D> positionProperty() {
+    public Point2DSerial positionProperty() {
         return position;
     }
 

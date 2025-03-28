@@ -1,6 +1,8 @@
 package iut.gon.agarioclient.model.entity.pellet;
 
 import iut.gon.agarioclient.model.entity.moveable.Player;
+import iut.gon.agarioclient.model.entity.moveable.Point2DSerial;
+import iut.gon.agarioclient.model.entity.pellet.EffectPellet;
 import javafx.geometry.Point2D;
 
 /**
@@ -15,7 +17,9 @@ public class PartialInvisibilityPellet extends EffectPellet {
      * @param position the position of the partial invisibility pellet in the game space
      * @param mass     the mass of the partial invisibility pellet
      */
-    public PartialInvisibilityPellet(String id, Point2D position, double mass) {
+    public PartialInvisibilityPellet(String id, Point2DSerial position, double mass) {
         super(id, position, mass);
     }
+
+
 }

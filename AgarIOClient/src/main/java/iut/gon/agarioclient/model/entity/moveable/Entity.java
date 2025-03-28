@@ -7,17 +7,21 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
  * The Entity class represents a basic game entity with a unique identifier, position, and mass.
  * This class serves as a base class for other specific entities like players and pellets.
  * It provides fundamental properties and methods common to all game entities.
  */
-public class Entity {
+public class Entity implements Serializable {
     private final String id;
 
-    private SimpleObjectProperty<Point2D> position;
-    private SimpleDoubleProperty mass;
-    private SimpleObjectProperty<MapNode> currentMapNode;
+    private Point2DSerial position;
+    private double mass;
+
+    private MapNode currentMapNode;
 
     /**
      * Constructs a new Entity with the specified id, position, and mass.
@@ -26,11 +30,11 @@ public class Entity {
      * @param position the initial position of the entity in the game space
      * @param mass     the initial mass of the entity
      */
-    public Entity(String id, Point2D position, double mass) {
+    public Entity(String id, Point2DSerial position, double mass) {
         this.id = id;
-        this.position = new SimpleObjectProperty<>(position);
-        this.mass = new SimpleDoubleProperty(mass);
-        this.currentMapNode = new SimpleObjectProperty<>();
+        this.position = position;
+        this.mass = mass;
+        this.currentMapNode = null;
     }
 
     /**
@@ -47,8 +51,8 @@ public class Entity {
      *
      * @return the current position as a Point2D object
      */
-    public Point2D getPosition() {
-        return position.getValue();
+    public Point2DSerial getPosition() {
+        return position;
     }
 
     /**
@@ -57,9 +61,9 @@ public class Entity {
      *
      * @param position the new position to set
      */
-    public void setPosition(Point2D position) {
+    public void setPosition(Point2DSerial position) {
         if(Game.isValidPosition(position)){
-            this.position.set(position);
+            this.position = new Point2DSerial(position.getX(), position.getY());
         }
     }
 
@@ -69,7 +73,7 @@ public class Entity {
      *
      * @return the position property
      */
-    public SimpleObjectProperty<Point2D> positionProperty(){
+    public Point2DSerial positionProperty(){
         return position;
     }
 
@@ -79,16 +83,6 @@ public class Entity {
      * @return the current mass value
      */
     public double getMass() {
-        return mass.getValue();
-    }
-
-    /**
-     * Returns the observable mass property of the entity.
-     * This allows for binding and change listeners to be added.
-     *
-     * @return the mass property
-     */
-    public DoubleProperty massProperty(){
         return mass;
     }
 
@@ -98,7 +92,7 @@ public class Entity {
      * @param mass the new mass value to set
      */
     public void setMass(double mass) {
-        this.mass.setValue(mass);
+        this.mass = mass;
     }
 
     /**
@@ -107,7 +101,7 @@ public class Entity {
      * @return the current MapNode containing this entity
      */
     public MapNode getCurrentMapNode() {
-        return currentMapNode.getValue();
+        return currentMapNode;
     }
 
     /**
@@ -116,7 +110,7 @@ public class Entity {
      * @param currentMapNode the new MapNode to associate with this entity
      */
     public void setCurrentMapNode(MapNode currentMapNode) {
-        this.currentMapNode.setValue(currentMapNode);
+        this.currentMapNode = currentMapNode;
     }
 
     /**
@@ -124,10 +118,10 @@ public class Entity {
      * Cleans up references between the entity and the node.
      */
     public void removeFromCurrentNode(){
-        MapNode node = currentMapNode.getValue();
+        MapNode node  = currentMapNode;
         if(node != null){
             node.getEntitySet().remove(this);
-            currentMapNode.setValue(null);
+            currentMapNode = null;
         }
     }
 
@@ -137,7 +131,16 @@ public class Entity {
      *
      * @return the currentMapNode property
      */
-    public SimpleObjectProperty<MapNode> currentMapNodeProperty(){
+    public  MapNode currentMapNodeProperty(){
         return currentMapNode;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Entity entity = (Entity) o;
+        return Double.compare(entity.mass, mass) == 0 && id.equals(entity.id) && position.equals(entity.position) && Objects.equals(currentMapNode, entity.currentMapNode);
+    }
+
 }

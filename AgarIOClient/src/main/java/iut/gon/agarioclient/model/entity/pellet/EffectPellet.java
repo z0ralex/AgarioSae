@@ -1,6 +1,8 @@
+// EffectPellet.java
 package iut.gon.agarioclient.model.entity.pellet;
 
 import iut.gon.agarioclient.model.entity.moveable.Player;
+import iut.gon.agarioclient.model.entity.moveable.Point2DSerial;
 import javafx.geometry.Point2D;
 
 /**
@@ -15,7 +17,10 @@ public abstract class EffectPellet extends Pellet {
      * @param position the position of the effect pellet in the game space
      * @param mass     the mass of the effect pellet
      */
-    public EffectPellet(String id, Point2D position, double mass) {
+    public EffectPellet(String id, Point2DSerial position, double mass) {
         super(id, position, mass);
     }
+
+
+
 }
