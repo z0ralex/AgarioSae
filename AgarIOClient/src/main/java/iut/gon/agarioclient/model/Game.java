@@ -68,7 +68,7 @@ public class Game {
         }));
 
 
-        map.putAll(getEatenEntities());
+        map.putAll(getEatenEntities(map.keySet()));
         return map;
     }
 
@@ -137,7 +137,7 @@ public class Game {
 
 
     //TODO a refactor si on fait l'optimisation
-    public HashMap<Entity, Set<Entity>> getEatenEntities(){
+    public HashMap<Entity, Set<Entity>> getEatenEntities(Set<Entity> newEntity){
         HashMap<Entity, Set<Entity>> eatenMap = new HashMap<>();
 
         for (Ennemy ennemy : enemyList) {
@@ -162,6 +162,8 @@ public class Game {
 
         HashSet<Entity> allEaten = new HashSet<>();
         eatenMap.values().forEach(allEaten::addAll);
+
+
 
         //suppression des entités mangées
         for(Entity e : allEaten){

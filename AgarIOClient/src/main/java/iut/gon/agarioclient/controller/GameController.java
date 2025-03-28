@@ -551,15 +551,21 @@ public class GameController implements Initializable {
 
     public void unrenderEntity(Entity entity) {
         Circle entityCircle;
+        Circle miniEntityCircle = null;
         if (entity instanceof Ennemy) {
             System.out.println("yoricked" + (debug_cmpt ++));
             entityCircle = ennemyCircles.get(entity);
+            miniEntityCircle = minimapEnnemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);
+            minimapEnnemyCircles.remove(entity,miniEntityCircle);
 
 
         } else if (entity instanceof Player) {
             entityCircle = playerCircles.get(entity);
             playerCircles.remove(entity, entityCircle);
+            miniEntityCircle = minimapPlayerCircles.get(entity);
+            minimapPlayerCircles.remove(entity,miniEntityCircle);
+
         } else {
             //Pellet
             entityCircle = pelletCircles.get(entity);
@@ -567,6 +573,7 @@ public class GameController implements Initializable {
         }
 
         pane.getChildren().remove(entityCircle);
+        minimap.getChildren().remove(miniEntityCircle);
     }
 
     public void updateLoadedChunks(MapNode currentChunk) {
