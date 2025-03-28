@@ -8,9 +8,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class MapNode {
+public class MapNode implements Serializable {
     private MapNode NEnode;
     private MapNode NWnode;
     private MapNode SEnode;
