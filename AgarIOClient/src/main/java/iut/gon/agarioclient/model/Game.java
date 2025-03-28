@@ -34,7 +34,7 @@ public class Game implements Serializable {
     }
 
     public Game(){
-        root = new MapNode(4, new Point2D(0, 0), new Point2D(X_MAX, Y_MAX));
+        root = new MapNode(4, new Point2DSerial(0, 0), new Point2DSerial(X_MAX, Y_MAX));
         if (root == null) {
             throw new IllegalStateException("Root MapNode is not initialized.");
         }
