@@ -22,6 +22,7 @@ public class Game implements Serializable {
 
     private final MapNode root;
     private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
+    private HashMap<Entity, Set<Entity>> eatenMap = new HashMap<>();
 
     //TODO changer ça
     private final List<Ennemy> enemyList;
@@ -69,8 +70,8 @@ public class Game implements Serializable {
         }));
 
 
-        map.putAll(getEatenEntities(map.keySet()));
-        return map;
+        updateEatenEntites(map.keySet());
+        return getEatenEntities();
     }
 
     /**
@@ -78,7 +79,7 @@ public class Game implements Serializable {
      * @param entity Player ou Ennemy
      * @param vector vecteur
      */
-    public void moveEntity(Player entity, Point2DSerial vector){
+    public synchronized void moveEntity(Player entity, Point2DSerial vector){
         Point2DSerial newPosition = entity.getPosition().add(vector.multiply(entity.getSpeed()));
 
         // Check for collisions with the map boundaries
@@ -93,7 +94,7 @@ public class Game implements Serializable {
         root.addEntity(e);
     }
 
-    public List<Pellet> spawnPellets() {
+    public synchronized List<Pellet> spawnPellets() {
         if (pellets.size() < MAX_PELLET) {
             return createPellets(Math.min(100, MAX_PELLET - pellets.size()));
         }
@@ -101,7 +102,7 @@ public class Game implements Serializable {
         return new ArrayList<>();
     }
 
-    public List<Pellet> createPellets(int count) {
+    public synchronized List<Pellet> createPellets(int count) {
 
         List<Pellet> pelletsList = pelletFactory.generatePellets(count);
         for (Pellet pellet : pelletsList) {
@@ -112,7 +113,7 @@ public class Game implements Serializable {
 
         return pelletsList;
     }
-    public Player addPlayer(String nickname){
+    public synchronized Player addPlayer(String nickname){
         Player player = new Player(nickname, new Point2DSerial(PLAYER_SPAWNPOINT_X, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS);
         player.add(new PlayerLeaf(nickname, new Point2DSerial(PLAYER_SPAWNPOINT_Y, PLAYER_SPAWNPOINT_Y), INITIAL_PLAYER_MASS, INITIAL_PLAYER_SPEED));
         players.add(player);
@@ -136,9 +137,7 @@ public class Game implements Serializable {
         }
     }
 
-
-    //TODO a refactor si on fait l'optimisation
-    public HashMap<Entity, Set<Entity>> getEatenEntities(Set<Entity> newEntity){
+    public synchronized void updateEatenEntites(Set<Entity> set){
         HashMap<Entity, Set<Entity>> eatenMap = new HashMap<>();
 
         for (Ennemy ennemy : enemyList) {
@@ -171,10 +170,19 @@ public class Game implements Serializable {
             removeEntity(e);
         }
 
+        set.forEach((e)->{
+            eatenMap.put(e, null);
+        });
+
+        this.eatenMap = eatenMap;
+    }
+
+    //TODO a refactor si on fait l'optimisation
+    public synchronized HashMap<Entity, Set<Entity>> getEatenEntities(){
         return eatenMap;
     }
 
-    public void removeEntity(Entity entity){
+    public synchronized void removeEntity(Entity entity){
         if(entity instanceof Ennemy){
             enemyList.remove(entity);
 
