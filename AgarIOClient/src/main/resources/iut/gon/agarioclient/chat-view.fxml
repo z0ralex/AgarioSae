@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="iut.gon.agarioclient.controller.ChatController" spacing="10">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10" />
+    </padding>
+
+    <TextArea fx:id="chatArea" editable="false" prefHeight="300" prefWidth="500" />
+    <TextField fx:id="messageField" prefWidth="400" />
+    <Button fx:id="sendButton" text="Envoyer un message" onAction="#handleSendMessage" />
+</VBox>
