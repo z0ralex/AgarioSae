@@ -20,7 +20,7 @@ import java.util.*;
 
 public class Player extends Entity implements PlayerComponent, Serializable {
     protected List<PlayerComponent> components = new ArrayList<>();
-    private ObjectProperty<Point2D> position;
+    private Point2D position;
     private double mass;
 
     private boolean alive = true;
@@ -39,7 +39,7 @@ public class Player extends Entity implements PlayerComponent, Serializable {
 
     public Player(String id, Point2D position, double mass) {
         super(id, position, mass);
-        this.position = new SimpleObjectProperty<>(position);
+        this.position = position;
         this.mass = mass;
     }
 
@@ -94,7 +94,7 @@ public class Player extends Entity implements PlayerComponent, Serializable {
     @Override
     public void setPosition(Point2D position) {
         this.lastPosition = getPosition();
-        this.position.set(position);
+        this.position = position;
         for (PlayerComponent component : components) {
             component.setPosition(position);
         }
@@ -148,9 +148,7 @@ public class Player extends Entity implements PlayerComponent, Serializable {
         return gotEffectedAt;
     }
 
-    public SimpleObjectProperty<Point2D> positionProperty() {
-        return (SimpleObjectProperty<Point2D>) position;
-    }
+
 
     public double massProperty() {
         return mass;

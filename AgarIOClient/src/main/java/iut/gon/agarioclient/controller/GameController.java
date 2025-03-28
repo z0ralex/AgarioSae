@@ -386,7 +386,7 @@ public class GameController implements Initializable {
     }
 
     private void setZoomFromMass(double deltaMass) {
-        System.out.println("scale : " );
+        //System.out.println("scale : " );
         // formule de calcul de la taille de la camera
         // peut être ajustee
         double newScale = 1 + 2. / (deltaMass);
@@ -567,7 +567,6 @@ public class GameController implements Initializable {
         Circle entityCircle;
         Circle miniEntityCircle = null;
         if (entity instanceof Ennemy) {
-            System.out.println("yoricked" + (debug_cmpt ++));
             entityCircle = ennemyCircles.get(entity);
             miniEntityCircle = minimapEnnemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);
