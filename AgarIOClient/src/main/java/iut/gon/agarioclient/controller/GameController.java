@@ -84,10 +84,9 @@ public class GameController implements Initializable {
     private final Map<Player, Circle> playerCircles = new HashMap<>();
     private final Map<Pellet, Circle> pelletCircles = new HashMap<>();
     private final Map<Ennemy, Circle> ennemyCircles = new HashMap<>();
-    private final NoEffectPelletFactory pelletFactory = new NoEffectPelletFactory();
 
-    private Map<Player, Circle> minimapPlayerCircles = new HashMap<>();
-    private Map<Ennemy, Circle> minimapEnnemyCircles = new HashMap<>();
+    private final Map<Player, Circle> minimapPlayerCircles = new HashMap<>();
+    private final Map<Ennemy, Circle> minimapEnnemyCircles = new HashMap<>();
     private AnimationManager animationManager;
 
     private String nickname;
@@ -209,7 +208,6 @@ public class GameController implements Initializable {
                                 for (Entity eatenEntity : eatenMap.get(eatingEntity)) {
                                     animationManager.playPelletAbsorption(getEntityCircle(eatenEntity),
                                             eatingEntity.getPosition());
-
 
                                         unrenderEntity(eatenEntity);
 
