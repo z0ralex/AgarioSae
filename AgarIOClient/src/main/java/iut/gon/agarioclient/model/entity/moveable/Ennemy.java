@@ -19,7 +19,7 @@ import java.util.Set;
 public class Ennemy extends Player implements Serializable {
     private IA strat;
     private Point2DSerial posE;
-    private DoubleProperty mass;
+    private double mass;
     private double speed;
     private boolean markedForRemoval = false;
 
@@ -27,7 +27,7 @@ public class Ennemy extends Player implements Serializable {
         super(id, position, mass);
         this.posE = position;
         this.strat = strat;
-        this.mass = new SimpleDoubleProperty(mass);
+        this.mass = mass;
         this.speed = speed;
     }
 
@@ -62,12 +62,12 @@ public class Ennemy extends Player implements Serializable {
 
     @Override
     public double getMass() {
-        return mass.get();
+        return mass;
     }
 
     @Override
     public void setMass(double mass) {
-        this.mass.set(mass);
+        this.mass = mass;
     }
 
     @Override
