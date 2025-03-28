@@ -59,7 +59,7 @@ public class GameController implements Initializable {
     @FXML
     private Pane classement ;
 
-    private Point2D cameraOffsetPoint;
+    private Point2DSerial cameraOffsetPoint;
     private Stage stage;
 
     private ParallelCamera camera;
@@ -115,7 +115,7 @@ public class GameController implements Initializable {
         animationManager = new AnimationManager(pane);
 
 
-        cameraOffsetPoint = new Point2D(container.getWidth() / 2., container.getHeight() / 2.);
+        cameraOffsetPoint = new Point2DSerial(container.getWidth() / 2., container.getHeight() / 2.);
         this.camera = camera;
         camera.setLayoutX(cameraOffsetPoint.getX());
         camera.setLayoutY(cameraOffsetPoint.getY());
@@ -126,7 +126,7 @@ public class GameController implements Initializable {
         gameSubscene.setCamera(camera);
         //update de la caméra si le pane change de taille
         ChangeListener<? super Number> sizeChange = (obs, oldWidth, newWidth) -> {
-            cameraOffsetPoint = new Point2D((container.getWidth() / 2) * camera.getScaleX(),
+            cameraOffsetPoint = new Point2DSerial((container.getWidth() / 2) * camera.getScaleX(),
                     (container.getHeight() / 2) * camera.getScaleX());
         };
 
@@ -182,7 +182,7 @@ public class GameController implements Initializable {
                         double speed = ourPlayer.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
                         ourPlayer.setSpeed(speed);
 
-                        game.moveEntity(ourPlayer, mouseVector.getValue());
+                        game.moveEntity(ourPlayer, new Point2DSerial(mouseVector.getValue()));
 
                         //graphique
                         //redrawPlayer(ourPlayer);
@@ -378,7 +378,7 @@ public class GameController implements Initializable {
     }
 
 
-    private void onPlayerPositionChanged(Player player, Point2D newPos) {
+    private void onPlayerPositionChanged(Player player, Point2DSerial newPos) {
 
 
         //mets à jour le chunk du joueur
@@ -395,7 +395,7 @@ public class GameController implements Initializable {
         camera.setScaleY(newScale);
 
         // le zoom change : on doit recalculer le centre de la caméra
-        cameraOffsetPoint = new Point2D(
+        cameraOffsetPoint = new Point2DSerial(
                 (container.getWidth() / 2) * camera.getScaleX(),
                 (container.getHeight() / 2) * camera.getScaleY()
 

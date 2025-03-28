@@ -18,12 +18,12 @@ import java.util.Set;
 
 public class Ennemy extends Player implements Serializable {
     private IA strat;
-    private Point2D posE;
+    private Point2DSerial posE;
     private DoubleProperty mass;
     private double speed;
     private boolean markedForRemoval = false;
 
-    public Ennemy(String id, Point2D position, double mass, IA strat, double speed) {
+    public Ennemy(String id, Point2DSerial position, double mass, IA strat, double speed) {
         super(id, position, mass);
         this.posE = position;
         this.strat = strat;
@@ -49,14 +49,14 @@ public class Ennemy extends Player implements Serializable {
     }
 
     @Override
-    public void setPosition(Point2D newPos) {
+    public void setPosition(Point2DSerial newPos) {
         if(Game.isValidPosition(newPos)) {
             this.posE = newPos;
         }
     }
 
     @Override
-    public Point2D getPosition() {
+    public Point2DSerial getPosition() {
         return posE;
     }
 

@@ -24,7 +24,7 @@ public class NoEffectLocalEnnemyFactory implements LocalEnnemyFactory{
         Random random = new Random();
 
         for (int i = 0; i < quantity; i++) {
-            Point2D position = new Point2D(random.nextInt(786, 986), random.nextInt(375, 575));
+            Point2DSerial position = new Point2DSerial(random.nextInt(786, 986), random.nextInt(375, 575));
             double mass = 10;
             double speed = (mass / Math.pow(mass, 1.44)) * 10;
             IA strategy;

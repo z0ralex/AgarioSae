@@ -1,6 +1,7 @@
 // AnimationManager.java
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.model.entity.moveable.Point2DSerial;
 import javafx.animation.*;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -16,7 +17,7 @@ public class AnimationManager {
         this.gamePane = gamePane;
     }
 
-    public void playPelletAbsorption(Node pellet, Point2D targetPosition) {
+    public void playPelletAbsorption(Node pellet, Point2DSerial targetPosition) {
         if(pellet != null){
             // Create a copy for the animation so the original can be removed immediately
             Circle animatedPellet = new Circle(
@@ -47,7 +48,7 @@ public class AnimationManager {
 
     }
 
-    public void playCellDivision(Point2D position, double initialRadius) {
+    public void playCellDivision(Point2DSerial position, double initialRadius) {
         // Create visual effect for division
         for (int i = 0; i < 8; i++) {
             Circle particle = new Circle(initialRadius/4, Color.WHITE);

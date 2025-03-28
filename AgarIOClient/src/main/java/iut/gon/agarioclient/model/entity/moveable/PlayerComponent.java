@@ -5,7 +5,7 @@ import javafx.geometry.Point2D;
 public interface PlayerComponent {
     double getMass();
     void setMass(double mass);
-    Point2D getPosition();
+    Point2DSerial getPosition();
     void setPosition(Point2DSerial position);
     double getSpeed();
     void setSpeed(double speed);

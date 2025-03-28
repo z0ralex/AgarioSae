@@ -1,6 +1,7 @@
 // EffectPelletFactory.java
 package iut.gon.agarioclient.model.entity.pellet;
 
+import iut.gon.agarioclient.model.entity.moveable.Point2DSerial;
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ public class EffectPelletFactory implements PelletFactory {
         List<Pellet> list = new ArrayList<>();
         Random r = new Random();
         for (int i = 0; i < quantity; i++) {
-            Point2D p = new Point2D(r.nextDouble() * 1600, r.nextDouble() * 1200); // Use pane dimensions
+            Point2DSerial p = new Point2DSerial(r.nextDouble() * 1600, r.nextDouble() * 1200); // Use pane dimensions
             int effectType = r.nextInt(3); // Assuming 4 types of effect pellets
             switch (effectType) {
                 case 0:

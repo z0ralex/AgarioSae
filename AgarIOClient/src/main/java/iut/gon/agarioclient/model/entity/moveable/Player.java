@@ -55,7 +55,7 @@ public class Player extends Entity implements PlayerComponent, Serializable {
         return components;
     }
 
-    private Point2D lastPosition = getPosition();
+    private Point2DSerial lastPosition = getPosition();
 
 
     @Override
@@ -73,12 +73,12 @@ public class Player extends Entity implements PlayerComponent, Serializable {
         this.mass=mass;
     }
 
-    public Point2D getDirection() {
-        Point2D currentPosition = getPosition();
-        Point2D direction = currentPosition.subtract(lastPosition);
+    public Point2DSerial getDirection() {
+        Point2DSerial currentPosition = getPosition();
+        Point2DSerial direction = currentPosition.subtract(lastPosition);
 
         if (direction.magnitude() == 0) {
-            return Point2D.ZERO;
+            return Point2DSerial.ZERO;
         }
         return direction.normalize();
     }
@@ -154,17 +154,17 @@ public class Player extends Entity implements PlayerComponent, Serializable {
         return mass;
     }
 
-    public Point2D calculateNewPosition(Point2D targetPosition, double mapWidth, double mapHeight) {
+    public Point2DSerial calculateNewPosition(Point2DSerial targetPosition, double mapWidth, double mapHeight) {
         double speed = calculateSpeed(targetPosition.getX(), targetPosition.getY(), mapWidth, mapHeight);
         setSpeed(speed);
 
-        Point2D direction = targetPosition.subtract(getPosition()).normalize();
-        Point2D newPosition = getPosition().add(direction.multiply(getSpeed()));
+        Point2DSerial direction = targetPosition.subtract(getPosition()).normalize();
+        Point2DSerial newPosition = getPosition().add(direction.multiply(getSpeed()));
 
         // Check for collisions with the map boundaries
         double newX = Math.max(0, Math.min(newPosition.getX(), mapWidth));
         double newY = Math.max(0, Math.min(newPosition.getY(), mapHeight));
-        return new Point2D(newX, newY);
+        return new Point2DSerial(newX, newY);
     }
 
     public Set<Pellet> checkCollisionsWithPellet(Collection<Pellet> pellets) {

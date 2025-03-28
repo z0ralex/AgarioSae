@@ -3,6 +3,7 @@ package iut.gon.agarioclient.model.entity.ia;
 import iut.gon.agarioclient.model.entity.moveable.Ennemy;
 import iut.gon.agarioclient.model.entity.moveable.Entity;
 import iut.gon.agarioclient.model.entity.moveable.Player;
+import iut.gon.agarioclient.model.entity.moveable.Point2DSerial;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
@@ -40,8 +41,8 @@ public class IAStratEatPlayers implements IA{
     }
 
     private void moveToPlayer(Ennemy ennemy, Player target) {
-        Point2D direction = target.getPosition().subtract(ennemy.getPosition()).normalize();
-        Point2D newPosition = ennemy.getPosition().add(direction.multiply(ennemy.getSpeed()));
+        Point2DSerial direction = target.getPosition().subtract(ennemy.getPosition()).normalize();
+        Point2DSerial newPosition = ennemy.getPosition().add(direction.multiply(ennemy.getSpeed()));
         ennemy.setPosition(newPosition);
     }
 }

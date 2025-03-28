@@ -28,7 +28,7 @@ public class Game implements Serializable {
     private final Set<Pellet> pellets;
     private final Set<Player> players;
 
-    public static boolean isValidPosition(Point2D pos){
+    public static boolean isValidPosition(Point2DSerial pos){
         return (pos.getX() >= 0 && pos.getX() <= X_MAX) &&
                 (pos.getY() >= 0 && pos.getY() <= Y_MAX);
     }
@@ -78,8 +78,8 @@ public class Game implements Serializable {
      * @param entity Player ou Ennemy
      * @param vector vecteur
      */
-    public void moveEntity(Player entity, Point2D vector){
-        Point2D newPosition = entity.getPosition().add(vector.multiply(entity.getSpeed()));
+    public void moveEntity(Player entity, Point2DSerial vector){
+        Point2DSerial newPosition = entity.getPosition().add(vector.multiply(entity.getSpeed()));
 
         // Check for collisions with the map boundaries
         double newX = Math.max(0, Math.min(newPosition.getX(), X_MAX));

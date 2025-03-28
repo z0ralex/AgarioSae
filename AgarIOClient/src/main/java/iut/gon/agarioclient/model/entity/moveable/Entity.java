@@ -59,13 +59,13 @@ public class Entity {
      *
      * @param position the new position of the entity
      */
-    public void setPosition(Point2D position) {
+    public void setPosition(Point2DSerial position) {
         if(Game.isValidPosition(position)){
             this.position = new Point2DSerial(position.getX(), position.getY());
         }
     }
 
-    public Point2D positionProperty(){
+    public Point2DSerial positionProperty(){
         return position;
     }
 

@@ -3,6 +3,7 @@ package iut.gon.agarioclient.model.entity.ia;
 
 import iut.gon.agarioclient.model.entity.moveable.Ennemy;
 import iut.gon.agarioclient.model.entity.moveable.Entity;
+import iut.gon.agarioclient.model.entity.moveable.Point2DSerial;
 import iut.gon.agarioclient.model.entity.pellet.Pellet;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
@@ -53,8 +54,8 @@ public class IAStratEatPelletsOnly implements IA {
     }
 
     private void moveToPellet(Ennemy ennemy, Pellet pellet) {
-        Point2D direction = pellet.getPosition().subtract(ennemy.getPosition()).normalize();
-        Point2D newPosition = ennemy.getPosition().add(direction.multiply(ennemy.getSpeed()));
+        Point2DSerial direction = pellet.getPosition().subtract(ennemy.getPosition()).normalize();
+        Point2DSerial newPosition = ennemy.getPosition().add(direction.multiply(ennemy.getSpeed()));
         ennemy.setPosition(newPosition);
     }
 }
