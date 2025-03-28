@@ -73,6 +73,10 @@ public class Point2DSerial implements Serializable {
         return new Point2DSerial(var1 + (this.getX() - var1) / 2.0, var3 + (this.getY() - var3) / 2.0);
     }
 
+    public Point2DSerial midpoint(Point2DSerial var1) {
+        return this.midpoint(var1.getX(), var1.getY());
+    }
+
 
     public double magnitude() {
         double var1 = this.getX();

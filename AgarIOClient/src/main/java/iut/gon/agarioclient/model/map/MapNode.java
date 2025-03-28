@@ -2,6 +2,7 @@
 package iut.gon.agarioclient.model.map;
 
 import iut.gon.agarioclient.model.entity.moveable.Entity;
+import iut.gon.agarioclient.model.entity.moveable.Point2DSerial;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -17,12 +18,12 @@ public class MapNode {
     private MapNode parent;
     private Direction direction;
     private Set<Entity> entitySet;
-    private final Point2D beginningPoint;
-    private final Point2D endPoint;
+    private final Point2DSerial beginningPoint;
+    private final Point2DSerial endPoint;
 
     // CONSTRUCTEURS
 
-    public MapNode(MapNode parent, Direction direction, Set<Entity> entitySet, Point2D beginningPoint, Point2D endPoint) {
+    public MapNode(MapNode parent, Direction direction, Set<Entity> entitySet, Point2DSerial beginningPoint, Point2DSerial endPoint) {
         this.NEnode = null;
         this.NWnode = null;
         this.SEnode = null;
@@ -37,7 +38,7 @@ public class MapNode {
     /**
      * @param level niveau de l'arbre (0 = feuille)
      */
-    public MapNode(int level, Point2D beginningPoint, Point2D endPoint, MapNode parent) {
+    public MapNode(int level, Point2DSerial beginningPoint, Point2DSerial endPoint, MapNode parent) {
         this.beginningPoint = beginningPoint;
         this.endPoint = endPoint;
         this.parent = parent;
@@ -48,23 +49,23 @@ public class MapNode {
         }
 
         if(level > 0) {
-            Point2D middle = beginningPoint.midpoint(endPoint);
+            Point2DSerial middle = beginningPoint.midpoint(endPoint);
 
             this.setNEnode(new MapNode(level - 1,
-                    new Point2D(middle.getX(), beginningPoint.getY()),
-                    new Point2D(endPoint.getX(), middle.getY()), this));
+                    new Point2DSerial(middle.getX(), beginningPoint.getY()),
+                    new Point2DSerial(endPoint.getX(), middle.getY()), this));
 
             this.setNWnode(new MapNode(level - 1, beginningPoint, middle, this));
 
             this.setSEnode(new MapNode(level - 1, middle, endPoint, this));
 
             this.setSWnode(new MapNode(level - 1,
-                    new Point2D(beginningPoint.getX(), middle.getY()),
-                    new Point2D(middle.getX(), endPoint.getY()), this));
+                    new Point2DSerial(beginningPoint.getX(), middle.getY()),
+                    new Point2DSerial(middle.getX(), endPoint.getY()), this));
         }
     }
 
-    public MapNode(int level, Point2D beginningPoint, Point2D endPoint) {
+    public MapNode(int level, Point2DSerial beginningPoint, Point2DSerial endPoint) {
         this(level, beginningPoint, endPoint, null);
     }
 
@@ -163,11 +164,11 @@ public class MapNode {
                 SWnode == null;
     }
 
-    public Point2D getBeginningPoint() {
+    public Point2DSerial getBeginningPoint() {
         return beginningPoint;
     }
 
-    public Point2D getEndPoint() {
+    public Point2DSerial getEndPoint() {
         return endPoint;
     }
 
