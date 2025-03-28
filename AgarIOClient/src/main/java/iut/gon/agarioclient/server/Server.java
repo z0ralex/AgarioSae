@@ -1,5 +1,7 @@
 package iut.gon.agarioclient.server;
 
+import iut.gon.agarioclient.model.Game;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -9,6 +11,8 @@ public class Server {
 
     private static final int PORT = 12345; // Port d'écoute
     private static ServerSocket serverSocket;
+
+    private static Game game = new Game();
 
     private static Set<ClientHandler> clientHandlersSet = new HashSet<>();;
     private static Set<ObjectOutputStream> clientOutputStreams = new HashSet<>(); // Remplace PrintWriter par ObjectOutputStream
@@ -24,7 +28,7 @@ public class Server {
         try {
             serverSocket = new ServerSocket(PORT);
             System.out.println("Serveur lancé, en attente de connexions...");
-            GameUpdater gameUpdater = new GameUpdater(clientHandlersSet);
+            GameUpdater gameUpdater = new GameUpdater(clientHandlersSet,game);
             threadPool.execute(gameUpdater);
             // Attente infinie de nouvelles connexions
             while (true) {
@@ -32,7 +36,7 @@ public class Server {
                 System.out.println("Nouveau client connecté : " + clientSocket.getInetAddress());
 
                 // Création d'un thread pour gérer cette connexion
-                ClientHandler clientHandler = new ClientHandler(clientSocket);
+                ClientHandler clientHandler = new ClientHandler(clientSocket,game);
                 clientHandlersSet.add(clientHandler);
                 threadPool.execute(clientHandler); // Démarrage du thread
             }

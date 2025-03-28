@@ -34,6 +34,15 @@ public class Game implements Serializable {
                 (pos.getY() >= 0 && pos.getY() <= Y_MAX);
     }
 
+    public Set<Entity> getEntites(){
+        HashSet<Entity> eSet = new HashSet<>();
+        eSet.addAll(enemyList);
+        eSet.addAll(pellets);
+        eSet.addAll(players);
+
+        return eSet;
+    }
+
     public Game(){
         root = new MapNode(4, new Point2DSerial(0, 0), new Point2DSerial(X_MAX, Y_MAX));
         if (root == null) {

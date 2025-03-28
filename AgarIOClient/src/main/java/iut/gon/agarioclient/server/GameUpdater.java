@@ -7,17 +7,18 @@ import java.util.Set;
 
 public  class GameUpdater implements Runnable {
     private Set<ClientHandler> clientWriters;
+    private Game game;
 
-    public GameUpdater(Set<ClientHandler> clients) {
+
+
+    public GameUpdater(Set<ClientHandler> clients, Game game) {
         this.clientWriters = clients;
+        this.game=game;
     }
     @Override
     public void run() {
         try {
             while (true) {
-                Random random = new Random();
-                TestVecteur vecteur = new TestVecteur(random.nextDouble(), random.nextDouble(), random.nextDouble());
-                Game game = new Game();
                 // Envoyer l'objet uniquement aux clients prêts
                 for (ClientHandler client : Server.getClientHandlersSet()) {
                     Boolean isReady = Server.getClientReadyStatus().get(client.getClientId());

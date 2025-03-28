@@ -167,10 +167,17 @@ public class GameController implements Initializable {
                     }
                 });
 
+                Set<Entity> entities = game.getEntites();
+
+                entities.forEach((e)->{
+                    renderEntity(e);
+                });
+
                 timer = new AnimationTimer() {
                     @Override
                     public void handle(long now) {
-                        HashMap<Entity, Set<Entity>> eatenMap = game.nextTick();
+                        //HashMap<Entity, Set<Entity>> eatenMap = game.nextTick();
+                        HashMap<Entity, Set<Entity>> eatenMap = game.getEatenEntities();
 
                         if (!ourPlayer.isAlive()) {
                             Platform.runLater(() -> handlePlayerDeath()); //purement client

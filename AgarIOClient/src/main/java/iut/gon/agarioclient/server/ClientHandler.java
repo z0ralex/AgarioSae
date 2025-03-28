@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.server;
 
+import iut.gon.agarioclient.model.Game;
 import iut.gon.agarioclient.server.Server;
 
 import java.io.*;
@@ -11,16 +12,20 @@ public class ClientHandler implements Runnable {
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private String clientId;
+    private Game game;
 
     public ObjectOutputStream getOut() {
         return out;
     }
 
-    public ClientHandler(Socket socket) {
+    public ClientHandler(Socket socket, Game game) {
         this.socket = socket;
+        this.game = game;
         try {
             this.out = new ObjectOutputStream(socket.getOutputStream()); // Remplace PrintWriter par ObjectOutputStream
             this.in = new ObjectInputStream(socket.getInputStream()); // Utilise ObjectInputStream pour les objets
+
+
         } catch (IOException e) {
             System.err.println("Erreur de connexion avec le client : " + e.getMessage());
         }
