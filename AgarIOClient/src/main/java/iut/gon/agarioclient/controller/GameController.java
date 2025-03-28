@@ -62,12 +62,9 @@ public class GameController implements Initializable {
     private Point2D cameraOffsetPoint;
     private Stage stage;
 
-    //TODO retirer
-    private Point2D cameraCenterPoint;
     private ParallelCamera camera;
 
-
-
+    private int debug_cmpt = 0;
 
     //TODO SUPPRIMER APRES SEPARATION CONTROLEUR/MODELE
     public static final int X_MAX = 8000;
@@ -118,8 +115,6 @@ public class GameController implements Initializable {
         this.nickname = nickname;
         animationManager = new AnimationManager(pane);
 
-        //TODO retirer
-        cameraCenterPoint = new Point2D(pane.getWidth() / 2., pane.getHeight() / 2.);
 
         cameraOffsetPoint = new Point2D(container.getWidth() / 2., container.getHeight() / 2.);
         this.camera = camera;
@@ -559,10 +554,10 @@ public class GameController implements Initializable {
     public void unrenderEntity(Entity entity) {
         Circle entityCircle;
         if (entity instanceof Ennemy) {
-
+            System.out.println("yoricked" + (debug_cmpt ++));
             entityCircle = ennemyCircles.get(entity);
             ennemyCircles.remove(entity, entityCircle);
-            pane.getChildren().remove(entityCircle);
+
 
         } else if (entity instanceof Player) {
             entityCircle = playerCircles.get(entity);
