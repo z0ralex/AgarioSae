@@ -6,9 +6,10 @@ import iut.gon.agarioclient.model.entity.pellet.Pellet;
 import iut.gon.agarioclient.model.map.MapNode;
 import javafx.geometry.Point2D;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Game {
+public class Game implements Serializable {
     //Constantes
     public static final int INITIAL_PLAYER_MASS = 10;
     public static final int INITIAL_PELLET_NB = 20;

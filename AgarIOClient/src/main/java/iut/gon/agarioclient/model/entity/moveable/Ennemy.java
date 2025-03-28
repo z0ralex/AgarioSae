@@ -10,12 +10,13 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class Ennemy extends Player {
+public class Ennemy extends Player implements Serializable {
     private IA strat;
     private Point2D posE;
     private DoubleProperty mass;

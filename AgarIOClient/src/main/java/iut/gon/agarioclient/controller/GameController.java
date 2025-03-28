@@ -353,10 +353,10 @@ public class GameController implements Initializable {
             onPlayerPositionChanged(player, newPoint);
         });
 
-        player.massProperty().addListener((obs, oldMass, newMass) -> {
+        /*player.massProperty().addListener((obs, oldMass, newMass) -> {
             playerCircle.setRadius(player.calculateRadius()); // update du radius du joueur
             setZoomFromMass(newMass.doubleValue() - oldMass.doubleValue()); // update du zoom de la camera
-        });
+        });*/
     }
 
     private void addPlayerToMinimap(Player player) {
@@ -391,10 +391,10 @@ public class GameController implements Initializable {
     }
 
     private void setZoomFromMass(double deltaMass) {
-        //System.out.println("scale : " + scale.doubleValue());
+        System.out.println("scale : " );
         // formule de calcul de la taille de la camera
         // peut être ajustee
-        double newScale = camera.getScaleX() + 1. / (deltaMass * 200.);
+        double newScale = 1 + 2. / (deltaMass);
 
         camera.setScaleX(newScale);
         camera.setScaleY(newScale);
@@ -429,9 +429,9 @@ public class GameController implements Initializable {
             ennemyCircle.setCenterY( e.getPosition().getY());
         });
 
-        e.massProperty().addListener((obs, oldMass, newMass) -> {
+        /*e.massProperty().addListener((obs, oldMass, newMass) -> {
             ennemyCircle.setRadius(e.calculateRadius()); // update du radius du joueur
-        });
+        });*/
         addEnnemyToMinimap(e);
     }
 
@@ -466,7 +466,12 @@ public class GameController implements Initializable {
         if (playerCircle != null) {
             playerCircle.setCenterX(player.getPosition().getX());
             playerCircle.setCenterY(player.getPosition().getY());
+            playerCircle.setRadius(player.calculateRadius());
         }
+
+
+        setZoomFromMass(player.getMass());//TODO div cellule
+
         Circle miniPlayerCircle = minimapPlayerCircles.get(player);
         if(miniPlayerCircle != null){
             double minimapScaleX = minimap.getWidth() / X_MAX;
@@ -486,6 +491,7 @@ public class GameController implements Initializable {
             ennemyCircle.setCenterY(e.getPosition().getY());
             ennemyCircle.setRadius(e.calculateRadius());
         }
+
         Circle miniEnnemyCircle = minimapEnnemyCircles.get(e);
         if(miniEnnemyCircle!=null){
             double minimapScaleX = minimap.getWidth() / X_MAX;

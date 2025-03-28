@@ -16,7 +16,7 @@ public class Entity {
     private final String id;
 
     private SimpleObjectProperty<Point2D> position;
-    private SimpleDoubleProperty mass;
+    private double mass;
 
     private SimpleObjectProperty<MapNode> currentMapNode;
 
@@ -30,7 +30,7 @@ public class Entity {
     public Entity(String id, Point2D position, double mass) {
         this.id = id;
         this.position = new SimpleObjectProperty<>(position);
-        this.mass = new SimpleDoubleProperty(mass);
+        this.mass = mass;
         this.currentMapNode = new SimpleObjectProperty<>();
     }
 
@@ -73,10 +73,10 @@ public class Entity {
      * @return the mass of the entity
      */
     public double getMass() {
-        return mass.getValue();
+        return mass;
     }
 
-    public DoubleProperty massProperty(){
+    public double massProperty(){
         return mass;
     }
 
@@ -87,7 +87,7 @@ public class Entity {
      * @param mass the new mass of the entity
      */
     public void setMass(double mass) {
-        this.mass.setValue(mass);
+        this.mass = mass;
     }
 
     public MapNode getCurrentMapNode() {

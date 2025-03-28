@@ -15,12 +15,13 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Player extends Entity implements PlayerComponent {
+public class Player extends Entity implements PlayerComponent, Serializable {
     protected List<PlayerComponent> components = new ArrayList<>();
     private ObjectProperty<Point2D> position;
-    private DoubleProperty mass;
+    private double mass;
 
     private boolean alive = true;
     private boolean markedForRemoval = false;
@@ -39,7 +40,7 @@ public class Player extends Entity implements PlayerComponent {
     public Player(String id, Point2D position, double mass) {
         super(id, position, mass);
         this.position = new SimpleObjectProperty<>(position);
-        this.mass = new SimpleDoubleProperty(mass);
+        this.mass = mass;
     }
 
     public void add(PlayerComponent component) {
@@ -69,7 +70,7 @@ public class Player extends Entity implements PlayerComponent {
             double proportion = component.getMass() / totalMass;
             component.setMass(mass * proportion);
         }
-        this.mass.set(mass);
+        this.mass=mass;
     }
 
     public Point2D getDirection() {
@@ -151,7 +152,7 @@ public class Player extends Entity implements PlayerComponent {
         return (SimpleObjectProperty<Point2D>) position;
     }
 
-    public DoubleProperty massProperty() {
+    public double massProperty() {
         return mass;
     }
 
