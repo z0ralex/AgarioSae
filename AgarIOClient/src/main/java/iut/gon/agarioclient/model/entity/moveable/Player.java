@@ -313,4 +313,14 @@ public class Player extends Entity implements PlayerComponent, Serializable {
         // TODO: Implement merge logic
         // Implement merging logic based on the formula t = C + m/100
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Player player = (Player) o;
+        return Double.compare(player.mass, mass) == 0 && alive == player.alive && markedForRemoval == player.markedForRemoval && isVisible == player.isVisible && affectedUntil == player.affectedUntil && Double.compare(player.specialEffect, specialEffect) == 0 && gotEffectedAt == player.gotEffectedAt && gotInvisbileAt == player.gotInvisbileAt && InvisbileUntil == player.InvisbileUntil && Objects.equals(components, player.components) && position.equals(player.position) && lastPosition.equals(player.lastPosition);
+    }
+
 }

@@ -74,7 +74,7 @@ public class GameController implements Initializable {
 //FIN VARIABLES COTE MODELE
 
     private Game game;
-
+    private Player ourPlayer;
     private AnimationTimer timer;
 
 
@@ -133,10 +133,10 @@ public class GameController implements Initializable {
         pane.widthProperty().addListener(sizeChange);
         pane.heightProperty().addListener(sizeChange);
 
-        Player player = game.addPlayer(nickname); //TODO serv
-        addPlayer(player);
+        ourPlayer = game.addPlayer(nickname); //TODO serv
+        addPlayer(ourPlayer);
 
-        addPlayerToMinimap(player);
+        addPlayerToMinimap(ourPlayer);
 
         afficherClassement();
 
@@ -153,8 +153,8 @@ public class GameController implements Initializable {
                     double yPosition = event.getY();
 
 
-                    double xVect = xPosition - (player.getPosition().getX() - camera.getLayoutX()) / scale.doubleValue();
-                    double yVect = yPosition - (player.getPosition().getY() - camera.getLayoutY()) / scale.doubleValue();
+                    double xVect = xPosition - (ourPlayer.getPosition().getX() - camera.getLayoutX()) / scale.doubleValue();
+                    double yVect = yPosition - (ourPlayer.getPosition().getY() - camera.getLayoutY()) / scale.doubleValue();
 
 
                     if (Math.abs(xVect) < NO_MOVE_DISTANCE && Math.abs(yVect) < NO_MOVE_DISTANCE) {
@@ -172,28 +172,28 @@ public class GameController implements Initializable {
                     public void handle(long now) {
                         HashMap<Entity, Set<Entity>> eatenMap = game.nextTick();
 
-                        if (!player.isAlive()) {
+                        if (!ourPlayer.isAlive()) {
                             Platform.runLater(() -> handlePlayerDeath()); //purement client
                             stop();
                             return;
                         }
 
 
-                        double speed = player.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
-                        player.setSpeed(speed);
+                        double speed = ourPlayer.calculateSpeed(mousePosition[0].getX(), mousePosition[0].getY(), X_MAX, Y_MAX);
+                        ourPlayer.setSpeed(speed);
 
-                        game.moveEntity(player, mouseVector.getValue());
+                        game.moveEntity(ourPlayer, mouseVector.getValue());
 
                         //graphique
-                        redrawPlayer(player);
+                        //redrawPlayer(ourPlayer);
 
 
                         afficherClassement();
 
-                        if(!(player.isVisible())){
-                            playerCircles.get(player).setOpacity(0.02);
+                        if(!(ourPlayer.isVisible())){
+                            playerCircles.get(ourPlayer).setOpacity(0.02);
                         } else{
-                            playerCircles.get(player).setOpacity(1);
+                            playerCircles.get(ourPlayer).setOpacity(1);
                         }
                         /*player.checkCollisionsWithEnemies(ennemyCircles, minimapEnnemyCircles, pane, minimap, animationManager);
                         spawnPellets();*/
@@ -349,9 +349,9 @@ public class GameController implements Initializable {
         });
 
         // change la position de la camera en fonction de la position du joueur
-        player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
+        /*player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             onPlayerPositionChanged(player, newPoint);
-        });
+        });*/
 
         /*player.massProperty().addListener((obs, oldMass, newMass) -> {
             playerCircle.setRadius(player.calculateRadius()); // update du radius du joueur
@@ -379,12 +379,7 @@ public class GameController implements Initializable {
 
 
     private void onPlayerPositionChanged(Player player, Point2D newPos) {
-        double x = (newPos.getX() - cameraOffsetPoint.getX()) ;
-        double y = (newPos.getY() - cameraOffsetPoint.getY()) ;
 
-
-        camera.setLayoutX(x);
-        camera.setLayoutY(y);
 
         //mets à jour le chunk du joueur
 
@@ -462,6 +457,15 @@ public class GameController implements Initializable {
 
 
     public void redrawPlayer(Player player) {
+        if(player.equals(ourPlayer)){
+            double x = (player.getPosition().getX() - cameraOffsetPoint.getX());
+            double y = (player.getPosition().getY() - cameraOffsetPoint.getY());
+
+
+            camera.setLayoutX(x);
+            camera.setLayoutY(y);
+        }
+
         Circle playerCircle = playerCircles.get(player);
         if (playerCircle != null) {
             playerCircle.setCenterX(player.getPosition().getX());

@@ -8,6 +8,8 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 
+import java.util.Objects;
+
 /**
  * The Entity class represents a basic game entity with a unique identifier, position, and mass.
  * This class serves as a base class for other specific entities like players and pellets.
@@ -108,6 +110,14 @@ public class Entity {
 
     public SimpleObjectProperty<MapNode> currentMapNodeProperty(){
         return currentMapNode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Entity entity = (Entity) o;
+        return Double.compare(entity.mass, mass) == 0 && id.equals(entity.id) && position.equals(entity.position) && Objects.equals(currentMapNode, entity.currentMapNode);
     }
 
 }

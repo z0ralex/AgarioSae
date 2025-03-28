@@ -1,5 +1,6 @@
 package iut.gon.agarioclient.controller;
 
+import iut.gon.agarioclient.model.Game;
 import iut.gon.agarioclient.server.Serializer;
 import iut.gon.agarioclient.server.TestVecteur;
 import javafx.application.Platform;
@@ -67,13 +68,9 @@ public class ChatController {
                                 String messageToDisplay = msg.replaceFirst("^CHAT: ", "");
                                 Platform.runLater(() -> chatArea.appendText(messageToDisplay + "\n"));
                             }
-                        }else if(message instanceof ArrayList<?>) {
-                            ArrayList<?> ar = (ArrayList<?>) message;
-                        } else if (message instanceof TestVecteur) {
-                            final TestVecteur vecteur = (TestVecteur) message;
-                            Platform.runLater(() -> {
-                                System.out.println("Vecteur reçu : " + vecteur);
-                            });
+                        }else if(message instanceof Game) {
+                            Game g = (Game) message;
+                            g.getRoot().getEntitySet().toArray().toString();
                         } else {
                             System.err.println("Type inconnu reçu : " + message.getClass());
                         }
