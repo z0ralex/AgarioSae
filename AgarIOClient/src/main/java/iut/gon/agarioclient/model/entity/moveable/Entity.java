@@ -17,10 +17,10 @@ import java.util.Objects;
 public class Entity {
     private final String id;
 
-    private SimpleObjectProperty<Point2D> position;
+    private Point2D position;
     private double mass;
 
-    private SimpleObjectProperty<MapNode> currentMapNode;
+    private MapNode currentMapNode;
 
     /**
      * Constructs a new Entity with the specified id, position, and mass.
@@ -31,9 +31,9 @@ public class Entity {
      */
     public Entity(String id, Point2D position, double mass) {
         this.id = id;
-        this.position = new SimpleObjectProperty<>(position);
+        this.position = position;
         this.mass = mass;
-        this.currentMapNode = new SimpleObjectProperty<>();
+        this.currentMapNode = null;
     }
 
     /**
@@ -51,7 +51,7 @@ public class Entity {
      * @return the position of the entity
      */
     public Point2D getPosition() {
-        return position.getValue();
+        return position;
     }
 
     /**
@@ -61,11 +61,11 @@ public class Entity {
      */
     public void setPosition(Point2D position) {
         if(Game.isValidPosition(position)){
-            this.position.set(position);
+            this.position = position;
         }
     }
 
-    public SimpleObjectProperty<Point2D> positionProperty(){
+    public Point2D positionProperty(){
         return position;
     }
 
@@ -93,22 +93,22 @@ public class Entity {
     }
 
     public MapNode getCurrentMapNode() {
-        return currentMapNode.getValue();
+        return currentMapNode;
     }
 
     public void setCurrentMapNode(MapNode currentMapNode) {
-        this.currentMapNode.setValue(currentMapNode);
+        this.currentMapNode = currentMapNode;
     }
 
     public void removeFromCurrentNode(){
-        MapNode node  = currentMapNode.getValue();
+        MapNode node  = currentMapNode;
         if(node != null){
             node.getEntitySet().remove(this);
-            currentMapNode.setValue(null);
+            currentMapNode = null;
         }
     }
 
-    public SimpleObjectProperty<MapNode> currentMapNodeProperty(){
+    public  MapNode currentMapNodeProperty(){
         return currentMapNode;
     }
 

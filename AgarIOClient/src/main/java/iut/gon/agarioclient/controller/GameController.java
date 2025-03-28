@@ -342,11 +342,11 @@ public class GameController implements Initializable {
         pane.getChildren().add(playerCircle);
         playerCircle.toFront();
 
-        player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)-> {
+        /*player.currentMapNodeProperty().addListener((obs, oldChunk, newChunk)-> {
             if (newChunk != null){
                 updateLoadedChunks(newChunk);
             }
-        });
+        });*/
 
         // change la position de la camera en fonction de la position du joueur
         /*player.positionProperty().addListener((obs, oldPoint, newPoint) -> {
@@ -417,12 +417,12 @@ public class GameController implements Initializable {
         ennemyCircles.put(e, ennemyCircle);
         pane.getChildren().add(ennemyCircle);
 
-        e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
+        /*e.positionProperty().addListener((obs, oldPoint, newPoint) -> {
             double x = newPoint.getX() - ((pane.getWidth() / 2) * camera.getScaleX());
             double y = newPoint.getY() - ((pane.getHeight() / 2) * camera.getScaleY());
             ennemyCircle.setCenterX( e.getPosition().getX());
             ennemyCircle.setCenterY( e.getPosition().getY());
-        });
+        });*/
 
         /*e.massProperty().addListener((obs, oldMass, newMass) -> {
             ennemyCircle.setRadius(e.calculateRadius()); // update du radius du joueur
@@ -449,10 +449,10 @@ public class GameController implements Initializable {
         minimap.getChildren().add(miniEnnemy);
 
         // Suivi des mouvements de l'ennemi
-        ennemy.positionProperty().addListener((obs, oldPos, newPos) -> {
+        /*ennemy.positionProperty().addListener((obs, oldPos, newPos) -> {
             miniEnnemy.setCenterX(newPos.getX() * minimapScaleX);
             miniEnnemy.setCenterY(newPos.getY() * minimapScaleY);
-        });
+        });*/
     }
 
 
