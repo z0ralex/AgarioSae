@@ -8,6 +8,7 @@ Bienvenue dans **AgarioSae**, notre adaptation revisitée du célèbre jeu Agar.
 
 - [Description](#description)
 - [Fonctionnalités du jeu](#fonctionnalités-du-jeu)
+- [Implémentation réseau partielle](Implémentation-réseau-partielle)
 - [UML avec MLD](#uml-avec-mld)
 - [Patron de conception utilisé](#patron-de-conception-utilisé)
 - [Installation](#installation)
@@ -27,6 +28,35 @@ Bienvenue dans **AgarioSae**, notre adaptation revisitée du célèbre jeu Agar.
   > **Note** : Actuellement, en mode réseau, le joueur joue en mode local malgré la connexion réseau et ne voit pas les autres joueurs.
 
 ---
+
+## Implémentation réseau partielle 🌐
+
+**Important** : Pour que le chat réseau fonctionne correctement, il est nécessaire de commenter les lignes 24 à 32 dans le fichier `GameUpdater.java`. Ces lignes concernent une tentative abandonnée de sérialisation d'objets Game.
+
+**Contexte** :
+Nous avons initialement développé un système serveur-client ambitieux où :
+- Le serveur devait synchroniser l'état complet du jeu via sérialisation d'objets
+- Le chat était intégré à cette architecture
+
+**État actuel** :
+  ✓ Chat fonctionnel (après commentaire des lignes mentionnées)
+  ✓ Connexion serveur établie
+  ✗ Synchronisation des joueurs réseau (mode local forcé)
+
+**Pour activer le chat** :
+1. Ouvrez `GameUpdater.java`
+2. Commentez les lignes 24 à 32 :
+   ```java
+   // try {
+   //    ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+   //    oos.writeObject(game);
+   //    oos.flush();
+   // } catch (IOException e) {
+   //    e.printStackTrace();
+   // }
+   ```
+
+   ---
 
 ## Fonctionnalités du jeu 🚀
 
